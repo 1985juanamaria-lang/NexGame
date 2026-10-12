@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tragaperras de Lujo - aldGAME</title>
+    <!-- Tailwind CSS for modern utility styling and crisp design tokens -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;900&family=Orbitron:wght@700;900&display=swap');
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: radial-gradient(circle at center, #1a1a1a 0%, #080808 100%);
+            color: #ffffff;
+            min-height: 100vh;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .font-orbitron {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Custom arcade styling for realistic depth */
+        .arcade-cabinet {
+            background: linear-gradient(135deg, #1c1c1c 0%, #0d0d0d 100%);
+            border: 8px solid #b8860b;
+            box-shadow: 
+                0 25px 60px rgba(0, 0, 0, 0.8),
+                inset 0 0 40px rgba(0, 0, 0, 0.9),
+                0 0 30px rgba(184, 134, 11, 0.3);
+            border-radius: 24px;
+        }
+
+        .gold-border-glow {
+            border: 3px solid #d4af37;
+            box-shadow: 0 0 15px rgba(212, 175, 55, 0.4), inset 0 0 15px rgba(212, 175, 55, 0.2);
+        }
+
+        /* Reel Window & Spin Blur Simulation */
+        .reel-window {
+            background: linear-gradient(to bottom, #000 0%, #111 50%, #000 100%);
+            box-shadow: inset 0 10px 20px rgba(0,0,0,0.9), inset 0 -10px 20px rgba(0,0,0,0.9);
+        }
+
+        .reel-item {
+            height: 110px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            user-select: none;
+            transition: transform 0.1s ease-out;
+            filter: drop-shadow(0 4px 6px rgba(0,0,0,0.5));
+        }
+
+        .spinning {
+            animation: blurSpin 0.12s infinite linear;
+        }
+
+        @keyframes blurSpin {
+            0% { transform: translateY(0); filter: blur(0px); }
+            50% { transform: translateY(-15px); filter: blur(4px); }
+            100% { transform: translateY(0); filter: blur(0px); }
+        }
+
+        /* Stunning Arcade Lever */
+        .lever-assembly {
+            position: absolute;
+            right: -65px;
+            top: 130px;
+            width: 60px;
+            height: 320px;
+            cursor: pointer;
+            z-index: 30;
+            perspective: 600px;
+        }
+
+        .lever-base {
+            position: absolute;
+            right: 15px;
+            top: 70px;
+            width: 28px;
+            height: 70px;
+            background: linear-gradient(90deg, #333, #666, #222);
+            border-radius: 6px;
+            border: 2px solid #111;
+            box-shadow: 3px 6px 12px rgba(0,0,0,0.8);
+        }
+
+        .lever-shaft {
+            position: absolute;
+            right: 25px;
+            top: 70px;
+            width: 14px;
+            height: 180px;
+            background: linear-gradient(90deg, #e0e0e0, #ffffff, #9e9e9e);
+            border-radius: 7px;
+            transform-origin: top center;
+            transition: transform 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 4px 4px 10px rgba(0,0,0,0.7);
+        }
+
+        .lever-knob {
+            position: absolute;
+            right: -16px;
+            top: -30px;
+            width: 46px;
+            height: 46px;
+            background: radial-gradient(circle at 35% 35%, #ff5252, #c62828 65%, #7a0000 100%);
+            border-radius: 50%;
+            box-shadow: 0 6px 15px rgba(0,0,0,0.8), inset 0 2px 4px rgba(255,255,255,0.4);
+        }
+
+        /* Lever Down State */
+        .lever-assembly.pulled .lever-shaft {
+            transform: rotateX(65deg) scaleY(0.75);
+        }
+
+        /* Chip styling */
+        .chip {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            border: 3px dashed #fff;
+            font-weight: 700;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.6);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        }
+        .chip-10 { background: #2980b9; }
+        .chip-25 { background: #27ae60; }
+        .chip-50 { background: #c0392b; }
+        .chip-100 { background: #ff69b4; border-color: #fff; } /* Ficha rosa solicitada */
+
+        .chip.active {
+            transform: scale(1.15) translateY(-2px);
+            box-shadow: 0 0 15px #fff, 0 6px 12px rgba(0,0,0,0.8);
+            border-style: solid;
+        }
+
+        /* LED Display Banner */
+        .led-screen {
+            background: #050505;
+            border: 2px solid #b8860b;
+            box-shadow: inset 0 0 10px rgba(212, 175, 55, 0.3);
+        }
+    </style>
+<style id="nexgame-theme">:root{--nx-bg:#0b0d12;--nx-surface:#12151c;--nx-surface2:#181c25;--nx-line:#232836;--nx-text:#e8eaf0;--nx-muted:#8b92a5;--nx-accent:#ff4757;--nx-ok:#35d07f}
+body{background:radial-gradient(circle at 50% 0,#151a26 0,#080a10 70%) !important}
+.arcade-cabinet{background:linear-gradient(160deg,#171b26,#0d1018);border:1px solid #2a3042;box-shadow:0 30px 70px rgba(0,0,0,.7),inset 0 0 0 1px rgba(255,255,255,.03);border-radius:22px}
+.gold-border-glow{border:1px solid #3a4258;box-shadow:inset 0 0 30px rgba(0,0,0,.7)}
+.led-screen{border:1px solid #2a3042;box-shadow:none}
+.chip{border-style:solid;border-color:rgba(255,255,255,.7)}
+</style>
+</head>
+<body class="p-4">
+
+    <!-- Top Header: Balance & Chip Selector -->
+    <div class="absolute top-4 w-[95%] max-w-4xl flex flex-col sm:flex-row justify-between items-center bg-zinc-900/90 backdrop-blur-md px-6 py-3 rounded-2xl border border-zinc-700/60 shadow-2xl z-20 gap-4">
+        <div id="info-estado" class="font-orbitron text-sm font-bold text-emerald-400 tracking-wide text-center sm:text-left">
+            ¡Selecciona tu apuesta y baja la palanca!
+        </div>
+        <div class="flex items-center gap-6">
+            <!-- Chip Selector -->
+            <div class="flex gap-2">
+                <button class="chip chip-10 active" onclick="setChip(10, this)">10</button>
+                <button class="chip chip-25" onclick="setChip(25, this)">25</button>
+                <button class="chip chip-50" onclick="setChip(50, this)">50</button>
+                <button class="chip chip-100" onclick="setChip(100, this)">100</button>
+            </div>
+            <!-- Wallet Display -->
+            <div class="text-right border-l border-zinc-700 pl-5">
+                <span class="text-[10px] text-zinc-400 uppercase tracking-widest block font-semibold">Saldo</span>
+                <strong id="saldo-actual" class="font-orbitron text-xl text-amber-400">$1000</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Return to Menu Button -->
+    <a href="../index.html" class="absolute bottom-5 left-5 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 px-5 py-2.5 rounded-xl text-xs font-bold uppercase tracking-wider border border-zinc-600 transition shadow-lg z-20">
+        ← Volver al Menú
+    </a>
+
+    <!-- Main Arcade Cabinet -->
+    <div class="relative mt-16 flex items-center justify-center">
+        <div class="arcade-cabinet p-6 sm:p-8 flex flex-col items-center gap-6 w-[480px] sm:w-[540px]">
+            
+            <!-- Cabinet Marquee Header -->
+            <div class="w-full text-center led-screen py-3 rounded-xl shadow-inner">
+                <h1 class="font-orbitron text-2xl sm:text-3xl font-black text-amber-400 tracking-widest drop-shadow-[0_2px_10px_rgba(212,175,55,0.6)]">
+                    🎰 LUCKY SLOTS 🎰
+                </h1>
+            </div>
+
+            <!-- Reels Window -->
+            <div class="reel-window w-full p-4 rounded-2xl gold-border-glow flex justify-center gap-4">
+                <div class="w-28 h-32 bg-white rounded-xl overflow-hidden border-2 border-zinc-700 shadow-inner flex items-center justify-center">
+                    <div class="reel-item" id="reel-0">🍒</div>
+                </div>
+                <div class="w-28 h-32 bg-white rounded-xl overflow-hidden border-2 border-zinc-700 shadow-inner flex items-center justify-center">
+                    <div class="reel-item" id="reel-1">🍋</div>
+                </div>
+                <div class="w-28 h-32 bg-white rounded-xl overflow-hidden border-2 border-zinc-700 shadow-inner flex items-center justify-center">
+                    <div class="reel-item" id="reel-2">🔔</div>
+                </div>
+            </div>
+
+            <!-- Payouts Table -->
+            <div class="w-full bg-black/60 border border-amber-500/30 rounded-xl p-3 text-xs grid grid-cols-2 gap-2 text-zinc-300">
+                <div class="flex justify-between items-center bg-zinc-900/60 p-1.5 rounded">
+                    <span>3x 7️⃣ (Siete)</span>
+                    <strong class="text-amber-400 font-orbitron">x50</strong>
+                </div>
+                <div class="flex justify-between items-center bg-zinc-900/60 p-1.5 rounded">
+                    <span>3x 💎 (Diamante)</span>
+                    <strong class="text-amber-400 font-orbitron">x25</strong>
+                </div>
+                <div class="flex justify-between items-center bg-zinc-900/60 p-1.5 rounded">
+                    <span>3x 🔔 (Campana)</span>
+                    <strong class="text-amber-400 font-orbitron">x15</strong>
+                </div>
+                <div class="flex justify-between items-center bg-zinc-900/60 p-1.5 rounded">
+                    <span>3x 🍉 / 🍋 / 🍒</span>
+                    <strong class="text-amber-400 font-orbitron">x5</strong>
+                </div>
+            </div>
+
+            <!-- Action hint banner -->
+            <div class="text-[11px] text-zinc-400 uppercase tracking-widest font-semibold">
+                ¡Haz clic en la palanca lateral para jugar!
+            </div>
+        </div>
+
+        <!-- Interactive 3D Side Lever -->
+        <div class="lever-assembly" id="lever" onclick="pullLever()">
+            <div class="lever-base"></div>
+            <div class="lever-shaft">
+                <div class="lever-knob"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Synchronize balance with pachinko_dinero global wallet
+        let saldo = parseInt(localStorage.getItem('pachinko_dinero'));
+        if (isNaN(saldo)) {
+            saldo = 1000;
+            localStorage.setItem('pachinko_dinero', saldo);
+        }
+
+        let apuestaActual = 10;
+        let isSpinning = false;
+
+        function updateBalanceUI() {
+            document.getElementById('saldo-actual').textContent = `$${saldo}`;
+            localStorage.setItem('pachinko_dinero', saldo);
+        }
+        updateBalanceUI();
+
+        function setChip(value, btnElement) {
+            if (isSpinning) return;
+            apuestaActual = value;
+            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+            btnElement.classList.add('active');
+        }
+
+        const symbols = ['🍒', '🍋', '🍉', '🔔', '💎', '7️⃣'];
+        const weights = [32, 26, 20, 14, 6, 2]; // Weighted odds for realistic casino RTP
+
+        function getRandomSymbol() {
+            let rnd = Math.random() * 100;
+            let acc = 0;
+            for (let i = 0; i < symbols.length; i++) {
+                acc += weights[i];
+                if (rnd <= acc) return symbols[i];
+            }
+            return symbols[0];
+        }
+
+        function pullLever() {
+            if (isSpinning) return;
+
+            if (saldo < apuestaActual) {
+                document.getElementById('info-estado').textContent = "⚠️ ¡Saldo insuficiente para apostar!";
+                document.getElementById('info-estado').className = "font-orbitron text-sm font-bold text-red-500 tracking-wide text-center sm:text-left";
+                return;
+            }
+
+            isSpinning = true;
+            saldo -= apuestaActual;
+            updateBalanceUI();
+
+            // Animate lever down and up
+            const lever = document.getElementById('lever');
+            lever.classList.add('pulled');
+            setTimeout(() => {
+                lever.classList.remove('pulled');
+            }, 350);
+
+            document.getElementById('info-estado').textContent = "🎲 Girando rodillos...";
+            document.getElementById('info-estado').className = "font-orbitron text-sm font-bold text-amber-400 tracking-wide text-center sm:text-left";
+
+            // Add blur animation class to reels
+            const reelElements = [
+                document.getElementById('reel-0'),
+                document.getElementById('reel-1'),
+                document.getElementById('reel-2')
+            ];
+
+            reelElements.forEach(r => r.classList.add('spinning'));
+
+            // Spin simulation timer
+            let counter = 0;
+            let spinInterval = setInterval(() => {
+                reelElements.forEach(r => {
+                    r.textContent = symbols[Math.floor(Math.random() * symbols.length)];
+                });
+                counter++;
+
+                if (counter > 22) {
+                    clearInterval(spinInterval);
+                    reelElements.forEach(r => r.classList.remove('spinning'));
+
+                    // Final fixed results
+                    let res0 = getRandomSymbol();
+                    let res1 = getRandomSymbol();
+                    let res2 = getRandomSymbol();
+
+                    reelElements[0].textContent = res0;
+                    reelElements[1].textContent = res1;
+                    reelElements[2].textContent = res2;
+
+                    evaluatePayout(res0, res1, res2);
+                    isSpinning = false;
+                }
+            }, 75);
+        }
+
+        function evaluatePayout(s0, s1, s2) {
+            let multiplier = 0;
+
+            if (s0 === s1 && s1 === s2) {
+                if (s0 === '7️⃣') multiplier = 50;
+                else if (s0 === '💎') multiplier = 25;
+                else if (s0 === '🔔') multiplier = 15;
+                else multiplier = 5;
+            }
+
+            const statusEl = document.getElementById('info-estado');
+            if (multiplier > 0) {
+                let payout = apuestaActual * multiplier;
+                saldo += payout;
+                updateBalanceUI();
+                statusEl.textContent = `🎉 ¡JACKPOT! Combinación ganadora. ¡Ganaste $${payout}!`;
+                statusEl.className = "font-orbitron text-sm font-bold text-emerald-400 tracking-wide text-center sm:text-left";
+            } else {
+                statusEl.textContent = `❌ Sin premios esta vez. ¡Sigue intentando!`;
+                statusEl.className = "font-orbitron text-sm font-bold text-zinc-400 tracking-wide text-center sm:text-left";
+            }
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>nexgame - Salón de Juegos</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #121212;
+            color: #ffffff;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.8rem;
+            color: #ff4757;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 10px rgba(255, 71, 87, 0.4);
+        }
+
+        p.subtitulo {
+            color: #aaa;
+            font-size: 1rem;
+        }
+
+        /* Contenedor en Cuadrícula Horizontal / Grid */
+        .grid-juegos {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+            gap: 20px;
+            width: 100%;
+            max-width: 1100px;
+        }
+
+        /* Tarjeta de cada juego */
+        .tarjeta-juego {
+            background: #1e1e1e;
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            text-decoration: none;
+            color: #fff;
+            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .tarjeta-juego:hover {
+            transform: translateY(-5px);
+            background: #252525;
+            border-color: #ff4757;
+            box-shadow: 0 8px 20px rgba(255, 71, 87, 0.2);
+        }
+
+        /* Contenedor para las miniaturas con imagen */
+        .miniatura-juego {
+            width: 55px;
+            height: 55px;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #000;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #444;
+        }
+
+        .miniatura-juego img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .info-tarjeta h3 {
+            font-size: 1.05rem;
+            margin-bottom: 4px;
+            color: #fff;
+        }
+
+        .info-tarjeta span {
+            font-size: 0.75rem;
+            color: #888;
+        }
+    
+body{background:radial-gradient(1000px 500px at 50% -5%,#1a1f33 0%,transparent 60%),#0b0d12;font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif;-webkit-font-smoothing:antialiased;padding:56px 24px}
+header{margin-bottom:38px}
+h1{font-size:2.6rem;font-weight:800;letter-spacing:6px;color:#fff;text-shadow:none}
+h1::first-letter{color:#ff4757}
+p.subtitulo{color:#8b92a5;letter-spacing:.3px}
+.grid-juegos{gap:16px;max-width:1120px}
+.tarjeta-juego{background:#12151c;border:1px solid #232836;border-radius:14px;padding:16px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.tarjeta-juego:hover{background:#171b25;border-color:#ff4757;transform:translateY(-3px);box-shadow:0 14px 34px rgba(255,71,87,.14)}
+.miniatura-juego{width:58px;height:58px;border-radius:12px;border:1px solid #2a3042}
+.info-tarjeta h3{font-weight:700;font-size:1.02rem;margin-bottom:3px}
+.info-tarjeta span{color:#8b92a5;font-size:.78rem}
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>NexGame</h1>
+        <p class="subtitulo">Selecciona un juego para comenzar la diversión</p>
+    </header>
+
+    <!-- Galería horizontal en cuadrícula con tus imágenes originales -->
+    <div class="grid-juegos">
+        <a href="juegos/juego1.html" class="tarjeta-juego">
+            <div class="miniatura-juego">
+                <img src="fotos/Tic_tac_toe.svg" alt="Tres en Raya">
+            </div>
+            <div class="info-tarjeta">
+                <h3>Tres en Raya</h3>
+                <span>Clásico de estrategia</span>
+            </div>
+        </a>
+
+        <a href="juegos/juego2.html" class="tarjeta-juego">
+            <div class="miniatura-juego">
+                <img src="fotos/how to play checkers board example.png" alt="Juego de Damas">
+            </div>
+            <div class="info-tarjeta">
+                <h3>Juego de Damas</h3>
+                <span>Tablero tradicional</span>
+            </div>
+        </a>
+
+        <a href="juegos/juego3.html" class="tarjeta-juego">
+            <div class="miniatura-juego">
+                <img src="fotos/unnamed.png" alt="Ahorcado">
+            </div>
+            <div class="info-tarjeta">
+                <h3>Ahorcado</h3>
+                <span>Adivina la palabra</span>
+            </div>
+        </a>
+
+        <a href="juegos/juego4.html" class="tarjeta-juego">
+            <div class="miniatura-juego">
+                <img src="fotos/fffff.png" alt="2048">
+            </div>
+            <div class="info-tarjeta">
+                <h3>2048</h3>
+                <span>Suma fichas y gana</span>
+            </div>
+        </a>
+
+        <a href="juegos/juego5.html" class="tarjeta-juego">
+            <div class="miniatura-juego">
+                <img src="fotos/tetris-mobile.jpg" alt="Tetris">
+            </div>
+            <div class="info-tarjeta">
+                <h3>Tetris</h3>
+                <span>Rompecabezas arcade</span>
+            </div>
+        </a>
+
+        <a href="juegos/juego6.html" class="tarjeta-juego">
+            <div class="miniatura-juego">
+                <img src="fotos/busca minas.webp" alt="Busca Minas">
+            </div>
+            <div class="info-tarjeta">
+                <h3>Busca Minas</h3>
+                <span>Evita las explosiones</span>
+            </div>
+        </a>
+
+        <a href="juegos/juego7.html" class="tarjeta-juego">
+            <div class="miniatura-juego">
+                <img src="fotos/pachinko.jpg" alt="Pachinko">
+            </div>
+            <div class="info-tarjeta">
+                <h3>Pachinko</h3>
+                <span>Lanza fichas y multiplica</span>
+            </div>
+        </a>
+
+        <a href="juegos/juego8.html" class="tarjeta-juego">
+            <div class="miniatura-juego">
+                <img src="fotos/Ruleta_Francesa_rueda.jpg" alt="Ruleta">
+            </div>
+            <div class="info-tarjeta">
+                <h3>Ruleta</h3>
+                <span>Apuesta al color y número</span>
+            </div>
+        </a>
+
+        <a href="juegos/juego9.html" class="tarjeta-juego">
+            <div class="miniatura-juego">
+                <img src="fotos/Tragaperras-2.jpg" alt="Tragaperras">
+            </div>
+            <div class="info-tarjeta">
+                <h3>Tragaperras</h3>
+                <span>Gira los rodillos y gana</span>
+            </div>
+        </a>
+
+        <a href="juegos/juego10.html" class="tarjeta-juego">
+            <div class="miniatura-juego">
+                <img src="fotos/snake.jpg" alt="Snake">
+            </div>
+            <div class="info-tarjeta">
+                <h3>Snake</h3>
+                <span>Come y crece sin chocar</span>
+            </div>
+        </a>
+
+        <a href="juegos/juego11.html" class="tarjeta-juego">
+            <div class="miniatura-juego">
+                <img src="fotos/clicker.png" alt="Clicker">
+            </div>
+            <div class="info-tarjeta">
+                <h3>Clicker</h3>
+                <span>Haz clics para ganar</span>
+            </div>
+        </a>
+
+        <a href="juegos/juego12.html" class="tarjeta-juego">
+            <div class="miniatura-juego">
+                <img src="fotos/aim trainer.png" alt="Aim Trainer">
+            </div>
+            <div class="info-tarjeta">
+                <h3>Aim Trainer</h3>
+                <span>Mejora tu puntería</span>
+            </div>
+        </a>
+
+        <a href="juegos/juego13.html" class="tarjeta-juego">
+            <div class="miniatura-juego">
+                <img src="fotos/wordle.png" alt="Wordle">
+            </div>
+            <div class="info-tarjeta">
+                <h3>Wordle</h3>
+                <span>Adivina la palabra del día</span>
+            </div>
+        </a>
+
+        <a href="juegos/juego14.html" class="tarjeta-juego">
+            <div class="miniatura-juego">
+                <img src="fotos/rhythia.jpg" alt="Rhythia">
+            </div>
+            <div class="info-tarjeta">
+                <h3>Rhythia</h3>
+                <span>Combina números y gana</span>
+            </div>
+        </a>
+
+        <a href="juegos/juego15.html" class="tarjeta-juego">
+            <div class="miniatura-juego">
+                <img src="fotos/geometry-dash.webp" alt="geometry dash">
+            </div>
+            <div class="info-tarjeta">
+                <h3>Geometry Dash</h3>
+                <span>Salta y evita obstáculos</span>
+            </div>
+    </div>
+
+</body>
+</html>

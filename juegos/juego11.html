@@ -1,0 +1,1251 @@
+<!DOCTYPE html>
+<html lang="es" data-tema="nebulosa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Astro Clicker Pro - aldGAME</title>
+    <style>
+        /* Themes / Temas de Cuerpos Celestes */
+        :root[data-tema="nebulosa"] {
+            --bg-body: #090a16;
+            --bg-wrapper: #13172e;
+            --border-wrapper: #2d386b;
+            --bg-panel: #0d1024;
+            --border-panel: #202952;
+            --color-principal: #00d2ff;
+            --color-texto: #ffffff;
+            --color-secundario: #8ba2d0;
+            --btn-menu: #1d254a;
+        }
+
+        :root[data-tema="sol"] {
+            --bg-body: #1f0d02;
+            --bg-wrapper: #3b1904;
+            --border-wrapper: #7a360a;
+            --bg-panel: #260e02;
+            --border-panel: #522306;
+            --color-principal: #ff9800;
+            --color-texto: #ffffff;
+            --color-secundario: #ffd180;
+            --btn-menu: #4a2106;
+        }
+
+        :root[data-tema="marte"] {
+            --bg-body: #1c0808;
+            --bg-wrapper: #361111;
+            --border-wrapper: #6e2424;
+            --bg-panel: #240a0a;
+            --border-panel: #4d1818;
+            --color-principal: #ff5252;
+            --color-texto: #ffffff;
+            --color-secundario: #ffb4b4;
+            --btn-menu: #451515;
+        }
+
+        :root[data-tema="saturno"] {
+            --bg-body: #1a170b;
+            --bg-wrapper: #363016;
+            --border-wrapper: #6e632b;
+            --bg-panel: #24200e;
+            --border-panel: #4a431c;
+            --color-principal: #ffd700;
+            --color-texto: #ffffff;
+            --color-secundario: #ffeaa7;
+            --btn-menu: #423b18;
+        }
+
+        :root[data-tema="agujero_negro"] {
+            --bg-body: #05020a;
+            --bg-wrapper: #120824;
+            --border-wrapper: #31145e;
+            --bg-panel: #0a0414;
+            --border-panel: #200c3e;
+            --color-principal: #b388ff;
+            --color-texto: #ffffff;
+            --color-secundario: #d1c4e9;
+            --btn-menu: #1d0b38;
+        }
+
+        :root[data-tema="gusano"] {
+            --bg-body: #020c0e;
+            --bg-wrapper: #062229;
+            --border-wrapper: #114c5b;
+            --bg-panel: #03161a;
+            --border-panel: #0a333d;
+            --color-principal: #18ffff;
+            --color-texto: #ffffff;
+            --color-secundario: #80d8ff;
+            --btn-menu: #0a2d36;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--color-texto);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow-x: hidden;
+            padding: 20px 0;
+            transition: background-color 0.4s ease;
+            position: relative;
+        }
+
+        #stars-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.45;
+        }
+
+        .btn-volver-menu {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: var(--btn-menu);
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border: 1px solid var(--border-wrapper);
+            transition: background 0.2s;
+            z-index: 10;
+        }
+        .btn-volver-menu:hover { filter: brightness(1.2); }
+
+        .btn-config-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: var(--btn-menu);
+            color: #fff;
+            padding: 10px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border-wrapper);
+            font-size: 0.9rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s;
+            z-index: 50;
+        }
+        .btn-config-toggle:hover { filter: brightness(1.2); }
+
+        .modal-config {
+            position: fixed;
+            top: 75px;
+            right: 20px;
+            background: var(--bg-panel);
+            border: 2px solid var(--color-principal);
+            border-radius: 14px;
+            padding: 20px;
+            width: 290px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.85);
+            z-index: 100;
+            display: none;
+            flex-direction: column;
+            gap: 15px;
+        }
+        .modal-config.activo { display: flex; }
+
+        .modal-config h4 {
+            font-size: 1rem;
+            border-bottom: 1px solid var(--border-panel);
+            padding-bottom: 6px;
+            color: var(--color-principal);
+        }
+
+        .config-grupo {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-size: 0.85rem;
+            color: var(--color-secundario);
+        }
+
+        .config-grupo select, .config-grupo input[type="range"] {
+            width: 100%;
+            padding: 6px;
+            background: var(--bg-wrapper);
+            color: var(--color-texto);
+            border: 1px solid var(--border-wrapper);
+            border-radius: 8px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .juego-wrapper {
+            position: relative;
+            z-index: 5;
+            display: grid;
+            grid-template-columns: 1fr 1.25fr;
+            gap: 20px;
+            background-color: var(--bg-wrapper);
+            border-radius: 24px;
+            padding: 25px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            width: 95%;
+            max-width: 1120px;
+            border: 2px solid var(--border-wrapper);
+            transition: background-color 0.4s ease, border-color 0.4s ease;
+        }
+
+        @media (max-width: 880px) {
+            .juego-wrapper { grid-template-columns: 1fr; }
+        }
+
+        .panel-principal {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-panel);
+            border-radius: 18px;
+            padding: 20px;
+            border: 1px solid var(--border-panel);
+            text-align: center;
+        }
+
+        .contador-monedas {
+            font-size: 2.2rem;
+            font-weight: bold;
+            color: var(--color-principal);
+            margin-bottom: 2px;
+            text-shadow: 0 0 15px var(--color-principal);
+        }
+
+        .produccion-segundo {
+            font-size: 0.9rem;
+            color: var(--color-secundario);
+            margin-bottom: 12px;
+        }
+
+        .combo-container {
+            width: 100%;
+            background: var(--bg-body);
+            border-radius: 10px;
+            padding: 6px;
+            margin-bottom: 15px;
+            border: 1px solid var(--border-panel);
+        }
+
+        .barra-combo-bg {
+            height: 10px;
+            background: var(--bg-wrapper);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .barra-combo-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--color-principal), #ff007f);
+            transition: width 0.1s linear;
+        }
+
+        .combo-texto {
+            font-size: 0.8rem;
+            font-weight: bold;
+            color: var(--color-principal);
+            margin-top: 4px;
+        }
+
+        .stats-mini {
+            font-size: 0.78rem;
+            color: var(--color-secundario);
+            margin-bottom: 15px;
+            line-height: 1.4;
+            background: var(--bg-body);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border-wrapper);
+            width: 100%;
+        }
+
+        .btn-clicker {
+            width: 170px;
+            height: 170px;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, var(--color-principal), var(--bg-wrapper), #000);
+            border: 4px solid rgba(255,255,255,0.3);
+            color: white;
+            font-size: 1.1rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            box-shadow: 0 0 35px rgba(0, 210, 255, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.05s, box-shadow 0.05s;
+            user-select: none;
+        }
+
+        .btn-clicker:active {
+            transform: scale(0.92);
+            box-shadow: 0 0 15px rgba(0, 210, 255, 0.2);
+        }
+
+        .btn-clicker span {
+            font-size: 2.2rem;
+            margin-top: 5px;
+        }
+
+        .panel-derecho {
+            background: var(--bg-panel);
+            border-radius: 18px;
+            padding: 15px;
+            border: 1px solid var(--border-panel);
+            display: flex;
+            flex-direction: column;
+            max-height: 560px;
+        }
+
+        .tabs-header {
+            display: flex;
+            gap: 8px;
+            border-bottom: 1px solid var(--border-panel);
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .tab-btn {
+            background: var(--bg-wrapper);
+            color: var(--color-secundario);
+            border: 1px solid var(--border-wrapper);
+            padding: 8px 10px;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        .tab-btn.activo {
+            background: var(--color-principal);
+            color: #000;
+            border-color: var(--color-principal);
+        }
+
+        .subtabs-header {
+            display: flex;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .subtab-btn {
+            background: var(--bg-body);
+            color: var(--color-secundario);
+            border: 1px solid var(--border-panel);
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .subtab-btn.activo {
+            background: var(--border-wrapper);
+            color: #fff;
+            border-color: var(--color-principal);
+        }
+
+        .tab-contenido {
+            display: none;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+            padding-right: 5px;
+        }
+
+        .tab-contenido.activo { display: flex; }
+
+        .item-mejora {
+            background: var(--bg-wrapper);
+            border: 1px solid var(--border-wrapper);
+            border-radius: 10px;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .item-mejora.bloqueado {
+            opacity: 0.5;
+            filter: grayscale(0.5);
+        }
+
+        .info-mejora h4 { font-size: 0.85rem; color: var(--color-texto); }
+        .info-mejora p { font-size: 0.72rem; color: var(--color-secundario); }
+
+        .btn-comprar {
+            background: var(--color-principal);
+            color: #000;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 0.78rem;
+        }
+
+        .btn-comprar:disabled {
+            background: #444;
+            color: #888;
+            cursor: not-allowed;
+        }
+
+        .buscador-logros {
+            width: 100%;
+            padding: 8px 12px;
+            background: var(--bg-wrapper);
+            border: 1px solid var(--border-wrapper);
+            color: #fff;
+            border-radius: 8px;
+            font-size: 0.82rem;
+            margin-bottom: 5px;
+        }
+
+        .card-logro {
+            background: var(--bg-wrapper);
+            border: 1px solid var(--border-wrapper);
+            border-radius: 10px;
+            padding: 8px 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            opacity: 0.4;
+        }
+
+        .card-logro.desbloqueado {
+            opacity: 1;
+            border-color: var(--color-principal);
+            background: var(--bg-body);
+        }
+
+        .logro-icono { font-size: 1.3rem; }
+        .logro-info h4 { font-size: 0.8rem; color: var(--color-texto); }
+        .logro-info p { font-size: 0.7rem; color: var(--color-secundario); }
+
+        .box-prestigio {
+            background: var(--bg-wrapper);
+            border: 1px solid #7000ff;
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .box-prestigio h4 { color: #d1b3ff; margin-bottom: 8px; }
+        .box-prestigio p { font-size: 0.8rem; color: #bca0eb; margin-bottom: 12px; line-height: 1.4; }
+
+        .btn-ascender {
+            background: linear-gradient(135deg, #7000ff, #00d2ff);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 0.9rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(112, 0, 255, 0.4);
+        }
+        .btn-ascender:disabled { background: #555; opacity: 0.5; cursor: not-allowed; }
+
+        .particula {
+            position: absolute;
+            color: var(--color-principal);
+            font-weight: bold;
+            font-size: 1.2rem;
+            pointer-events: none;
+            animation: flotarArriba 0.8s ease-out forwards;
+            z-index: 100;
+        }
+
+        @keyframes flotarArriba {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-60px) scale(1.2); }
+        }
+
+        .modal-offline {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--bg-panel);
+            border: 2px solid var(--color-principal);
+            color: var(--color-texto);
+            padding: 12px 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            z-index: 1000;
+            font-size: 0.88rem;
+            text-align: center;
+            animation: fadeInOut 5s ease forwards;
+        }
+
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: translate(-50%, -20px); }
+            15% { opacity: 1; transform: translate(-50%, 0); }
+            85% { opacity: 1; transform: translate(-50%, 0); }
+            100% { opacity: 0; transform: translate(-50%, -20px); pointer-events: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="stars-bg"></canvas>
+
+    <a href="../index.html" class="btn-volver-menu">Volver al Menú</a>
+    <button class="btn-config-toggle" onclick="toggleConfig()">⚙️ Ajustes</button>
+
+    <div class="modal-config" id="modal-config">
+        <h4>Ajustes de Cuerpos Celestes</h4>
+        
+        <div class="config-grupo">
+            <label for="select-tema">Fondo y Entorno Cósmico:</label>
+            <select id="select-tema" onchange="cambiarTema()">
+                <option value="nebulosa">🌌 Nebulosa Neón (Clásico)</option>
+                <option value="sol">☀️ El Sol (Estrella de Fuego)</option>
+                <option value="marte">🔴 Marte (Planeta Rojo)</option>
+                <option value="saturno">🪐 Saturno (Gigante de Gas)</option>
+                <option value="agujero_negro">🌌 Agujero Negro (Singularidad)</option>
+                <option value="gusano">🕳️ Agujero de Gusano (Hiperespacio)</option>
+            </select>
+        </div>
+
+        <div class="config-grupo">
+            <label for="range-volumen">Efectos de Audio: <span id="txt-vol">50%</span></label>
+            <input type="range" id="range-volumen" min="0" max="100" value="50" oninput="cambiarVolumen()">
+        </div>
+    </div>
+
+    <div class="juego-wrapper">
+        <div class="panel-principal">
+            <div class="contador-monedas" id="txt-fichas">0 ✨</div>
+            <div class="produccion-segundo" id="txt-ps">Polvo Estelar por seg: 0.0</div>
+
+            <div class="combo-container">
+                <div class="barra-combo-bg">
+                    <div class="barra-combo-fill" id="barra-combo"></div>
+                </div>
+                <div class="combo-texto" id="txt-combo">TURBO HIPERESPACIAL: x1.0</div>
+            </div>
+            
+            <div class="stats-mini" id="txt-stats">
+                Poder por clic: 1 ✨<br>
+                Clics manuales: 0 👆<br>
+                Materia Oscura: 0 🌌 (+0% Prod)<br>
+                Logros completados: 0 / 637
+            </div>
+
+            <div style="position: relative;">
+                <button class="btn-clicker" id="btn-click" onclick="cliquearMoneda(event)">
+                    EXTRAER
+                    <span id="icono-clicker">🪐</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="panel-derecho">
+            <div class="tabs-header">
+                <button class="tab-btn activo" onclick="cambiarTab('tienda')">🚀 Tienda Espacial</button>
+                <button class="tab-btn" onclick="cambiarTab('logros')">🏆 Logros (<span id="count-logros">0/637</span>)</button>
+                <button class="tab-btn" onclick="cambiarTab('prestigio')">🌌 Ascensión</button>
+            </div>
+
+            <div class="tab-contenido activo" id="tab-tienda">
+                <div class="subtabs-header">
+                    <button class="subtab-btn activo" onclick="cambiarSubtab('autoclick')">🤖 Auto-Clicker (CPS)</button>
+                    <button class="subtab-btn" onclick="cambiarSubtab('clickup')">⚡ Aumento de Clics (20)</button>
+                </div>
+
+                <div id="lista-mejoras-auto"></div>
+                <div id="lista-mejoras-click" style="display: none;"></div>
+            </div>
+
+            <div class="tab-contenido" id="tab-logros">
+                <input type="text" class="buscador-logros" id="search-logros" placeholder="Buscar logro..." oninput="filtrarLogros()">
+                <div id="lista-logros"></div>
+            </div>
+
+            <div class="tab-contenido" id="tab-prestigio">
+                <div class="box-prestigio">
+                    <h4>🌌 Salto Cuántico (Prestigio)</h4>
+                    <p>Colapsa tu imperio galáctico a cambio de <b>Materia Oscura</b> (1 por cada 1,000 de Polvo Estelar histórico).<br>Cada unidad otorga un <b>+10% de producción permanente</b>.</p>
+                    <div style="margin-bottom: 12px; font-weight: bold; color: #d1b3ff;" id="txt-prestigio-gain">
+                        Materia Oscura a ganar: 0 🌌<br>
+                        <small style="color: var(--color-secundario);">Requieres al menos 1,000 Polvo Estelar histórico</small>
+                    </div>
+                    <button class="btn-ascender" id="btn-ascender" onclick="ejecutarAscension()" disabled>Iniciar Salto</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('stars-bg');
+        const ctx = canvas.getContext('2d');
+        let stars = [];
+
+        function initStars() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            stars = [];
+            for(let i = 0; i < 120; i++) {
+                stars.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    size: Math.random() * 2,
+                    speed: Math.random() * 0.5 + 0.1
+                });
+            }
+        }
+
+        function drawStars() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = '#ffffff';
+            stars.forEach(s => {
+                ctx.beginPath();
+                ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2);
+                ctx.fill();
+                s.y += s.speed;
+                if (s.y > canvas.height) s.y = 0;
+            });
+            requestAnimationFrame(drawStars);
+        }
+        window.addEventListener('resize', initStars);
+        initStars();
+        drawStars();
+
+        const AudioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        let volumenAudio = 0.5;
+
+        function toggleConfig() {
+            document.getElementById('modal-config').classList.toggle('activo');
+        }
+
+        function cambiarVolumen() {
+            let val = document.getElementById('range-volumen').value;
+            volumenAudio = val / 100;
+            document.getElementById('txt-vol').textContent = `${val}%`;
+            localStorage.setItem('aldgame_volumen', volumenAudio);
+        }
+
+        function cambiarTema() {
+            let temaSeleccionado = document.getElementById('select-tema').value;
+            document.documentElement.setAttribute('data-tema', temaSeleccionado);
+            localStorage.setItem('aldgame_tema_espacio', temaSeleccionado);
+
+            let iconoMap = {
+                nebulosa: '🪐',
+                sol: '☀️',
+                marte: '🔴',
+                saturno: '🪐',
+                agujero_negro: '🌌',
+                gusano: '🕳️'
+            };
+            document.getElementById('icono-clicker').textContent = iconoMap[temaSeleccionado] || '🪐';
+        }
+
+        function sonarEfecto(tipo) {
+            if (volumenAudio <= 0) return;
+            if (AudioCtx.state === 'suspended') AudioCtx.resume();
+            
+            const osc = AudioCtx.createOscillator();
+            const gain = AudioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(AudioCtx.destination);
+
+            let ahora = AudioCtx.currentTime;
+            let volMax = 0.15 * volumenAudio;
+
+            if (tipo === 'click') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(300, ahora);
+                osc.frequency.exponentialRampToValueAtTime(900, ahora + 0.05);
+                gain.gain.setValueAtTime(volMax, ahora);
+                gain.gain.linearRampToValueAtTime(0.01, ahora + 0.05);
+                osc.start(ahora);
+                osc.stop(ahora + 0.05);
+            } else if (tipo === 'compra') {
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(440, ahora);
+                osc.frequency.setValueAtTime(880, ahora + 0.08);
+                gain.gain.setValueAtTime(volMax, ahora);
+                gain.gain.linearRampToValueAtTime(0.01, ahora + 0.18);
+                osc.start(ahora);
+                osc.stop(ahora + 0.18);
+            } else if (tipo === 'logro') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(523, ahora);
+                osc.frequency.setValueAtTime(659, ahora + 0.08);
+                osc.frequency.setValueAtTime(783, ahora + 0.16);
+                osc.frequency.setValueAtTime(1046, ahora + 0.24);
+                gain.gain.setValueAtTime(volMax, ahora);
+                gain.gain.linearRampToValueAtTime(0.01, ahora + 0.35);
+                osc.start(ahora);
+                osc.stop(ahora + 0.35);
+            }
+        }
+
+        let partida = {
+            fichas: 0,
+            fichasTotalesHistoricas: 0,
+            clicsManualesTotales: 0,
+            materiaOscura: 0,
+            poderClick: 1,
+            fichasPorSegundo: 0,
+            ultimoTimestamp: Date.now(),
+            mejorasAuto: {
+                sonda: { id: 'sonda', nombre: '🛰️ Sonda Espacial', desc: '+1 f/s', costo: 15, valor: 1, cantidad: 0, mult: 1.18 },
+                satelite: { id: 'satelite', nombre: '🛰️ Satélite Solar', desc: '+8 f/s', costo: 120, valor: 8, cantidad: 0, mult: 1.19 },
+                plataforma: { id: 'plataforma', nombre: '👨‍🚀 Plataforma Orbital', desc: '+40 f/s', costo: 1100, valor: 40, cantidad: 0, mult: 1.20 },
+                minaLunar: { id: 'minaLunar', nombre: '🌕 Mina Lunar Helio-3', desc: '+160 f/s', costo: 8500, valor: 160, cantidad: 0, mult: 1.20 },
+                cazadorAsteroides: { id: 'cazadorAsteroides', nombre: '☄️ Cazador de Asteroides', desc: '+750 f/s', costo: 55000, valor: 750, cantidad: 0, mult: 1.21 },
+                coloniaMarte: { id: 'coloniaMarte', nombre: '🔴 Colonia Marciana', desc: '+3,400 f/s', costo: 380000, valor: 3400, cantidad: 0, mult: 1.21 },
+                colectorJupiter: { id: 'colectorJupiter', nombre: '🪐 Colector de Júpiter', desc: '+16,000 f/s', costo: 2600000, valor: 16000, cantidad: 0, mult: 1.22 },
+                esferaDyson: { id: 'esferaDyson', nombre: '☀️ Esfera de Dyson', desc: '+85,000 f/s', costo: 18000000, valor: 85000, cantidad: 0, mult: 1.22 },
+                extractorMateria: { id: 'extractorMateria', nombre: '🕳️ Extractor Materia Oscura', desc: '+450,000 f/s', costo: 140000000, valor: 450000, cantidad: 0, mult: 1.23 },
+                antimateria: { id: 'antimateria', nombre: '🌌 Matriz Antimateria', desc: '+2,800,000 f/s', costo: 1100000000, valor: 2800000, cantidad: 0, mult: 1.23 },
+                singularidad: { id: 'singularidad', nombre: '🔮 Motor Singularidad', desc: '+18,000,000 f/s', costo: 9500000000, valor: 18000000, cantidad: 0, mult: 1.24 },
+                creadorCosmico: { id: 'creadorCosmico', nombre: '⚡ Santuario Creador', desc: '+120,000,000 f/s', costo: 85000000000, valor: 120000000, cantidad: 0, mult: 1.25 }
+            },
+            mejorasClick: {
+                c1: { id: 'c1', nombre: '🚀 Propulsor Plasma', desc: '+1 clic', costo: 50, valor: 1, cantidad: 0, mult: 1.8 },
+                c2: { id: 'c2', nombre: '⚡ Láser de Fotones', desc: '+3 clic', costo: 250, valor: 3, cantidad: 0, mult: 1.8 },
+                c3: { id: 'c3', nombre: '💎 Taladro de Diamante', desc: '+8 clic', costo: 1200, valor: 8, cantidad: 0, mult: 1.85 },
+                c4: { id: 'c4', nombre: '🌌 Guante de Taquiones', desc: '+25 clic', costo: 6000, valor: 25, cantidad: 0, mult: 1.85 },
+                c5: { id: 'c5', nombre: '🔮 Pulsador Iónico', desc: '+70 clic', costo: 32000, valor: 70, cantidad: 0, mult: 1.9 },
+                c6: { id: 'c6', nombre: '☄️ Cañón Neón', desc: '+200 clic', costo: 180000, valor: 200, cantidad: 0, mult: 1.9 },
+                c7: { id: 'c7', nombre: '🪐 Anillo de Amplificación', desc: '+650 clic', costo: 950000, valor: 650, cantidad: 0, mult: 1.95 },
+                c8: { id: 'c8', nombre: '☀️ Rayo Solar Concentrado', desc: '+2,200 clic', costo: 5000000, valor: 2200, cantidad: 0, mult: 1.95 },
+                c9: { id: 'c9', nombre: '🕳️ Manipulador de Gravedad', desc: '+7,500 clic', costo: 28000000, valor: 7500, cantidad: 0, mult: 2.0 },
+                c10: { id: 'c10', nombre: '⚡ Disruptor Cuántico', desc: '+25,000 clic', costo: 150000000, valor: 25000, cantidad: 0, mult: 2.0 },
+                c11: { id: 'c11', nombre: '🌌 Sifón de Singularidad', desc: '+85,000 clic', costo: 850000000, valor: 85000, cantidad: 0, mult: 2.05 },
+                c12: { id: 'c12', nombre: '🔮 Cristal de Caos', desc: '+300,000 clic', costo: 4800000000, valor: 300000, cantidad: 0, mult: 2.05 },
+                c13: { id: 'c13', nombre: '☄️ Impactador de Antimateria', desc: '+1,100,000 clic', costo: 28000000000, valor: 1100000, cantidad: 0, mult: 2.1 },
+                c14: { id: 'c14', nombre: '🚀 Motor Warp de Clic', desc: '+4,000,000 clic', costo: 160000000000, valor: 4000000, cantidad: 0, mult: 2.1 },
+                c15: { id: 'c15', nombre: '🪐 Catalizador Galáctico', desc: '+15,000,000 clic', costo: 950000000000, valor: 15000000, cantidad: 0, mult: 2.15 },
+                c16: { id: 'c16', nombre: '☀️ Nucleador Estelar', desc: '+55,000,000 clic', costo: 5500000000000, valor: 55000000, cantidad: 0, mult: 2.15 },
+                c17: { id: 'c17', nombre: '🕳️ Extractor Hiperdimensional', desc: '+200,000,000 clic', costo: 32000000000000, valor: 200000000, cantidad: 0, mult: 2.2 },
+                c18: { id: 'c18', nombre: '⚡ Inductor Multiversal', desc: '+800,000,000 clic', costo: 190000000000000, valor: 800000000, cantidad: 0, mult: 2.2 },
+                c19: { id: 'c19', nombre: '🔮 Mano del Omniverso', desc: '+3,000,000,000 clic', costo: 1200000000000000, valor: 3000000000, cantidad: 0, mult: 2.25 },
+                c20: { id: 'c20', nombre: '🌌 Clic del Creador Primordial', desc: '+12,000,000,000 clic', costo: 8500000000000000, valor: 12000000000, cantidad: 0, mult: 2.3 }
+            },
+            logrosDesbloqueados: {}
+        };
+
+        let listaLogrosProcedurales = [];
+
+        function generar637Logros() {
+            listaLogrosProcedurales = [];
+
+            // 1. Logros de Polvo Estelar Histórico (Clásicos)
+            const metasPolvo = [100, 1000, 10000, 50000, 100000, 500000, 1000000, 5000000, 10000000, 50000000, 100000000, 500000000, 1000000000];
+            metasPolvo.forEach((m, idx) => {
+                listaLogrosProcedurales.push({
+                    id: `logro_polvo_clasico_${m}`,
+                    icono: '✨',
+                    nombre: `Magnate Estelar #${idx+1}`,
+                    desc: `Acumula ${m.toLocaleString()} Polvo Estelar histórico`,
+                    check: () => partida.fichasTotalesHistoricas >= m
+                });
+            });
+
+            // 2. Logros de Materia Oscura / Ascensión (Clásicos)
+            const metasMateria = [1, 5, 10, 25, 50, 100, 250, 500, 1000];
+            metasMateria.forEach((m, idx) => {
+                listaLogrosProcedurales.push({
+                    id: `logro_materia_clasica_${m}`,
+                    icono: '🌌',
+                    nombre: `Trascendencia Cuántica #${idx+1}`,
+                    desc: `Posee ${m} unidades de Materia Oscura`,
+                    check: () => partida.materiaOscura >= m
+                });
+            });
+
+            // 3. Logros de Clics Manuales Totales
+            const metasClics = [1, 10, 100, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000];
+            metasClics.forEach((m, idx) => {
+                listaLogrosProcedurales.push({
+                    id: `logro_clic_manual_${m}`,
+                    icono: '👆',
+                    nombre: `Toque Cósmico #${idx+1}`,
+                    desc: `Realiza ${m.toLocaleString()} clics manuales`,
+                    check: () => partida.clicsManualesTotales >= m
+                });
+            });
+
+            // 4. Logros por Compras de Mejoras (Hitos de 1, 10, 50 y 100)
+            const todasLasMejoras = { ...partida.mejorasAuto, ...partida.mejorasClick };
+            for (let idMejora in todasLasMejoras) {
+                let m = todasLasMejoras[idMejora];
+                let hitos = [1, 10, 50, 100];
+                hitos.forEach(h => {
+                    listaLogrosProcedurales.push({
+                        id: `logro_compra_${idMejora}_${h}`,
+                        icono: '🛒',
+                        nombre: `Coleccionista de ${m.nombre} (x${h})`,
+                        desc: `Adquiere al menos ${h} unidades de ${m.nombre}`,
+                        check: () => m.cantidad >= h
+                    });
+                });
+            }
+
+            // 5. Rellenar hasta los 637 logros de forma procedural si hiciera falta
+            let rellenoIdx = 1;
+            while (listaLogrosProcedurales.length < 637) {
+                let metaExtra = rellenoIdx * 2500000;
+                listaLogrosProcedurales.push({
+                    id: `logro_extra_${rellenoIdx}`,
+                    icono: '⭐',
+                    nombre: `Estrella Distante #${rellenoIdx}`,
+                    desc: `Alcanza ${metaExtra.toLocaleString()} Polvo Estelar acumulado`,
+                    check: () => partida.fichasTotalesHistoricas >= metaExtra
+                });
+                rellenoIdx++;
+            }
+
+            listaLogrosProcedurales = listaLogrosProcedurales.slice(0, 637);
+        }
+
+        let comboNivel = 0;
+        let comboMult = 1.0;
+
+        function cargarConfiguracionGuardada() {
+            let temaGuardado = localStorage.getItem('aldgame_tema_espacio');
+            if (temaGuardado) {
+                document.documentElement.setAttribute('data-tema', temaGuardado);
+                document.getElementById('select-tema').value = temaGuardado;
+                cambiarTema();
+            }
+
+            let volGuardado = localStorage.getItem('aldgame_volumen');
+            if (volGuardado !== null) {
+                volumenAudio = parseFloat(volGuardado);
+                let rangeVal = Math.round(volumenAudio * 100);
+                document.getElementById('range-volumen').value = rangeVal;
+                document.getElementById('txt-vol').textContent = `${rangeVal}%`;
+            }
+        }
+
+        function cargarPartida() {
+            generar637Logros();
+            cargarConfiguracionGuardada();
+
+            let guardado = localStorage.getItem('aldgame_astro_clicker_v8');
+            if (guardado) {
+                try {
+                    let datos = JSON.parse(guardado);
+                    partida.fichas = datos.fichas || 0;
+                    partida.fichasTotalesHistoricas = datos.fichasTotalesHistoricas || 0;
+                    partida.clicsManualesTotales = datos.clicsManualesTotales || 0;
+                    partida.materiaOscura = datos.materiaOscura || 0;
+                    partida.poderClick = datos.poderClick || 1;
+                    partida.ultimoTimestamp = datos.ultimoTimestamp || Date.now();
+                    partida.logrosDesbloqueados = datos.logrosDesbloqueados || {};
+                    
+                    if (datos.mejorasAuto) {
+                        for (let k in datos.mejorasAuto) {
+                            if (partida.mejorasAuto[k] && datos.mejorasAuto[k]) {
+                                partida.mejorasAuto[k].cantidad = datos.mejorasAuto[k].cantidad || 0;
+                                partida.mejorasAuto[k].costo = datos.mejorasAuto[k].costo || partida.mejorasAuto[k].costo;
+                            }
+                        }
+                    }
+                    if (datos.mejorasClick) {
+                        for (let k in datos.mejorasClick) {
+                            if (partida.mejorasClick[k] && datos.mejorasClick[k]) {
+                                partida.mejorasClick[k].cantidad = datos.mejorasClick[k].cantidad || 0;
+                                partida.mejorasClick[k].costo = datos.mejorasClick[k].costo || partida.mejorasClick[k].costo;
+                            }
+                        }
+                    }
+                } catch(e) {}
+            }
+            recalcularCPS();
+            recalcularPoderClick();
+
+            let ahora = Date.now();
+            let segundosOffline = (ahora - partida.ultimoTimestamp) / 1000;
+            if (segundosOffline > 5 && partida.fichasPorSegundo > 0) {
+                let gananciasOffline = segundosOffline * partida.fichasPorSegundo;
+                partida.fichas += gananciasOffline;
+                partida.fichasTotalesHistoricas += gananciasOffline;
+                mostrarAvisoOffline(gananciasOffline, segundosOffline);
+            }
+        }
+
+        function guardarPartida() {
+            partida.ultimoTimestamp = Date.now();
+            localStorage.setItem('aldgame_astro_clicker_v8', JSON.stringify(partida));
+        }
+
+        function contarLogrosDesbloqueados() {
+            return Object.keys(partida.logrosDesbloqueados).length;
+        }
+
+        function recalcularCPS() {
+            let base = 0;
+            for (let key in partida.mejorasAuto) {
+                let m = partida.mejorasAuto[key];
+                base += m.cantidad * m.valor;
+            }
+            let multMateria = 1 + (partida.materiaOscura * 0.10);
+            let multLogros = 1 + (contarLogrosDesbloqueados() * 0.005);
+            partida.fichasPorSegundo = base * multMateria * multLogros;
+        }
+
+        function recalcularPoderClick() {
+            let total = 1;
+            for (let key in partida.mejorasClick) {
+                let m = partida.mejorasClick[key];
+                total += m.cantidad * m.valor;
+            }
+            partida.poderClick = total;
+        }
+
+        function cliquearMoneda(e) {
+            sonarEfecto('click');
+            partida.clicsManualesTotales++;
+
+            comboNivel = Math.min(100, comboNivel + 8);
+            comboMult = 1.0 + (comboNivel / 100) * 4.0;
+
+            let valorGanado = Math.round(partida.poderClick * comboMult);
+            partida.fichas += valorGanado;
+            partida.fichasTotalesHistoricas += valorGanado;
+
+            crearParticulaFlotante(e.clientX, e.clientY, `+${valorGanado}`);
+            verificarLogrosGlobales();
+            actualizarUI();
+        }
+
+        function crearParticulaFlotante(x, y, texto) {
+            let el = document.createElement('div');
+            el.className = 'particula';
+            el.textContent = texto;
+            el.style.left = (x - 15) + 'px';
+            el.style.top = (y - 25) + 'px';
+            document.body.appendChild(el);
+            setTimeout(() => el.remove(), 800);
+        }
+
+        function comprarMejoraAuto(id) {
+            let mejora = partida.mejorasAuto[id];
+            if (partida.fichas >= mejora.costo) {
+                sonarEfecto('compra');
+                partida.fichas -= mejora.costo;
+                mejora.cantidad++;
+                mejora.costo = Math.round(mejora.costo * mejora.mult);
+                recalcularCPS();
+                verificarLogrosGlobales();
+                actualizarUI();
+                guardarPartida();
+            }
+        }
+
+        function comprarMejoraClick(id) {
+            let mejora = partida.mejorasClick[id];
+            if (partida.fichas >= mejora.costo) {
+                sonarEfecto('compra');
+                partida.fichas -= mejora.costo;
+                mejora.cantidad++;
+                mejora.costo = Math.round(mejora.costo * mejora.mult);
+                recalcularPoderClick();
+                verificarLogrosGlobales();
+                actualizarUI();
+                guardarPartida();
+            }
+        }
+
+        function verificarLogrosGlobales() {
+            let nuevoDesbloqueo = false;
+            listaLogrosProcedurales.forEach(l => {
+                if (!partida.logrosDesbloqueados[l.id] && l.check()) {
+                    partida.logrosDesbloqueados[l.id] = true;
+                    nuevoDesbloqueo = true;
+                }
+            });
+
+            if (nuevoDesbloqueo) {
+                sonarEfecto('logro');
+                recalcularCPS();
+                renderizarLogros();
+            }
+        }
+
+        // FÓRMULA DE PRESTIGIO: 1 Materia Oscura por cada 1,000 Polvo Estelar histórico
+        function calcularMateriaPendiente() {
+            if (partida.fichasTotalesHistoricas < 1000) return 0;
+            return Math.floor(partida.fichasTotalesHistoricas / 1000);
+        }
+
+        function ejecutarAscension() {
+            let ganados = calcularMateriaPendiente();
+            if (ganados > 0) {
+                if (confirm(`¿Ejecutar salto cuántico? Reiniciarás tu imperio pero ganarás +${ganados} Materia Oscura 🌌.`)) {
+                    partida.materiaOscura += ganados;
+                    partida.fichas = 0;
+                    partida.poderClick = 1;
+                    
+                    for (let k in partida.mejorasAuto) partida.mejorasAuto[k].cantidad = 0;
+                    for (let k in partida.mejorasClick) partida.mejorasClick[k].cantidad = 0;
+
+                    partida.mejorasAuto.sonda.costo = 15;
+                    partida.mejorasAuto.satelite.costo = 120;
+                    partida.mejorasAuto.plataforma.costo = 1100;
+                    partida.mejorasAuto.minaLunar.costo = 8500;
+                    partida.mejorasAuto.cazadorAsteroides.costo = 55000;
+                    partida.mejorasAuto.coloniaMarte.costo = 380000;
+                    partida.mejorasAuto.colectorJupiter.costo = 2600000;
+                    partida.mejorasAuto.esferaDyson.costo = 18000000;
+                    partida.mejorasAuto.extractorMateria.costo = 140000000;
+                    partida.mejorasAuto.antimateria.costo = 1100000000;
+                    partida.mejorasAuto.singularidad.costo = 9500000000;
+                    partida.mejorasAuto.creadorCosmico.costo = 85000000000;
+
+                    let baseCostesClick = [50, 250, 1200, 6000, 32000, 180000, 950000, 5000000, 28000000, 150000000, 850000000, 4800000000, 28000000000, 160000000000, 950000000000, 5500000000000, 32000000000000, 190000000000000, 1200000000000000, 8500000000000000];
+                    let idx = 0;
+                    for (let k in partida.mejorasClick) {
+                        partida.mejorasClick[k].costo = baseCostesClick[idx++];
+                    }
+
+                    verificarLogrosGlobales();
+                    recalcularCPS();
+                    recalcularPoderClick();
+                    inicializarTiendaHTML();
+                    actualizarUI();
+                    guardarPartida();
+                }
+            }
+        }
+
+        function cambiarTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('activo'));
+            document.querySelectorAll('.tab-contenido').forEach(c => c.classList.remove('activo'));
+
+            if (tab === 'tienda') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('activo');
+                document.getElementById('tab-tienda').classList.add('activo');
+            } else if (tab === 'logros') {
+                document.querySelectorAll('.tab-btn')[1].classList.add('activo');
+                document.getElementById('tab-logros').classList.add('activo');
+            } else if (tab === 'prestigio') {
+                document.querySelectorAll('.tab-btn')[2].classList.add('activo');
+                document.getElementById('tab-prestigio').classList.add('activo');
+            }
+        }
+
+        function cambiarSubtab(subtab) {
+            document.querySelectorAll('.subtab-btn').forEach(b => b.classList.remove('activo'));
+            let contenedorAuto = document.getElementById('lista-mejoras-auto');
+            let contenedorClick = document.getElementById('lista-mejoras-click');
+
+            if (subtab === 'autoclick') {
+                document.querySelectorAll('.subtab-btn')[0].classList.add('activo');
+                contenedorAuto.style.display = 'block';
+                contenedorClick.style.display = 'none';
+            } else {
+                document.querySelectorAll('.subtab-btn')[1].classList.add('activo');
+                contenedorAuto.style.display = 'none';
+                contenedorClick.style.display = 'block';
+            }
+        }
+
+        function inicializarTiendaHTML() {
+            let contenedorAuto = document.getElementById('lista-mejoras-auto');
+            let contenedorClick = document.getElementById('lista-mejoras-click');
+            
+            contenedorAuto.innerHTML = '';
+            contenedorClick.innerHTML = '';
+
+            for (let key in partida.mejorasAuto) {
+                let m = partida.mejorasAuto[key];
+                let div = document.createElement('div');
+                div.className = 'item-mejora';
+                div.id = `item-auto-${key}`;
+                div.innerHTML = `
+                    <div class="info-mejora">
+                        <h4 id="nombre-auto-${key}">${m.nombre} (x${m.cantidad})</h4>
+                        <p>${m.desc}</p>
+                        <p id="costo-auto-${key}" style="color: var(--color-principal); font-weight: bold; margin-top: 2px;">Coste: ${Math.round(m.costo).toLocaleString()} ✨</p>
+                    </div>
+                    <button class="btn-comprar" id="btn-compra-auto-${key}" onclick="comprarMejoraAuto('${key}')">Comprar</button>
+                `;
+                contenedorAuto.appendChild(div);
+            }
+
+            for (let key in partida.mejorasClick) {
+                let m = partida.mejorasClick[key];
+                let div = document.createElement('div');
+                div.className = 'item-mejora';
+                div.id = `item-click-${key}`;
+                div.innerHTML = `
+                    <div class="info-mejora">
+                        <h4 id="nombre-click-${key}">${m.nombre} (x${m.cantidad})</h4>
+                        <p>${m.desc}</p>
+                        <p id="costo-click-${key}" style="color: var(--color-principal); font-weight: bold; margin-top: 2px;">Coste: ${Math.round(m.costo).toLocaleString()} ✨</p>
+                    </div>
+                    <button class="btn-comprar" id="btn-compra-click-${key}" onclick="comprarMejoraClick('${key}')">Comprar</button>
+                `;
+                contenedorClick.appendChild(div);
+            }
+        }
+
+        function renderizarLogros() {
+            let contenedor = document.getElementById('lista-logros');
+            let filtro = document.getElementById('search-logros') ? document.getElementById('search-logros').value.toLowerCase() : '';
+            contenedor.innerHTML = '';
+
+            let count = 0;
+            listaLogrosProcedurales.forEach(l => {
+                let desbloqueado = !!partida.logrosDesbloqueados[l.id];
+                if (desbloqueado) count++;
+
+                if (!filtro || l.nombre.toLowerCase().includes(filtro) || l.desc.toLowerCase().includes(filtro)) {
+                    if (contenedor.children.length < 80 || desbloqueado) {
+                        let div = document.createElement('div');
+                        div.className = `card-logro ${desbloqueado ? 'desbloqueado' : ''}`;
+                        div.innerHTML = `
+                            <div class="logro-icono">${l.icono}</div>
+                            <div class="logro-info">
+                                <h4>${l.nombre} ${desbloqueado ? '✅' : '🔒'}</h4>
+                                <p>${l.desc}</p>
+                            </div>
+                        `;
+                        contenedor.appendChild(div);
+                    }
+                }
+            });
+
+            document.getElementById('count-logros').textContent = `${count}/637`;
+        }
+
+        function filtrarLogros() {
+            renderizarLogros();
+        }
+
+        function mostrarAvisoOffline(ganancia, segundos) {
+            let tiempoTexto = segundos > 60 ? `${(segundos/60).toFixed(1)} m` : `${Math.floor(segundos)} s`;
+            let div = document.createElement('div');
+            div.className = 'modal-offline';
+            div.innerHTML = `🌟 ¡Orbitas sincronizadas!<br>Extrajiste <b>+${Math.floor(ganancia).toLocaleString()} ✨</b> en ${tiempoTexto} offline`;
+            document.body.appendChild(div);
+            setTimeout(() => div.remove(), 5000);
+        }
+
+        function actualizarUI() {
+            document.getElementById('txt-fichas').textContent = `${Math.floor(partida.fichas).toLocaleString()} ✨`;
+            document.getElementById('txt-ps').textContent = `Polvo Estelar por seg: ${partida.fichasPorSegundo.toFixed(1)}`;
+            
+            let countL = contarLogrosDesbloqueados();
+            let bonoLogroPct = (countL * 0.5).toFixed(1);
+            let bonoMateriaPct = (partida.materiaOscura * 10);
+
+            document.getElementById('txt-stats').innerHTML = `
+                Poder por clic: ${partida.poderClick.toLocaleString()} ✨<br>
+                Clics manuales: ${partida.clicsManualesTotales.toLocaleString()} 👆<br>
+                Materia Oscura: ${partida.materiaOscura} 🌌 (+${bonoMateriaPct}% Prod)<br>
+                Logros Desbloqueados: ${countL} / 637 (+${bonoLogroPct}% Prod)
+            `;
+
+            document.getElementById('barra-combo').style.width = `${comboNivel}%`;
+            document.getElementById('txt-combo').textContent = `TURBO HIPERESPACIAL: x${comboMult.toFixed(1)}`;
+
+            for (let key in partida.mejorasAuto) {
+                let m = partida.mejorasAuto[key];
+                let itemEl = document.getElementById(`item-auto-${key}`);
+                let nombreEl = document.getElementById(`nombre-auto-${key}`);
+                let costoEl = document.getElementById(`costo-auto-${key}`);
+                let btnEl = document.getElementById(`btn-compra-auto-${key}`);
+
+                if (itemEl && nombreEl && costoEl && btnEl) {
+                    nombreEl.textContent = `${m.nombre} (x${m.cantidad})`;
+                    costoEl.textContent = `Coste: ${Math.round(m.costo).toLocaleString()} ✨`;
+                    if (partida.fichas >= m.costo) {
+                        itemEl.classList.remove('bloqueado');
+                        btnEl.disabled = false;
+                    } else {
+                        itemEl.classList.add('bloqueado');
+                        btnEl.disabled = true;
+                    }
+                }
+            }
+
+            for (let key in partida.mejorasClick) {
+                let m = partida.mejorasClick[key];
+                let itemEl = document.getElementById(`item-click-${key}`);
+                let nombreEl = document.getElementById(`nombre-click-${key}`);
+                let costoEl = document.getElementById(`costo-click-${key}`);
+                let btnEl = document.getElementById(`btn-compra-click-${key}`);
+
+                if (itemEl && nombreEl && costoEl && btnEl) {
+                    nombreEl.textContent = `${m.nombre} (x${m.cantidad})`;
+                    costoEl.textContent = `Coste: ${Math.round(m.costo).toLocaleString()} ✨`;
+                    if (partida.fichas >= m.costo) {
+                        itemEl.classList.remove('bloqueado');
+                        btnEl.disabled = false;
+                    } else {
+                        itemEl.classList.add('bloqueado');
+                        btnEl.disabled = true;
+                    }
+                }
+            }
+
+            let dGanados = calcularMateriaPendiente();
+            let btnAscender = document.getElementById('btn-ascender');
+            document.getElementById('txt-prestigio-gain').innerHTML = `
+                Materia Oscura a ganar: ${dGanados} 🌌<br>
+                <small style="color: var(--color-secundario);">Basado en ${Math.floor(partida.fichasTotalesHistoricas).toLocaleString()} Polvo Estelar histórico (1 🌌 por cada 1,000 ✨)</small>
+            `;
+            btnAscender.disabled = (dGanados <= 0);
+        }
+
+        let ultimoTiempo = performance.now();
+        function buclePrincipal(tiempoActual) {
+            let delta = (tiempoActual - ultimoTiempo) / 1000;
+            ultimoTiempo = tiempoActual;
+
+            if (comboNivel > 0) {
+                comboNivel = Math.max(0, comboNivel - (15 * delta));
+                comboMult = 1.0 + (comboNivel / 100) * 4.0;
+            }
+
+            if (partida.fichasPorSegundo > 0) {
+                let ganancia = partida.fichasPorSegundo * delta;
+                partida.fichas += ganancia;
+                partida.fichasTotalesHistoricas += ganancia;
+            }
+
+            actualizarUI();
+            requestAnimationFrame(buclePrincipal);
+        }
+
+        setInterval(guardarPartida, 5000);
+        window.addEventListener('beforeunload', guardarPartida);
+
+        cargarPartida();
+        inicializarTiendaHTML();
+        renderizarLogros();
+        actualizarUI();
+        requestAnimationFrame(buclePrincipal);
+    </script>
+</body>
+</html>

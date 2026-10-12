@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>2048 - aldGAME</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2b2b2b;
+            color: #ffffff;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* Panel Lateral */
+        .panel-lateral {
+            width: 320px;
+            background-color: #1e1e1e;
+            border-right: 2px solid #333;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            justify-content: space-between;
+        }
+
+        .panel-lateral h2 {
+            font-size: 1.4rem;
+            color: #e94560;
+            margin-bottom: 8px;
+        }
+
+        .info-estado {
+            font-size: 0.95rem;
+            background: #2b2b2b;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        .puntuacion-contenedor {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .caja-puntos {
+            flex: 1;
+            background: #252525;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+
+        .caja-puntos span {
+            display: block;
+            font-size: 0.75rem;
+            color: #aaa;
+            text-transform: uppercase;
+        }
+
+        .caja-puntos strong {
+            font-size: 1.2rem;
+            color: #e94560;
+        }
+
+        /* Historial de Partidas */
+        .seccion-historial {
+            background-color: #252525;
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+
+        .seccion-historial h3 {
+            font-size: 0.9rem;
+            color: #e94560;
+            margin-bottom: 4px;
+            text-align: center;
+        }
+
+        .lista-partidas {
+            list-style: none;
+            font-size: 0.8rem;
+        }
+
+        .lista-partidas li {
+            padding: 4px 6px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .lista-partidas li:last-child {
+            border-bottom: none;
+        }
+
+        .tag-puntos { color: #2ecc71; font-weight: bold; }
+
+        /* Contenedor principal del juego */
+        .contenedor-juego {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Tablero 2048 */
+        .tablero-2048 {
+            width: 400px;
+            height: 400px;
+            background-color: #bbada0;
+            border-radius: 10px;
+            padding: 15px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 15px;
+            position: relative;
+        }
+
+        .celda-2048 {
+            background-color: rgba(238, 228, 218, 0.35);
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #776e65;
+            user-select: none;
+            transition: all 0.1s ease-in-out;
+        }
+
+        /* Colores dinámicos para las fichas de 2048 */
+        .f-2 { background-color: #eee4da; color: #776e65; }
+        .f-4 { background-color: #ede0c8; color: #776e65; }
+        .f-8 { background-color: #f2b179; color: #f9f6f2; }
+        .f-16 { background-color: #f59563; color: #f9f6f2; }
+        .f-32 { background-color: #f67c5f; color: #f9f6f2; }
+        .f-64 { background-color: #f65e3b; color: #f9f6f2; }
+        .f-128 { background-color: #edcf72; color: #f9f6f2; font-size: 1.5rem; }
+        .f-256 { background-color: #edcc61; color: #f9f6f2; font-size: 1.5rem; }
+        .f-512 { background-color: #edc850; color: #f9f6f2; font-size: 1.5rem; }
+        .f-1024 { background-color: #edc53f; color: #f9f6f2; font-size: 1.2rem; }
+        .f-2048 { background-color: #edc22e; color: #f9f6f2; font-size: 1.2rem; }
+        .f-mas { background-color: #3c3a32; color: #f9f6f2; font-size: 1rem; }
+
+        /* Botones */
+        .botones {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: background 0.2s;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background-color: #cf3a53;
+        }
+
+        .btn-volver {
+            background-color: #444;
+        }
+
+        .btn-volver:hover {
+            background-color: #555;
+        }
+    </style>
+<style id="nexgame-theme">
+/* ===== NexGame · tema común ===== */
+:root{--nx-bg:#0b0d12;--nx-surface:#12151c;--nx-surface2:#181c25;--nx-line:#232836;--nx-text:#e8eaf0;--nx-muted:#8b92a5;--nx-accent:#ff4757;--nx-ok:#35d07f;--nx-bad:#ff5c6c;--nx-warn:#f5c451}
+body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !important;background:var(--nx-bg) !important;color:var(--nx-text) !important;-webkit-font-smoothing:antialiased}
+.panel-lateral{width:300px;background:var(--nx-surface);border-right:1px solid var(--nx-line);padding:26px 20px}
+.panel-lateral h2{font-size:1.2rem;font-weight:700;color:var(--nx-text);margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--nx-line);letter-spacing:.2px}
+.panel-lateral h2::before{content:'NEXGAME';display:block;font-size:.62rem;letter-spacing:3px;color:var(--nx-accent);font-weight:800;margin-bottom:7px}
+.info-estado,.info-turno{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px;padding:12px 14px;font-size:.88rem;font-weight:600;color:var(--nx-text);line-height:1.35}
+.puntuacion-contenedor{gap:10px}
+.caja-puntos,.caja-saldo,.selector-apuesta{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px}
+.caja-puntos span,.caja-saldo span,.selector-apuesta span{color:var(--nx-muted);font-size:.64rem;letter-spacing:1.4px;font-weight:700}
+.caja-puntos strong,.caja-saldo strong{color:var(--nx-text);font-size:1.4rem;font-weight:800;font-variant-numeric:tabular-nums}
+.caja-saldo strong{color:var(--nx-warn)}
+.seccion-historial{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px;padding:12px}
+.seccion-historial h3{color:var(--nx-muted);font-size:.64rem;letter-spacing:1.6px;text-transform:uppercase;font-weight:800;margin-bottom:8px;text-align:left}
+.lista-partidas li{border-bottom:1px solid var(--nx-line);padding:7px 2px;color:var(--nx-muted)}
+.tag-victoria,.tag-ganada{color:var(--nx-ok) !important}.tag-derrota,.tag-perdida{color:var(--nx-bad) !important}.tag-empate{color:var(--nx-warn) !important}.tag-puntos{color:var(--nx-text) !important}
+.btn{background:var(--nx-accent);color:#fff;border:1px solid transparent;border-radius:10px;padding:12px 16px;font-size:.9rem;font-weight:600;letter-spacing:.2px;transition:background .15s,transform .1s,border-color .15s}
+.btn:hover{background:#ff6070}.btn:active{transform:translateY(1px)}
+.btn-volver,.btn-secundario{background:transparent !important;border:1px solid var(--nx-line) !important;color:var(--nx-muted) !important}
+.btn-volver:hover,.btn-secundario:hover{border-color:#3a4258 !important;color:var(--nx-text) !important;background:var(--nx-surface2) !important}
+.btn:disabled{background:#262b38;color:#6b7387}
+.contenedor-juego{background:radial-gradient(800px 500px at 50% 0%,#141826 0%,transparent 70%)}
+
+.tablero-2048{width:min(440px,calc(100vh - 80px));height:min(440px,calc(100vh - 80px));background:#161a24;border:1px solid var(--nx-line);border-radius:16px;padding:12px;gap:12px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.celda-2048{background:#1d2230;border-radius:10px;color:#d6dbe8;font-weight:800}
+.f-2{background:#e9edf5;color:#2b3142}.f-4{background:#d5ddf0;color:#2b3142}
+.f-8{background:#ffb067;color:#fff}.f-16{background:#ff9548;color:#fff}.f-32{background:#ff7a45;color:#fff}.f-64{background:#ff5a47;color:#fff}
+.f-128{background:#f5d061;color:#2b2406}.f-256{background:#f0c53f;color:#2b2406}.f-512{background:#e9b923;color:#2b2406}
+.f-1024{background:#6dd3a0;color:#06210f}.f-2048{background:#3ec9ff;color:#04202b}.f-mas{background:#a37bff;color:#fff}
+</style>
+</head>
+<body>
+
+    <!-- Panel Lateral -->
+    <div class="panel-lateral">
+        <div>
+            <h2>Juego 2048</h2>
+            <div class="info-estado" id="info-estado">Usa las flechas para mover</div>
+
+            <div class="puntuacion-contenedor">
+                <div class="caja-puntos">
+                    <span>Puntuación</span>
+                    <strong id="puntuacion">0</strong>
+                </div>
+                <div class="caja-puntos">
+                    <span>Récord</span>
+                    <strong id="record">0</strong>
+                </div>
+            </div>
+
+            <!-- Historial de las 10 últimas partidas -->
+            <div class="seccion-historial">
+                <h3>Últimas Partidas</h3>
+                <ul class="lista-partidas" id="lista-historial">
+                    <!-- Se llena dinámicamente -->
+                </ul>
+            </div>
+        </div>
+
+        <div class="botones">
+            <button class="btn" onclick="reiniciarJuego()">Reiniciar Partida</button>
+            <a href="../index.html" class="btn btn-volver">Volver al Menú</a>
+        </div>
+    </div>
+
+    <!-- Contenedor del Juego -->
+    <div class="contenedor-juego">
+        <div class="tablero-2048" id="tablero">
+            <!-- Se generan dinámicamente las 16 celdas -->
+        </div>
+    </div>
+
+    <script>
+        let tablero = [];
+        let puntuacion = 0;
+        let record = localStorage.getItem('2048_record') || 0;
+        let juegoTerminado = false;
+
+        document.getElementById('record').textContent = record;
+
+        function iniciarJuego() {
+            tablero = [
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0],
+                [0, 0, 0, 0]
+            ];
+            puntuacion = 0;
+            juegoTerminado = false;
+            document.getElementById('puntuacion').textContent = puntuacion;
+            document.getElementById('info-estado').textContent = "Combina hasta llegar a 2048";
+            
+            agregarNumeroAleatorio();
+            agregarNumeroAleatorio();
+            actualizarTableroUI();
+        }
+
+        function reiniciarJuego() {
+            if (puntuacion > 0) {
+                registrarPartida(puntuacion);
+            }
+            iniciarJuego();
+        }
+
+        function agregarNumeroAleatorio() {
+            let celdasVacias = [];
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    if (tablero[r][c] === 0) {
+                        celdasVacias.push({r, c});
+                    }
+                }
+            }
+            if (celdasVacias.length > 0) {
+                let aleatoria = celdasVacias[Math.floor(Math.random() * celdasVacias.length)];
+                tablero[aleatoria.r][aleatoria.c] = Math.random() < 0.9 ? 2 : 4;
+            }
+        }
+
+        function actualizarTableroUI() {
+            const tableroEl = document.getElementById('tablero');
+            tableroEl.innerHTML = '';
+
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    let valor = tablero[r][c];
+                    let celda = document.createElement('div');
+                    celda.classList.add('celda-2048');
+                    
+                    if (valor > 0) {
+                        celda.textContent = valor;
+                        if (valor <= 2048) {
+                            celda.classList.add(`f-${valor}`);
+                        } else {
+                            celda.classList.add('f-mas');
+                        }
+                    }
+                    tableroEl.appendChild(celda);
+                }
+            }
+            document.getElementById('puntuacion').textContent = puntuacion;
+            if (puntuacion > record) {
+                record = puntuacion;
+                localStorage.setItem('2048_record', record);
+                document.getElementById('record').textContent = record;
+            }
+        }
+
+        // Control mediante teclado
+        document.addEventListener('keydown', (e) => {
+            if (juegoTerminado) return;
+            let movido = false;
+
+            if (e.key === "ArrowLeft") {
+                movido = moverIzquierda();
+            } else if (e.key === "ArrowRight") {
+                movido = moverDerecha();
+            } else if (e.key === "ArrowUp") {
+                movido = moverArriba();
+            } else if (e.key === "ArrowDown") {
+                movido = moverAbajo();
+            }
+
+            if (movido) {
+                agregarNumeroAleatorio();
+                actualizarTableroUI();
+
+                if (verificarFinJuego()) {
+                    juegoTerminado = true;
+                    document.getElementById('info-estado').textContent = "¡Juego terminado! 🤖";
+                    registrarPartida(puntuacion);
+                }
+            }
+        });
+
+        // Lógica de movimientos de 2048
+        function filtrarCeros(fila) {
+            return fila.filter(num => num !== 0);
+        }
+
+        function deslizarIzquierda(fila) {
+            let arr = filtrarCeros(fila);
+            for (let i = 0; i < arr.length - 1; i++) {
+                if (arr[i] === arr[i + 1]) {
+                    arr[i] *= 2;
+                    puntuacion += arr[i];
+                    arr[i + 1] = 0;
+                }
+            }
+            arr = filtrarCeros(arr);
+            while (arr.length < 4) {
+                arr.push(0);
+            }
+            return arr;
+        }
+
+        function moverIzquierda() {
+            let cambiado = false;
+            for (let r = 0; r < 4; r++) {
+                let filaOriginal = [...tablero[r]];
+                tablero[r] = deslizarIzquierda(tablero[r]);
+                if (JSON.stringify(filaOriginal) !== JSON.stringify(tablero[r])) cambiado = true;
+            }
+            return cambiado;
+        }
+
+        function moverDerecha() {
+            let cambiado = false;
+            for (let r = 0; r < 4; r++) {
+                let filaOriginal = [...tablero[r]];
+                let filaInvertida = [...tablero[r]].reverse();
+                filaInvertida = deslizarIzquierda(filaInvertida);
+                tablero[r] = filaInvertida.reverse();
+                if (JSON.stringify(filaOriginal) !== JSON.stringify(tablero[r])) cambiado = true;
+            }
+            return cambiado;
+        }
+
+        function moverArriba() {
+            let cambiado = false;
+            for (let c = 0; c < 4; c++) {
+                let columna = [tablero[0][c], tablero[1][c], tablero[2][c], tablero[3][c]];
+                let columnaOriginal = [...columna];
+                columna = deslizarIzquierda(columna);
+                for (let r = 0; r < 4; r++) {
+                    tablero[r][c] = columna[r];
+                }
+                if (JSON.stringify(columnaOriginal) !== JSON.stringify(columna)) cambiado = true;
+            }
+            return cambiado;
+        }
+
+        function moverAbajo() {
+            let cambiado = false;
+            for (let c = 0; c < 4; c++) {
+                let columna = [tablero[0][c], tablero[1][c], tablero[2][c], tablero[3][c]];
+                let columnaOriginal = [...columna];
+                columna = columna.reverse();
+                columna = deslizarIzquierda(columna);
+                columna = columna.reverse();
+                for (let r = 0; r < 4; r++) {
+                    tablero[r][c] = columna[r];
+                }
+                if (JSON.stringify(columnaOriginal) !== JSON.stringify(columna)) cambiado = true;
+            }
+            return cambiado;
+        }
+
+        function verificarFinJuego() {
+            for (let r = 0; r < 4; r++) {
+                for (let c = 0; c < 4; c++) {
+                    if (tablero[r][c] === 0) return false;
+                    if (c < 3 && tablero[r][c] === tablero[r][c + 1]) return false;
+                    if (r < 3 && tablero[r][c] === tablero[r + 1][c]) return false;
+                }
+            }
+            return true;
+        }
+
+        // --- Sistema de Historial (LocalStorage) ---
+        function registrarPartida(puntosFinales) {
+            let historial = JSON.parse(localStorage.getItem('2048_historial')) || [];
+            const fecha = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            historial.unshift({ puntos: puntosFinales, fecha });
+
+            if (historial.length > 10) historial.pop();
+
+            localStorage.setItem('2048_historial', JSON.stringify(historial));
+            actualizarHistorialUI();
+        }
+
+        function actualizarHistorialUI() {
+            const listaEl = document.getElementById('lista-historial');
+            listaEl.innerHTML = '';
+            let historial = JSON.parse(localStorage.getItem('2048_historial')) || [];
+
+            if (historial.length === 0) {
+                listaEl.innerHTML = `<li style="color: #777; text-align: center;">Sin partidas aún</li>`;
+                return;
+            }
+
+            historial.forEach(item => {
+                const elementoLi = document.createElement('li');
+                elementoLi.innerHTML = `<span>${item.fecha}</span> <span class="tag-puntos">${item.puntos} pts</span>`;
+                listaEl.appendChild(elementoLi);
+            });
+        }
+
+        // Inicializar al cargar
+        iniciarJuego();
+        actualizarHistorialUI();
+    </script>
+</body>
+</html>

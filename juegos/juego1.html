@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tres en Raya - aldGAME</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2b2b2b;
+            color: #ffffff;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* Panel Lateral */
+        .panel-lateral {
+            width: 320px;
+            background-color: #1e1e1e;
+            border-right: 2px solid #333;
+            display: flex;
+            flex-direction: column;
+            padding: 25px;
+            justify-content: space-between;
+        }
+
+        .panel-lateral h2 {
+            font-size: 1.5rem;
+            color: #e94560;
+            margin-bottom: 10px;
+        }
+
+        .info-turno {
+            font-size: 1.1rem;
+            background: #2b2b2b;
+            padding: 12px 18px;
+            border-radius: 10px;
+            border: 1px solid #444;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        /* Historial de Partidas */
+        .seccion-historial {
+            background-color: #252525;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+
+        .seccion-historial h3 {
+            font-size: 0.95rem;
+            color: #e94560;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+
+        .lista-partidas {
+            list-style: none;
+            font-size: 0.85rem;
+        }
+
+        .lista-partidas li {
+            padding: 5px 6px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .lista-partidas li:last-child {
+            border-bottom: none;
+        }
+
+        .tag-victoria { color: #2ecc71; font-weight: bold; }
+        .tag-derrota { color: #e74c3c; font-weight: bold; }
+        .tag-empate { color: #f1c40f; font-weight: bold; }
+
+        /* Contenedor principal del tablero */
+        .contenedor-juego {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        /* Tablero de 3x3 */
+        .tablero-gato {
+            display: grid;
+            grid-template-columns: repeat(3, 100px);
+            grid-template-rows: repeat(3, 100px);
+            gap: 10px;
+        }
+
+        .celda {
+            background-color: #1e1e1e;
+            border: 2px solid #0f3460;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.2s, transform 0.1s;
+        }
+
+        .celda:hover {
+            background-color: #2d2d2d;
+            transform: scale(1.02);
+        }
+
+        /* Colores más claros para X y O */
+        .celda.x {
+            color: #ff6b81; /* Rosa/Rojo más claro y brillante */
+        }
+
+        .celda.o {
+            color: #ff9f43; /* Naranja/Rojo suave más claro */
+        }
+
+        /* Botones */
+        .botones {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .btn {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 1rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: background 0.2s;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background-color: #cf3a53;
+        }
+
+        .btn-volver {
+            background-color: #444;
+        }
+
+        .btn-volver:hover {
+            background-color: #555;
+        }
+    </style>
+<style id="nexgame-theme">
+/* ===== NexGame · tema común ===== */
+:root{--nx-bg:#0b0d12;--nx-surface:#12151c;--nx-surface2:#181c25;--nx-line:#232836;--nx-text:#e8eaf0;--nx-muted:#8b92a5;--nx-accent:#ff4757;--nx-ok:#35d07f;--nx-bad:#ff5c6c;--nx-warn:#f5c451}
+body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !important;background:var(--nx-bg) !important;color:var(--nx-text) !important;-webkit-font-smoothing:antialiased}
+.panel-lateral{width:300px;background:var(--nx-surface);border-right:1px solid var(--nx-line);padding:26px 20px}
+.panel-lateral h2{font-size:1.2rem;font-weight:700;color:var(--nx-text);margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--nx-line);letter-spacing:.2px}
+.panel-lateral h2::before{content:'NEXGAME';display:block;font-size:.62rem;letter-spacing:3px;color:var(--nx-accent);font-weight:800;margin-bottom:7px}
+.info-estado,.info-turno{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px;padding:12px 14px;font-size:.88rem;font-weight:600;color:var(--nx-text);line-height:1.35}
+.puntuacion-contenedor{gap:10px}
+.caja-puntos,.caja-saldo,.selector-apuesta{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px}
+.caja-puntos span,.caja-saldo span,.selector-apuesta span{color:var(--nx-muted);font-size:.64rem;letter-spacing:1.4px;font-weight:700}
+.caja-puntos strong,.caja-saldo strong{color:var(--nx-text);font-size:1.4rem;font-weight:800;font-variant-numeric:tabular-nums}
+.caja-saldo strong{color:var(--nx-warn)}
+.seccion-historial{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px;padding:12px}
+.seccion-historial h3{color:var(--nx-muted);font-size:.64rem;letter-spacing:1.6px;text-transform:uppercase;font-weight:800;margin-bottom:8px;text-align:left}
+.lista-partidas li{border-bottom:1px solid var(--nx-line);padding:7px 2px;color:var(--nx-muted)}
+.tag-victoria,.tag-ganada{color:var(--nx-ok) !important}.tag-derrota,.tag-perdida{color:var(--nx-bad) !important}.tag-empate{color:var(--nx-warn) !important}.tag-puntos{color:var(--nx-text) !important}
+.btn{background:var(--nx-accent);color:#fff;border:1px solid transparent;border-radius:10px;padding:12px 16px;font-size:.9rem;font-weight:600;letter-spacing:.2px;transition:background .15s,transform .1s,border-color .15s}
+.btn:hover{background:#ff6070}.btn:active{transform:translateY(1px)}
+.btn-volver,.btn-secundario{background:transparent !important;border:1px solid var(--nx-line) !important;color:var(--nx-muted) !important}
+.btn-volver:hover,.btn-secundario:hover{border-color:#3a4258 !important;color:var(--nx-text) !important;background:var(--nx-surface2) !important}
+.btn:disabled{background:#262b38;color:#6b7387}
+.contenedor-juego{background:radial-gradient(800px 500px at 50% 0%,#141826 0%,transparent 70%)}
+
+.tablero-gato{grid-template-columns:repeat(3,112px);grid-template-rows:repeat(3,112px);gap:12px}
+.celda{background:var(--nx-surface);border:1px solid var(--nx-line);border-radius:16px;font-size:3.3rem;box-shadow:0 8px 20px rgba(0,0,0,.25)}
+.celda:hover{background:var(--nx-surface2);border-color:#3a4258;transform:translateY(-2px)}
+.celda.x{color:#ff6b7a}.celda.o{color:#6cb6ff}
+</style>
+</head>
+<body>
+
+    <!-- Panel Lateral -->
+    <div class="panel-lateral">
+        <div>
+            <h2>Tres en Raya</h2>
+            <div class="info-turno" id="info-turno">Tu turno (X)</div>
+
+            <!-- Historial de las 10 últimas partidas -->
+            <div class="seccion-historial">
+                <h3>Últimas Partidas</h3>
+                <ul class="lista-partidas" id="lista-historial">
+                    <!-- Se llena dinámicamente -->
+                </ul>
+            </div>
+        </div>
+
+        <div class="botones">
+            <button class="btn" onclick="reiniciarPartida()">Reiniciar Partida</button>
+            <a href="../index.html" class="btn btn-volver">Volver al Menú</a>
+        </div>
+    </div>
+
+    <!-- Contenedor del Tablero -->
+    <div class="contenedor-juego">
+        <div class="tablero-gato" id="tablero">
+            <div class="celda" onclick="realizarMovimiento(0)"></div>
+            <div class="celda" onclick="realizarMovimiento(1)"></div>
+            <div class="celda" onclick="realizarMovimiento(2)"></div>
+            <div class="celda" onclick="realizarMovimiento(3)"></div>
+            <div class="celda" onclick="realizarMovimiento(4)"></div>
+            <div class="celda" onclick="realizarMovimiento(5)"></div>
+            <div class="celda" onclick="realizarMovimiento(6)"></div>
+            <div class="celda" onclick="realizarMovimiento(7)"></div>
+            <div class="celda" onclick="realizarMovimiento(8)"></div>
+        </div>
+    </div>
+
+    <script>
+        let tablero = ['', '', '', '', '', '', '', '', ''];
+        let juegoActivo = true;
+        let turno = 'X'; 
+        let temporizadorReiniciar = null;
+
+        const condicionesGanadoras = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Filas
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columnas
+            [0, 4, 8], [2, 4, 6]            // Diagonales
+        ];
+
+        const infoTurno = document.getElementById('info-turno');
+        const celdas = document.querySelectorAll('.celda');
+
+        function realizarMovimiento(indice) {
+            if (!juegoActivo || tablero[indice] !== '' || turno !== 'X') return;
+
+            tablero[indice] = 'X';
+            actualizarTableroUI();
+
+            if (verificarFinJuego('X')) return;
+
+            turno = 'O';
+            infoTurno.textContent = "Turno de la IA (O)...";
+            
+            setTimeout(turnoIA, 600);
+        }
+
+        function turnoIA() {
+            if (!juegoActivo) return;
+
+            let movimientoElegido = encontrarMovimientoEstrategico('O');
+
+            if (movimientoElegido === -1) {
+                movimientoElegido = encontrarMovimientoEstrategico('X');
+            }
+
+            if (movimientoElegido === -1 && tablero[4] === '') {
+                movimientoElegido = 4;
+            }
+
+            if (movimientoElegido === -1) {
+                let disponibles = [];
+                tablero.forEach((val, idx) => {
+                    if (val === '') disponibles.push(idx);
+                });
+                if (disponibles.length > 0) {
+                    movimientoElegido = disponibles[Math.floor(Math.random() * disponibles.length)];
+                }
+            }
+
+            if (movimientoElegido !== -1) {
+                tablero[movimientoElegido] = 'O';
+                actualizarTableroUI();
+                if (verificarFinJuego('O')) return;
+            }
+
+            turno = 'X';
+            infoTurno.textContent = "Tu turno (X)";
+        }
+
+        function encontrarMovimientoEstrategico(simbolo) {
+            for (let condicion of condicionesGanadoras) {
+                let [a, b, c] = condicion;
+                let valores = [tablero[a], tablero[b], tablero[c]];
+                if (valores.filter(v => v === simbolo).length === 2 && valores.includes('')) {
+                    if (tablero[a] === '') return a;
+                    if (tablero[b] === '') return b;
+                    if (tablero[c] === '') return c;
+                }
+            }
+            return -1;
+        }
+
+        function actualizarTableroUI() {
+            tablero.forEach((val, idx) => {
+                celdas[idx].textContent = val;
+                celdas[idx].classList.remove('x', 'o');
+                if (val === 'X') celdas[idx].classList.add('x');
+                if (val === 'O') celdas[idx].classList.add('o');
+            });
+        }
+
+        function verificarFinJuego(simboloActual) {
+            let ganador = false;
+
+            for (let condicion of condicionesGanadoras) {
+                let [a, b, c] = condicion;
+                if (tablero[a] && tablero[a] === tablero[b] && tablero[a] === tablero[c]) {
+                    ganador = true;
+                    break;
+                }
+            }
+
+            if (ganador) {
+                if (simboloActual === 'X') {
+                    infoTurno.textContent = "¡Has ganado! 🎉";
+                    registrarPartida('Victoria');
+                } else {
+                    infoTurno.textContent = "¡La IA ha ganado! 🤖";
+                    registrarPartida('Derrota');
+                }
+                juegoActivo = false;
+                programarReiniciadaAutomatica();
+                return true;
+            }
+
+            if (!tablero.includes('')) {
+                infoTurno.textContent = "¡Empate! 🤝";
+                registrarPartida('Empate');
+                juegoActivo = false;
+                programarReiniciadaAutomatica();
+                return true;
+            }
+
+            return false;
+        }
+
+        function programarReiniciadaAutomatica() {
+            if (temporizadorReiniciar) clearTimeout(temporizadorReiniciar);
+            temporizadorReiniciar = setTimeout(() => {
+                reiniciarPartida();
+            }, 2500); // Se reinicia solo tras 2.5 segundos
+        }
+
+        function reiniciarPartida() {
+            if (temporizadorReiniciar) clearTimeout(temporizadorReiniciar);
+            tablero = ['', '', '', '', '', '', '', '', ''];
+            juegoActivo = true;
+            turno = 'X';
+            infoTurno.textContent = "Tu turno (X)";
+            actualizarTableroUI();
+        }
+
+        // --- Sistema de Historial (LocalStorage) ---
+        function registrarPartida(resultado) {
+            let historial = JSON.parse(localStorage.getItem('tictactoe_historial')) || [];
+            
+            const fecha = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            historial.unshift({ resultado, fecha }); 
+
+            if (historial.length > 10) {
+                historial.pop(); 
+            }
+
+            localStorage.setItem('tictactoe_historial', JSON.stringify(historial));
+            actualizarHistorialUI();
+        }
+
+        function actualizarHistorialUI() {
+            const listaEl = document.getElementById('lista-historial');
+            listaEl.innerHTML = '';
+
+            let historial = JSON.parse(localStorage.getItem('tictactoe_historial')) || [];
+
+            if (historial.length === 0) {
+                listaEl.innerHTML = `<li style="color: #777; text-align: center;">Sin partidas aún</li>`;
+                return;
+            }
+
+            historial.forEach(item => {
+                const li = document.createElement('li');
+                
+                let claseTag = 'tag-empate';
+                if (item.resultado === 'Victoria') claseTag = 'tag-victoria';
+                if (item.resultado === 'Derrota') claseTag = 'tag-derrota';
+
+                li.innerHTML = `<span>${item.fecha}</span> <span class="${claseTag}">${item.resultado}</span>`;
+                listaEl.appendChild(li);
+            });
+        }
+
+        actualizarHistorialUI();
+    </script>
+</body>
+</html>

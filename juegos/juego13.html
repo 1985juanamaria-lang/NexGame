@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wordle Minimal - NexGame</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --text-color: #ffffff;
+            --subtext-color: #888;
+            --border-color: #2f3640;
+            --key-bg: #2f3640;
+            --key-hover: #3a414d;
+            --primary: #ff4757;
+            --correct: #538d4e;
+            --present: #b59f3b;
+            --absent: #3a3a3c;
+        }
+
+        body.modo-claro {
+            --bg-color: #ffffff;
+            --card-bg: #f3f3f3;
+            --text-color: #1a1a1b;
+            --subtext-color: #787c7e;
+            --border-color: #d3d6da;
+            --key-bg: #d3d6da;
+            --key-hover: #818384;
+            --absent: #787c7e;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: space-between;
+            padding: 15px 10px;
+            transition: background-color 0.3s, color 0.3s;
+        }
+
+        header {
+            width: 100%;
+            max-width: 550px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            padding: 0 5px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .btn-header {
+            color: var(--text-color);
+            text-decoration: none;
+            font-size: 0.8rem;
+            background: var(--card-bg);
+            padding: 6px 10px;
+            border-radius: 4px;
+            border: 1px solid var(--border-color);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        .btn-header:hover {
+            border-color: var(--primary);
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+        }
+
+        .panel-opciones {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        select, .btn-accion {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+            padding: 5px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .btn-accion {
+            font-weight: bold;
+        }
+
+        .btn-rendirse {
+            border-color: #e84118;
+            color: #e84118;
+        }
+
+        .btn-rendirse:hover {
+            background: #e84118;
+            color: #fff !important;
+        }
+
+        #contenedor-tablero {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-grow: 1;
+            margin: 5px 0;
+            overflow-x: auto;
+            width: 100%;
+        }
+
+        #tablero {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .fila {
+            display: flex;
+            gap: 5px;
+        }
+
+        .casilla {
+            width: 40px;
+            height: 40px;
+            border: 2px solid var(--border-color);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            background: var(--bg-color);
+            color: var(--text-color);
+            user-select: none;
+            transition: transform 0.1s ease, background-color 0.4s, border-color 0.4s;
+        }
+
+        .casilla.llena {
+            border-color: var(--subtext-color);
+            animation: pop 0.1s ease;
+        }
+
+        .casilla.correcta, .tecla.correcta {
+            background-color: var(--correct) !important;
+            border-color: var(--correct) !important;
+            color: #fff !important;
+        }
+
+        .casilla.presente, .tecla.presente {
+            background-color: var(--present) !important;
+            border-color: var(--present) !important;
+            color: #fff !important;
+        }
+
+        .casilla.ausente, .tecla.ausente {
+            background-color: var(--absent) !important;
+            border-color: var(--absent) !important;
+            color: #fff !important;
+        }
+
+        #teclado {
+            width: 100%;
+            max-width: 500px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 10px;
+        }
+
+        .fila-teclado {
+            display: flex;
+            justify-content: center;
+            gap: 4px;
+            width: 100%;
+        }
+
+        .tecla {
+            background: var(--key-bg);
+            color: var(--text-color);
+            border: none;
+            border-radius: 4px;
+            height: 40px;
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 0.75rem;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.2s;
+        }
+
+        .tecla:hover {
+            background: var(--key-hover);
+        }
+
+        .tecla.ancha {
+            flex: 1.5;
+            font-size: 0.65rem;
+        }
+
+        #mensaje {
+            min-height: 22px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 4px;
+        }
+
+        @keyframes pop {
+            0% { transform: scale(0.85); }
+            50% { transform: scale(1.08); }
+            100% { transform: scale(1); }
+        }
+    </style>
+<style id="nexgame-theme">:root{--nx-bg:#0b0d12;--nx-surface:#12151c;--nx-surface2:#181c25;--nx-line:#232836;--nx-text:#e8eaf0;--nx-muted:#8b92a5;--nx-accent:#ff4757;--nx-ok:#35d07f}
+.casilla{width:clamp(46px,8.2vh,64px);height:clamp(46px,8.2vh,64px);font-size:1.6rem;border-radius:8px}
+#tablero,.fila{gap:6px}
+.tecla{height:52px;border-radius:8px;font-size:.85rem}
+header{max-width:620px}#teclado{max-width:560px}
+h1{letter-spacing:6px;font-size:1.4rem}
+</style>
+</head>
+<body>
+
+    <header>
+        <a href="../index.html" class="btn-header">← Volver</a>
+        <h1>Wordle</h1>
+        <button id="btn-tema" class="btn-header">🌙</button>
+    </header>
+
+    <div class="panel-opciones">
+        <select id="select-modo">
+            <option value="libre">Modo Libre (Infinito)</option>
+            <option value="diario">Palabra del Día (24h)</option>
+        </select>
+
+        <select id="select-categoria">
+            <option value="general">General</option>
+            <option value="anime">Anime</option>
+            <option value="juegos">Videojuegos</option>
+            <option value="series">Series</option>
+            <option value="peliculas">Películas</option>
+            <option value="famosos">Famosos</option>
+            <option value="youtuber">Youtubers</option>
+        </select>
+
+        <button id="btn-reiniciar" class="btn-accion">Nuevo</button>
+        <button id="btn-rendirse" class="btn-accion btn-rendirse">Rendirse</button>
+    </div>
+
+    <div id="mensaje"></div>
+
+    <div id="contenedor-tablero">
+        <div id="tablero"></div>
+    </div>
+
+    <div id="teclado"></div>
+
+    <script>
+        // Diccionarios completos sin recortes forzados
+        const DICCIONARIOS = {
+            general: ["CLAVE", "JUEGO", "TEXTO", "MUNDO", "PIXEL", "FUEGO", "NOCHE", "AMIGO", "SUEÑO", "PLAYA", "VERDE", "CABLE"],
+            anime: ["NARUTO", "GOKU", "TITAN", "BLEACH", "SAITO", "ZORO", "LUFFY", "EDWARD", "DEATH", "AKATSUKI"],
+            juegos: ["ZELDA", "MARIO", "SONIC", "HALO", "STEAM", "DOTA", "FORTNITE", "VALORANT", "CYBER", "SNAKE"],
+            series: ["LOST", "FRIENDS", "BOARD", "ELITE", "DARK", "VAMPIRE", "NARCOS", "PEAKY", "CHERNOBYL"],
+            peliculas: ["AVATAR", "TITANIC", "MATRIX", "JURASSIC", "AVENGERS", "GLADIATOR", "INTERSTELLAR"],
+            famosos: ["MESSI", "RONALDO", "SHAKIRA", "ADELE", "BIEBER", "BRAD", "TOMCRUISE"],
+            youtuber: ["AURON", "IBAI", "RUBIUS", "VEGETTA", "THEGREFG", "LOLA", "WISMICHU"]
+        };
+
+        let categoriaActual = "general";
+        let modoActual = "libre";
+        let palabraSecreta = "";
+        let columnas = 5;
+        let filas = 6;
+        let intentoActual = 0;
+        let posicionLetra = 0;
+        let juegoTerminado = false;
+        let intento = [];
+
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        function reproducirSonidoTecla() {
+            if (audioCtx.state === 'suspended') audioCtx.resume();
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'triangle';
+            osc.frequency.setValueAtTime(300, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(80, audioCtx.currentTime + 0.03);
+            gain.gain.setValueAtTime(0.08, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.03);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.03);
+        }
+
+        const btnTema = document.getElementById("btn-tema");
+        btnTema.addEventListener("click", () => {
+            document.body.classList.toggle("modo-claro");
+            const esClaro = document.body.classList.contains("modo-claro");
+            btnTema.innerText = esClaro ? "☀️" : "🌙";
+        });
+
+        const selectModo = document.getElementById("select-modo");
+        const selectCategoria = document.getElementById("select-categoria");
+        const btnReiniciar = document.getElementById("btn-reiniciar");
+        const btnRendirse = document.getElementById("btn-rendirse");
+
+        selectModo.addEventListener("change", (e) => {
+            modoActual = e.target.value;
+            iniciarJuego();
+        });
+
+        selectCategoria.addEventListener("change", (e) => {
+            categoriaActual = e.target.value;
+            iniciarJuego();
+        });
+
+        btnReiniciar.addEventListener("click", iniciarJuego);
+        btnRendirse.addEventListener("click", rendirse);
+
+        function obtenerClaveLocalStorage() {
+            const hoy = new Date().toISOString().slice(0, 10);
+            return `wordle_diario_${categoriaActual}_${hoy}`;
+        }
+
+        function iniciarJuego() {
+            const lista = DICCIONARIOS[categoriaActual];
+
+            if (modoActual === "diario") {
+                const claveStorage = obtenerClaveLocalStorage();
+                const estadoGuardado = localStorage.getItem(claveStorage);
+
+                if (estadoGuardado === "completado") {
+                    juegoTerminado = true;
+                    mostrarMensaje("Ya jugaste la palabra del día de esta categoría. ¡Vuelve mañana!");
+                    return;
+                }
+
+                const hoy = new Date().toISOString().slice(0, 10);
+                let hash = 0;
+                for (let i = 0; i < (hoy + categoriaActual).length; i++) {
+                    hash = (hoy + categoriaActual).charCodeAt(i) + ((hash << 5) - hash);
+                }
+                palabraSecreta = lista[Math.abs(hash) % lista.length].toUpperCase();
+                btnReiniciar.style.display = "none";
+            } else {
+                palabraSecreta = lista[Math.floor(Math.random() * lista.length)].toUpperCase();
+                btnReiniciar.style.display = "inline-block";
+            }
+
+            // Adaptar columnas y filas automáticamente según la longitud de la palabra seleccionada
+            columnas = palabraSecreta.length;
+            filas = columnas + 1;
+            intentoActual = 0;
+            posicionLetra = 0;
+            juegoTerminado = false;
+            intento = new Array(columnas).fill("");
+
+            crearTablero();
+            crearTeclado();
+            mostrarMensaje("");
+        }
+
+        function crearTablero() {
+            const tablero = document.getElementById("tablero");
+            tablero.innerHTML = "";
+            for (let i = 0; i < filas; i++) {
+                const fila = document.createElement("div");
+                fila.className = "fila";
+                for (let j = 0; j < columnas; j++) {
+                    const casilla = document.createElement("div");
+                    casilla.className = "casilla";
+                    casilla.id = `casilla-${i}-${j}`;
+                    fila.appendChild(casilla);
+                }
+                tablero.appendChild(fila);
+            }
+        }
+
+        function crearTeclado() {
+            const distribucionTeclado = [
+                ["Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"],
+                ["A", "S", "D", "F", "G", "H", "J", "K", "L", "Ñ"],
+                ["ENTER", "Z", "X", "C", "V", "B", "N", "M", "BORRAR"]
+            ];
+
+            const contenedorTeclado = document.getElementById("teclado");
+            contenedorTeclado.innerHTML = "";
+            distribucionTeclado.forEach(filaTeclas => {
+                const filaDiv = document.createElement("div");
+                filaDiv.className = "fila-teclado";
+                filaTeclas.forEach(tecla => {
+                    const boton = document.createElement("button");
+                    boton.innerText = tecla;
+                    boton.className = "tecla";
+                    boton.dataset.key = tecla;
+                    if (tecla === "ENTER" || tecla === "BORRAR") {
+                        boton.classList.add("ancha");
+                    }
+                    boton.addEventListener("click", () => manejarEntrada(tecla));
+                    filaDiv.appendChild(boton);
+                });
+                contenedorTeclado.appendChild(filaDiv);
+            });
+        }
+
+        document.addEventListener("keydown", (e) => {
+            if (juegoTerminado) return;
+            const tecla = e.key.toUpperCase();
+            if (tecla === "ENTER") {
+                manejarEntrada("ENTER");
+            } else if (tecla === "BACKSPACE") {
+                manejarEntrada("BORRAR");
+            } else if (/^[A-ZÑ]$/.test(tecla)) {
+                manejarEntrada(tecla);
+            }
+        });
+
+        function manejarEntrada(tecla) {
+            if (juegoTerminado) return;
+            reproducirSonidoTecla();
+
+            if (tecla === "BORRAR") {
+                if (posicionLetra > 0) {
+                    posicionLetra--;
+                    intento[posicionLetra] = "";
+                    const casilla = document.getElementById(`casilla-${intentoActual}-${posicionLetra}`);
+                    casilla.innerText = "";
+                    casilla.classList.remove("llena");
+                }
+            } else if (tecla === "ENTER") {
+                if (posicionLetra === columnas) {
+                    evaluarIntento();
+                } else {
+                    mostrarMensaje("Faltan letras");
+                }
+            } else if (posicionLetra < columnas) {
+                intento[posicionLetra] = tecla;
+                const casilla = document.getElementById(`casilla-${intentoActual}-${posicionLetra}`);
+                casilla.innerText = tecla;
+                casilla.classList.add("llena");
+                posicionLetra++;
+            }
+        }
+
+        function evaluarIntento() {
+            const palabraUsuario = intento.join("");
+            const copiaSecreta = palabraSecreta.split("");
+
+            for (let i = 0; i < columnas; i++) {
+                const casilla = document.getElementById(`casilla-${intentoActual}-${i}`);
+                const letra = intento[i];
+                const botonTecla = document.querySelector(`.tecla[data-key="${letra}"]`);
+
+                if (letra === palabraSecreta[i]) {
+                    casilla.classList.add("correcta");
+                    actualizarTecla(botonTecla, "correcta");
+                    copiaSecreta[i] = null;
+                }
+            }
+
+            for (let i = 0; i < columnas; i++) {
+                const casilla = document.getElementById(`casilla-${intentoActual}-${i}`);
+                const letra = intento[i];
+                const botonTecla = document.querySelector(`.tecla[data-key="${letra}"]`);
+
+                if (!casilla.classList.contains("correcta")) {
+                    if (copiaSecreta.includes(letra)) {
+                        casilla.classList.add("presente");
+                        actualizarTecla(botonTecla, "presente");
+                        copiaSecreta[copiaSecreta.indexOf(letra)] = null;
+                    } else {
+                        casilla.classList.add("ausente");
+                        actualizarTecla(botonTecla, "ausente");
+                    }
+                }
+            }
+
+            if (palabraUsuario === palabraSecreta) {
+                mostrarMensaje("¡Genial! ¡Has ganado! 🎉");
+                finalizarPartidaDiaria();
+                return;
+            }
+
+            intentoActual++;
+            posicionLetra = 0;
+            intento = new Array(columnas).fill("");
+
+            if (intentoActual === filas) {
+                mostrarMensaje(`Fin del juego. Era: ${palabraSecreta}`);
+                finalizarPartidaDiaria();
+            }
+        }
+
+        function rendirse() {
+            if (juegoTerminado) return;
+            mostrarMensaje(`Te rendiste. La palabra era: ${palabraSecreta}`);
+            finalizarPartidaDiaria();
+        }
+
+        function finalizarPartidaDiaria() {
+            juegoTerminado = true;
+            if (modoActual === "diario") {
+                localStorage.setItem(obtenerClaveLocalStorage(), "completado");
+            }
+        }
+
+        function actualizarTecla(boton, estado) {
+            if (!boton) return;
+            if (boton.classList.contains("correcta")) return;
+            if (boton.classList.contains("presente") && estado === "ausente") return;
+
+            boton.classList.remove("presente", "ausente");
+            boton.classList.add(estado);
+        }
+
+        function mostrarMensaje(texto) {
+            const divMensaje = document.getElementById("mensaje");
+            divMensaje.innerText = texto;
+        }
+
+        iniciarJuego();
+    </script>
+</body>
+</html>

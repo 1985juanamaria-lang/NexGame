@@ -1,0 +1,522 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ahorcado - aldGAME</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2b2b2b;
+            color: #ffffff;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* Panel Lateral */
+        .panel-lateral {
+            width: 320px;
+            background-color: #1e1e1e;
+            border-right: 2px solid #333;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            justify-content: space-between;
+        }
+
+        .panel-lateral h2 {
+            font-size: 1.4rem;
+            color: #e94560;
+            margin-bottom: 8px;
+        }
+
+        .info-estado {
+            font-size: 0.95rem;
+            background: #2b2b2b;
+            padding: 10px 12px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        /* Selector de Temas */
+        .seccion-temas {
+            margin-bottom: 12px;
+        }
+
+        .seccion-temas label {
+            font-size: 0.85rem;
+            color: #aaa;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .select-tema {
+            width: 100%;
+            background: #2b2b2b;
+            color: white;
+            border: 1px solid #0f3460;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 0.9rem;
+            cursor: pointer;
+        }
+
+        /* Historial de Partidas */
+        .seccion-historial {
+            background-color: #252525;
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+
+        .seccion-historial h3 {
+            font-size: 0.9rem;
+            color: #e94560;
+            margin-bottom: 4px;
+            text-align: center;
+        }
+
+        .lista-partidas {
+            list-style: none;
+            font-size: 0.8rem;
+        }
+
+        .lista-partidas li {
+            padding: 4px 6px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .lista-partidas li:last-child {
+            border-bottom: none;
+        }
+
+        .tag-victoria { color: #2ecc71; font-weight: bold; }
+        .tag-derrota { color: #e74c3c; font-weight: bold; }
+
+        /* Contenedor principal del juego */
+        .contenedor-juego {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            gap: 20px;
+        }
+
+        /* Dibujo del Ahorcado */
+        .dibujo-ahorcado {
+            font-family: monospace;
+            white-space: pre;
+            background: #1e1e1e;
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: 2px solid #0f3460;
+            font-size: 1.1rem;
+            line-height: 1.2;
+            color: #ff6b81;
+            min-height: 120px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* Palabra oculta */
+        .palabra-contenedor {
+            display: flex;
+            gap: 10px;
+            font-size: 2.2rem;
+            font-weight: bold;
+            letter-spacing: 3px;
+        }
+
+        .letra-slot {
+            border-bottom: 4px solid #e94560;
+            min-width: 35px;
+            text-align: center;
+            color: #ffffff;
+        }
+
+        /* Letras no adivinadas al perder (en rojo) */
+        .letra-slot.fallida {
+            color: #e74c3c;
+        }
+
+        /* Teclado en pantalla */
+        .teclado {
+            display: grid;
+            grid-template-columns: repeat(9, 42px);
+            gap: 6px;
+            max-width: 440px;
+            justify-content: center;
+        }
+
+        .tecla {
+            background-color: #1e1e1e;
+            color: white;
+            border: 2px solid #0f3460;
+            border-radius: 6px;
+            font-size: 1rem;
+            font-weight: bold;
+            height: 42px;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .tecla:hover:not(:disabled) {
+            background-color: #e94560;
+            border-color: #e94560;
+        }
+
+        .tecla.correcta {
+            background-color: #2ecc71 !important;
+            border-color: #27ae60 !important;
+            color: white !important;
+            cursor: not-allowed;
+        }
+
+        .tecla.incorrecta {
+            background-color: #e74c3c !important;
+            border-color: #c0392b !important;
+            color: white !important;
+            cursor: not-allowed;
+        }
+
+        .tecla:disabled {
+            opacity: 0.8;
+        }
+
+        /* Botones */
+        .botones {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: background 0.2s;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background-color: #cf3a53;
+        }
+
+        .btn-volver {
+            background-color: #444;
+        }
+
+        .btn-volver:hover {
+            background-color: #555;
+        }
+    </style>
+<style id="nexgame-theme">
+/* ===== NexGame · tema común ===== */
+:root{--nx-bg:#0b0d12;--nx-surface:#12151c;--nx-surface2:#181c25;--nx-line:#232836;--nx-text:#e8eaf0;--nx-muted:#8b92a5;--nx-accent:#ff4757;--nx-ok:#35d07f;--nx-bad:#ff5c6c;--nx-warn:#f5c451}
+body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !important;background:var(--nx-bg) !important;color:var(--nx-text) !important;-webkit-font-smoothing:antialiased}
+.panel-lateral{width:300px;background:var(--nx-surface);border-right:1px solid var(--nx-line);padding:26px 20px}
+.panel-lateral h2{font-size:1.2rem;font-weight:700;color:var(--nx-text);margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--nx-line);letter-spacing:.2px}
+.panel-lateral h2::before{content:'NEXGAME';display:block;font-size:.62rem;letter-spacing:3px;color:var(--nx-accent);font-weight:800;margin-bottom:7px}
+.info-estado,.info-turno{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px;padding:12px 14px;font-size:.88rem;font-weight:600;color:var(--nx-text);line-height:1.35}
+.puntuacion-contenedor{gap:10px}
+.caja-puntos,.caja-saldo,.selector-apuesta{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px}
+.caja-puntos span,.caja-saldo span,.selector-apuesta span{color:var(--nx-muted);font-size:.64rem;letter-spacing:1.4px;font-weight:700}
+.caja-puntos strong,.caja-saldo strong{color:var(--nx-text);font-size:1.4rem;font-weight:800;font-variant-numeric:tabular-nums}
+.caja-saldo strong{color:var(--nx-warn)}
+.seccion-historial{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px;padding:12px}
+.seccion-historial h3{color:var(--nx-muted);font-size:.64rem;letter-spacing:1.6px;text-transform:uppercase;font-weight:800;margin-bottom:8px;text-align:left}
+.lista-partidas li{border-bottom:1px solid var(--nx-line);padding:7px 2px;color:var(--nx-muted)}
+.tag-victoria,.tag-ganada{color:var(--nx-ok) !important}.tag-derrota,.tag-perdida{color:var(--nx-bad) !important}.tag-empate{color:var(--nx-warn) !important}.tag-puntos{color:var(--nx-text) !important}
+.btn{background:var(--nx-accent);color:#fff;border:1px solid transparent;border-radius:10px;padding:12px 16px;font-size:.9rem;font-weight:600;letter-spacing:.2px;transition:background .15s,transform .1s,border-color .15s}
+.btn:hover{background:#ff6070}.btn:active{transform:translateY(1px)}
+.btn-volver,.btn-secundario{background:transparent !important;border:1px solid var(--nx-line) !important;color:var(--nx-muted) !important}
+.btn-volver:hover,.btn-secundario:hover{border-color:#3a4258 !important;color:var(--nx-text) !important;background:var(--nx-surface2) !important}
+.btn:disabled{background:#262b38;color:#6b7387}
+.contenedor-juego{background:radial-gradient(800px 500px at 50% 0%,#141826 0%,transparent 70%)}
+
+.contenedor-juego{gap:26px}
+.dibujo-ahorcado{background:var(--nx-surface);border:1px solid var(--nx-line);border-radius:14px;color:#ff8591;font-size:1.15rem;padding:16px 30px}
+.letra-slot{border-bottom:3px solid var(--nx-accent)}
+.teclado{grid-template-columns:repeat(9,46px);gap:8px;max-width:none}
+.tecla{background:var(--nx-surface);border:1px solid var(--nx-line);border-radius:10px;height:46px;font-weight:700;color:var(--nx-text)}
+.tecla:hover:not(:disabled){background:var(--nx-accent);border-color:var(--nx-accent)}
+.tecla.correcta{background:var(--nx-ok) !important;border-color:var(--nx-ok) !important;color:#05130b !important}
+.tecla.incorrecta{background:#2a1a1f !important;border-color:#5a2630 !important;color:#ff7a88 !important}
+.select-tema{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px;padding:10px;color:var(--nx-text)}
+.seccion-temas label{color:var(--nx-muted);text-transform:uppercase;font-size:.64rem;letter-spacing:1.4px;font-weight:700}
+</style>
+</head>
+<body>
+
+    <!-- Panel Lateral -->
+    <div class="panel-lateral">
+        <div>
+            <h2>Ahorcado</h2>
+            <div class="info-estado" id="info-estado">Adivina la palabra oculta</div>
+
+            <!-- Selector de Temas -->
+            <div class="seccion-temas">
+                <label for="selector-tema">Selecciona Categoría:</label>
+                <select id="selector-tema" class="select-tema" onchange="cambiarTema()">
+                    <option value="tecnologia">Tecnología</option>
+                    <option value="cine">Cine</option>
+                    <option value="youtube">YouTube / Creadores</option>
+                    <option value="videojuegos">Videojuegos</option>
+                    <option value="paises">Países / Geografía</option>
+                    <option value="animales">Animales</option>
+                </select>
+            </div>
+
+            <!-- Historial de las 10 últimas partidas -->
+            <div class="seccion-historial">
+                <h3>Últimas Partidas</h3>
+                <ul class="lista-partidas" id="lista-historial">
+                    <!-- Se llena dinámicamente -->
+                </ul>
+            </div>
+        </div>
+
+        <div class="botones">
+            <button class="btn" onclick="reiniciarJuego()">Nueva Palabra</button>
+            <a href="../index.html" class="btn btn-volver">Volver al Menú</a>
+        </div>
+    </div>
+
+    <!-- Contenedor del Juego -->
+    <div class="contenedor-juego">
+        <div class="dibujo-ahorcado" id="dibujo"></div>
+        <div class="palabra-contenedor" id="palabra-secreta"></div>
+        <div class="teclado" id="teclado"></div>
+    </div>
+
+    <script>
+        const temas = {
+            tecnologia: ["PROGRAMACION", "JAVASCRIPT", "ALGORITMO", "COMPUTADORA", "INTERNET", "SERVIDOR", "NAVEGADOR", "DESARROLLO"],
+            cine: ["GLADIATOR", "INTERSTELLAR", "AVATAR", "TITANIC", "MATRIX", "INCEPTION", "PARASITOS", "DREAMS"],
+            youtube: ["STREAMER", "GAMER", "VLOGUEO", "SUSCRIPTOR", "MINIATURA", "DIRECTO", "CONTENIDO", "TENDENCIA"],
+            videojuegos: ["MINECRAFT", "FORTNITE", "ZELDA", "POKEMON", "VALORANT", "TETRIS", "SONIC", "ROBLOX"],
+            paises: ["ESPAÑA", "JAPON", "ARGENTINA", "ITALIA", "FRANCIA", "CANADA", "BRASIL", "MEXICO"],
+            animales: ["ELEFANTE", "DELFIN", "JIRAFA", "TIBURON", "AGUILA", "PANTERA", "TIGRE", "KANGURO"]
+        };
+
+        let palabraActual = "";
+        let letrasAdivinadas = [];
+        let errores = 0;
+        const maxErrores = 6;
+        let juegoActivo = true;
+        let partidaTerminada = false;
+        let temporizadorReiniciar = null;
+
+        const estadosAhorcado = [
+            `
+  +---+
+      |
+      |
+      |
+     ===`,
+            `
+  +---+
+  O   |
+      |
+      |
+     ===`,
+            `
+  +---+
+  O   |
+  |   |
+      |
+     ===`,
+            `
+  +---+
+  O   |
+ /|   |
+      |
+     ===`,
+            `
+  +---+
+  O   |
+ /|\\  |
+      |
+     ===`,
+            `
+  +---+
+  O   |
+ /|\\  |
+ /    |
+     ===`,
+            `
+  +---+
+  O   |
+ /|\\  |
+ / \\  |
+     ===`
+        ];
+
+        function cambiarTema() {
+            if (temporizadorReiniciar) clearTimeout(temporizadorReiniciar);
+            reiniciarJuego();
+        }
+
+        function reiniciarJuego() {
+            if (temporizadorReiniciar) clearTimeout(temporizadorReiniciar);
+            
+            const temaSeleccionado = document.getElementById('selector-tema').value;
+            const listaPalabras = temas[temaSeleccionado];
+            palabraActual = listaPalabras[Math.floor(Math.random() * listaPalabras.length)];
+            
+            letrasAdivinadas = [];
+            errores = 0;
+            juegoActivo = true;
+            partidaTerminada = false;
+            document.getElementById('info-estado').textContent = "Adivina la palabra oculta";
+            
+            crearTeclado();
+            actualizarUI();
+        }
+
+        function crearTeclado() {
+            const tecladoEl = document.getElementById('teclado');
+            tecladoEl.innerHTML = '';
+            const letras = "ABCDEFGHIJKLMNÑOPQRSTUVWXYZ";
+
+            for (let letra of letras) {
+                const boton = document.createElement('button');
+                boton.classList.add('tecla');
+                boton.textContent = letra;
+                boton.id = `tecla-${letra}`;
+                boton.onclick = () => manejarLetra(letra);
+                tecladoEl.appendChild(boton);
+            }
+        }
+
+        function manejarLetra(letra) {
+            if (!juegoActivo || letrasAdivinadas.includes(letra)) return;
+
+            letrasAdivinadas.push(letra);
+            const boton = document.getElementById(`tecla-${letra}`);
+
+            if (palabraActual.includes(letra)) {
+                if (boton) boton.classList.add('correcta');
+                
+                if (verificarVictoria()) {
+                    document.getElementById('info-estado').textContent = "¡Has ganado! 🎉";
+                    juegoActivo = false;
+                    partidaTerminada = true;
+                    deshabilitarTecladoRestante();
+                    registrarPartida('Victoria');
+                    temporizadorReiniciar = setTimeout(reiniciarJuego, 3000);
+                }
+            } else {
+                if (boton) boton.classList.add('incorrecta');
+                errores++;
+                
+                if (errores >= maxErrores) {
+                    document.getElementById('info-estado').textContent = `¡Perdiste! Era: ${palabraActual} 🤖`;
+                    juegoActivo = false;
+                    partidaTerminada = true;
+                    deshabilitarTecladoRestante();
+                    registrarPartida('Derrota');
+                    actualizarUI(); 
+                    temporizadorReiniciar = setTimeout(reiniciarJuego, 4000); 
+                }
+            }
+            if (!partidaTerminada) {
+                actualizarUI();
+            }
+        }
+
+        function verificarVictoria() {
+            return [...palabraActual].every(letra => letrasAdivinadas.includes(letra));
+        }
+
+        function deshabilitarTecladoRestante() {
+            document.querySelectorAll('.tecla').forEach(b => {
+                b.disabled = true;
+            });
+        }
+
+        function actualizarUI() {
+            document.getElementById('dibujo').textContent = estadosAhorcado[errores];
+
+            const contenedor = document.getElementById('palabra-secreta');
+            contenedor.innerHTML = '';
+            for (let letra of palabraActual) {
+                const slot = document.createElement('div');
+                slot.classList.add('letra-slot');
+
+                if (letrasAdivinadas.includes(letra)) {
+                    slot.textContent = letra;
+                } else if (partidaTerminada) {
+                    slot.textContent = letra;
+                    slot.classList.add('fallida'); 
+                } else {
+                    slot.textContent = '';
+                }
+                contenedor.appendChild(slot);
+            }
+        }
+
+        // --- Sistema de Historial (LocalStorage) ---
+        function registrarPartida(resultado) {
+            let historial = JSON.parse(localStorage.getItem('ahorcado_historial')) || [];
+            const fecha = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            historial.unshift({ resultado, fecha });
+
+            if (historial.length > 10) historial.pop();
+
+            localStorage.setItem('ahorcado_historial', JSON.stringify(historial));
+            actualizarHistorialUI();
+        }
+
+        function actualizarHistorialUI() {
+            const listaEl = document.getElementById('lista-historial');
+            listaEl.innerHTML = '';
+            let historial = JSON.parse(localStorage.getItem('ahorcado_historial')) || [];
+
+            if (historial.length === 0) {
+                listaEl.innerHTML = `<li style="color: #777; text-align: center;">Sin partidas aún</li>`;
+                return;
+            }
+
+            historial.forEach(item => {
+                const elementoLi = document.createElement('li');
+                let claseTag = item.resultado === 'Victoria' ? 'tag-victoria' : 'tag-derrota';
+                elementoLi.innerHTML = `<span>${item.fecha}</span> <span class="${claseTag}">${item.resultado}</span>`;
+                listaEl.appendChild(elementoLi);
+            });
+        }
+
+        // Inicializar al cargar
+        reiniciarJuego();
+        actualizarHistorialUI();
+    </script>
+</body>
+</html>

@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Snake Pro Fluid - aldGAME</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #111b11;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            overflow: hidden;
+        }
+
+        .juego-wrapper {
+            position: relative;
+            background-color: #2b3924;
+            border-radius: 24px;
+            padding: 20px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .barra-superior {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 0 10px 15px 10px;
+        }
+
+        .score-info-mini {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .icono-fruta-mini {
+            font-size: 1.6rem;
+        }
+
+        .btn-audio {
+            background: none;
+            border: none;
+            color: #fff;
+            font-size: 1.5rem;
+            cursor: pointer;
+            opacity: 0.8;
+        }
+        .btn-audio:hover { opacity: 1; }
+
+        canvas {
+            background-color: #38482d;
+            border-radius: 14px;
+            display: block;
+        }
+
+        .menu-inicio-overlay {
+            position: absolute;
+            top: 70px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 85%;
+            max-width: 400px;
+            background: #1e628d;
+            border-radius: 20px;
+            padding: 30px 25px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+            z-index: 20;
+            border: 2px solid rgba(255,255,255,0.15);
+            transition: all 0.3s ease;
+        }
+
+        .menu-inicio-overlay.oculto {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(-50%) scale(0.9);
+        }
+
+        .tarjeta-estadisticas {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: #fff;
+            font-weight: bold;
+            font-size: 1.6rem;
+        }
+
+        .stat-item span.emoji-stat {
+            font-size: 2.2rem;
+            margin-bottom: 5px;
+        }
+
+        .serpiente-ilustracion {
+            width: 100%;
+            height: 80px;
+            position: relative;
+            margin-bottom: 25px;
+        }
+
+        .contenedor-botones-menu {
+            display: flex;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .btn-jugar-google {
+            flex: 1;
+            background-color: #2b6c99;
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 14px;
+            border-radius: 14px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn-jugar-google:hover { background-color: #357cae; transform: translateY(-2px); }
+
+        .btn-ajustes-google {
+            background-color: #2b6c99;
+            border: 2px solid rgba(255,255,255,0.3);
+            color: white;
+            padding: 14px 18px;
+            border-radius: 14px;
+            font-size: 1.3rem;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+            transition: background 0.2s, transform 0.1s;
+        }
+        .btn-ajustes-google:hover { background-color: #357cae; transform: translateY(-2px); }
+
+        .selector-mapa-footer {
+            margin-top: 18px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .select-personalizado {
+            background: #2b3924;
+            color: #fff;
+            border: 1px solid #4a5d3e;
+            padding: 8px 14px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .modal-ajustes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.75);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+            z-index: 100;
+        }
+        .modal-ajustes.activo { opacity: 1; pointer-events: auto; }
+
+        .modal-contenido-skin {
+            background: #222d1d;
+            border: 2px solid #3e5233;
+            padding: 25px;
+            border-radius: 20px;
+            width: 380px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.8);
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-contenido-skin h3 { color: #fff; font-size: 1.2rem; border-bottom: 1px solid #3e5233; padding-bottom: 8px; }
+
+        .grid-opciones {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+
+        .btn-opcion-grid {
+            background: #2b3924;
+            border: 2px solid #4a5d3e;
+            color: white;
+            padding: 10px;
+            border-radius: 10px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+        .btn-opcion-grid.activo {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.25);
+        }
+
+        .btn-cerrar-modal {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 12px;
+            font-weight: bold;
+            cursor: pointer;
+            font-size: 1rem;
+        }
+        .btn-cerrar-modal:hover { background: #43A047; }
+
+        .btn-volver-menu {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
+            background: #2b3924;
+            color: #fff;
+            padding: 10px 18px;
+            border-radius: 10px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border: 1px solid #4a5d3e;
+        }
+        .btn-volver-menu:hover { background: #38482d; }
+    </style>
+</head>
+<body>
+
+    <a href="../index.html" class="btn-volver-menu">Volver al Menú</a>
+
+    <div class="juego-wrapper">
+        <div class="barra-superior">
+            <div class="score-info-mini">
+                <span class="icono-fruta-mini" id="icono-fruta-ui">🍎</span>
+                <span id="puntuacion-mini">0</span>
+            </div>
+            <button class="btn-audio" id="btn-audio" onclick="alternarAudio()">🔊</button>
+        </div>
+
+        <canvas id="tableroSnake" width="520" height="520"></canvas>
+
+        <div class="menu-inicio-overlay" id="menu-inicio">
+            <div class="tarjeta-estadisticas">
+                <div class="stat-item">
+                    <span class="emoji-stat" id="stat-emoji-fruta">🍎</span>
+                    <span id="stat-score">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="emoji-stat">🏆</span>
+                    <span id="stat-record">0</span>
+                </div>
+            </div>
+
+            <div class="serpiente-ilustracion">
+                <svg viewBox="0 0 200 60" width="100%" height="100%">
+                    <path d="M 10,40 Q 100,40 160,40 Q 185,40 185,25 Q 185,10 160,10 L 30,10" fill="none" stroke="#4a8bc2" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="170" cy="18" r="4" fill="white"/>
+                    <circle cx="171" cy="18" r="1.5" fill="black"/>
+                    <circle cx="180" cy="18" r="4" fill="white"/>
+                    <circle cx="181" cy="18" r="1.5" fill="black"/>
+                    <path d="M 168,26 Q 175,31 182,26" fill="none" stroke="black" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+            </div>
+
+            <div class="contenedor-botones-menu">
+                <button class="btn-jugar-google" onclick="empezarJuego()">
+                    <span style="font-size: 1.3rem;">▶</span> Jugar
+                </button>
+                <button class="btn-ajustes-google" onclick="abrirModalSkins(true)">⚙️</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="selector-mapa-footer">
+        <label style="font-size: 0.9rem; font-weight: bold; color: #a0b294;">Tamaño de Mapa:</label>
+        <select id="select-tamano" class="select-personalizado" onchange="cambiarTamanoMapa()">
+            <option value="compacto">9 x 10 (Compacto)</option>
+            <option value="pequeno">14 x 14 (Pequeño)</option>
+            <option value="mediano" selected>20 x 20 (Estándar)</option>
+            <option value="grande">26 x 26 (Grande)</option>
+        </select>
+    </div>
+
+    <div class="modal-ajustes" id="modal-skins">
+        <div class="modal-contenido-skin">
+            <h3>Personalizar Skin de la Serpiente</h3>
+            <div class="grid-opciones" id="grid-skins">
+                <button class="btn-opcion-grid activo" onclick="seleccionarSkin('azul', this)">🔵 Azul Google</button>
+                <button class="btn-opcion-grid" onclick="seleccionarSkin('clasica', this)">🟢 Clásica Verde</button>
+                <button class="btn-opcion-grid" onclick="seleccionarSkin('rojo', this)">🔴 Rojo Fuego</button>
+                <button class="btn-opcion-grid" onclick="seleccionarSkin('amarillo', this)">🟡 Amarillo Sol</button>
+                <button class="btn-opcion-grid" onclick="seleccionarSkin('morado', this)">🟣 Morado Místico</button>
+                <button class="btn-opcion-grid" onclick="seleccionarSkin('arcoiris', this)">🌈 Arcoíris</button>
+            </div>
+
+            <h3>Seleccionar Fruta</h3>
+            <div class="grid-opciones" id="grid-frutas">
+                <button class="btn-opcion-grid activo" onclick="seleccionarFruta('manzana', '🍎', this)">🍎 Manzana</button>
+                <button class="btn-opcion-grid" onclick="seleccionarFruta('platano', '🍌', this)">🍌 Plátano</button>
+                <button class="btn-opcion-grid" onclick="seleccionarFruta('fresa', '🍓', this)">🍓 Fresa</button>
+                <button class="btn-opcion-grid" onclick="seleccionarFruta('uvas', '🍇', this)">🍇 Uvas</button>
+                <button class="btn-opcion-grid" onclick="seleccionarFruta('sandia', '🍉', this)">🍉 Sandía</button>
+                <button class="btn-opcion-grid" onclick="seleccionarFruta('naranja', '🍊', this)">🍊 Naranja</button>
+            </div>
+
+            <button class="btn-cerrar-modal" onclick="abrirModalSkins(false)">Aceptar y Guardar</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('tableroSnake');
+        const ctx = canvas.getContext('2d');
+
+        const mapasConfig = {
+            compacto: { cols: 9, filas: 10, pixelSize: 44 },
+            pequeno: { cols: 14, filas: 14, pixelSize: 34 },
+            mediano: { cols: 20, filas: 20, pixelSize: 26 },
+            grande: { cols: 26, filas: 26, pixelSize: 20 }
+        };
+
+        let modoMapa = 'mediano';
+        let cols = mapasConfig[modoMapa].cols;
+        let filas = mapasConfig[modoMapa].filas;
+        let tileSize = mapasConfig[modoMapa].pixelSize;
+
+        canvas.width = cols * tileSize;
+        canvas.height = filas * tileSize;
+
+        let snake = [];
+        let snakeVisual = [];
+        let comida = { x: 0, y: 0 };
+        let dx = 1;
+        let dy = 0;
+        let proximoDx = 1;
+        let proximoDy = 0;
+        let puntuacion = 0;
+        
+        let records = JSON.parse(localStorage.getItem('google_snake_records_v2')) || { compacto: 0, pequeno: 0, mediano: 0, grande: 0 };
+        
+        let juegoEnCurso = false;
+        let audioActivo = true;
+        let animacionFrameId = null;
+        let ultimoTiempo = 0;
+        const velocidadMovimiento = 110;
+
+        let skinSeleccionada = 'azul';
+        let frutaSeleccionada = 'manzana';
+        let emojiFrutaActual = '🍎';
+
+        const paletaSkins = {
+            azul: { cabeza: '#3b82f6', cuerpo: '#60a5fa' },
+            clasica: { cabeza: '#2e7d32', cuerpo: '#4caf50' },
+            rojo: { cabeza: '#c62828', cuerpo: '#ef4444' },
+            amarillo: { cabeza: '#f59e0b', cuerpo: '#fbbf24' },
+            morado: { cabeza: '#7c3aed', cuerpo: '#a78bfa' },
+            arcoiris: ['#ef4444', '#f97316', '#eab308', '#22c55e', '#3b82f6', '#8b5cf6']
+        };
+
+        actualizarEstadisticasUI();
+
+        let audioCtx = null;
+        function reproducirSonido(tipo) {
+            if (!audioActivo) return;
+            try {
+                if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                let osc = audioCtx.createOscillator();
+                let gain = audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                if (tipo === 'comer') {
+                    osc.frequency.setValueAtTime(450, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(850, audioCtx.currentTime + 0.1);
+                    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.1);
+                } else if (tipo === 'gameover') {
+                    osc.frequency.setValueAtTime(250, audioCtx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.35);
+                    gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.35);
+                    osc.start();
+                    osc.stop(audioCtx.currentTime + 0.35);
+                }
+            } catch(e) {}
+        }
+
+        function actualizarEstadisticasUI() {
+            document.getElementById('stat-score').textContent = puntuacion;
+            document.getElementById('stat-record').textContent = records[modoMapa];
+            document.getElementById('puntuacion-mini').textContent = puntuacion;
+            document.getElementById('icono-fruta-ui').textContent = emojiFrutaActual;
+            document.getElementById('stat-emoji-fruta').textContent = emojiFrutaActual;
+        }
+
+        function cambiarTamanoMapa() {
+            if (juegoEnCurso) {
+                juegoEnCurso = false;
+                cancelAnimationFrame(animacionFrameId);
+            }
+            modoMapa = document.getElementById('select-tamano').value;
+            cols = mapasConfig[modoMapa].cols;
+            filas = mapasConfig[modoMapa].filas;
+            tileSize = mapasConfig[modoMapa].pixelSize;
+
+            canvas.width = cols * tileSize;
+            canvas.height = filas * tileSize;
+
+            actualizarEstadisticasUI();
+            dibujarTableroVacio();
+        }
+
+        function abrirModalSkins(abrir) {
+            const modal = document.getElementById('modal-skins');
+            if (abrir) modal.classList.add('activo');
+            else modal.classList.remove('activo');
+        }
+
+        function seleccionarSkin(skin, btn) {
+            skinSeleccionada = skin;
+            document.querySelectorAll('#grid-skins .btn-opcion-grid').forEach(b => b.classList.remove('activo'));
+            btn.classList.add('activo');
+        }
+
+        function seleccionarFruta(fruta, emoji, btn) {
+            frutaSeleccionada = fruta;
+            emojiFrutaActual = emoji;
+            document.querySelectorAll('#grid-frutas .btn-opcion-grid').forEach(b => b.classList.remove('activo'));
+            btn.classList.add('activo');
+            actualizarEstadisticasUI();
+        }
+
+        function alternarAudio() {
+            audioActivo = !audioActivo;
+            document.getElementById('btn-audio').textContent = audioActivo ? '🔊' : '🔇';
+        }
+
+        function empezarJuego() {
+            document.getElementById('menu-inicio').classList.add('oculto');
+            
+            let cx = Math.floor(cols / 2);
+            let cy = Math.floor(filas / 2);
+            snake = [
+                { x: cx, y: cy },
+                { x: cx - 1, y: cy },
+                { x: cx - 2, y: cy }
+            ];
+            snakeVisual = snake.map(p => ({ x: p.x, y: p.y }));
+            dx = 1; dy = 0;
+            proximoDx = 1; proximoDy = 0;
+            puntuacion = 0;
+            actualizarEstadisticasUI();
+
+            generarComida();
+            juegoEnCurso = true;
+            ultimoTiempo = performance.now();
+            if (animacionFrameId) cancelAnimationFrame(animacionFrameId);
+            animacionFrameId = requestAnimationFrame(buclePrincipal);
+        }
+
+        function buclePrincipal(tiempoActual) {
+            if (!juegoEnCurso) return;
+
+            let delta = tiempoActual - ultimoTiempo;
+
+            if (delta >= velocidadMovimiento) {
+                ultimoTiempo = tiempoActual;
+                actualizarLogicaSnake();
+                if (!juegoEnCurso) return;
+            }
+
+            for (let i = 0; i < snake.length; i++) {
+                if (!snakeVisual[i]) {
+                    snakeVisual[i] = { x: snake[i].x, y: snake[i].y };
+                }
+                let target = snake[i];
+                let current = snakeVisual[i];
+                current.x += (target.x - current.x) * 0.4;
+                current.y += (target.y - current.y) * 0.4;
+            }
+
+            dibujarEscenario();
+            animacionFrameId = requestAnimationFrame(buclePrincipal);
+        }
+
+        function actualizarLogicaSnake() {
+            dx = proximoDx;
+            dy = proximoDy;
+
+            const cabeza = { x: snake[0].x + dx, y: snake[0].y + dy };
+            snake.unshift(cabeza);
+            // Sincronizamos también el array visual al añadir la cabeza
+            snakeVisual.unshift({ x: cabeza.x, y: cabeza.y });
+
+            if (cabeza.x === comida.x && cabeza.y === comida.y) {
+                puntuacion += 10;
+                reproducirSonido('comer');
+                actualizarEstadisticasUI();
+                generarComida();
+            } else {
+                snake.pop();
+                // Si no comemos, retiramos el último segmento visual para mantener la longitud sincronizada
+                snakeVisual.pop();
+            }
+
+            if (verificarGameOver()) {
+                juegoEnCurso = false;
+                reproducirSonido('gameover');
+
+                if (puntuacion > records[modoMapa]) {
+                    records[modoMapa] = puntuacion;
+                    localStorage.setItem('google_snake_records_v2', JSON.stringify(records));
+                }
+
+                actualizarEstadisticasUI();
+                document.getElementById('menu-inicio').classList.remove('oculto');
+            }
+        }
+
+        function dibujarTableroVacio() {
+            for (let x = 0; x < cols; x++) {
+                for (let y = 0; y < filas; y++) {
+                    ctx.fillStyle = (x + y) % 2 === 0 ? '#aad751' : '#a2d149';
+                    ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                }
+            }
+        }
+
+        function dibujarEscenario() {
+            for (let x = 0; x < cols; x++) {
+                for (let y = 0; y < filas; y++) {
+                    ctx.fillStyle = (x + y) % 2 === 0 ? '#aad751' : '#a2d149';
+                    ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
+                }
+            }
+
+            // Fruta
+            let fx = (comida.x * tileSize) + tileSize / 2;
+            let fy = (comida.y * tileSize) + tileSize / 2;
+            ctx.font = `${tileSize * 0.8}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(emojiFrutaActual, fx, fy + 1);
+
+            // Serpiente
+            if (skinSeleccionada === 'arcoiris') {
+                for (let i = snakeVisual.length - 1; i >= 0; i--) {
+                    let colorIndex = i % paletaSkins.arcoiris.length;
+                    ctx.fillStyle = paletaSkins.arcoiris[colorIndex];
+                    ctx.strokeStyle = paletaSkins.arcoiris[colorIndex];
+                    dibujarSegmentoVisual(i);
+                }
+            } else {
+                let skin = paletaSkins[skinSeleccionada];
+                ctx.fillStyle = skin.cuerpo;
+                ctx.strokeStyle = skin.cuerpo;
+                ctx.lineWidth = tileSize - 4;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+
+                ctx.beginPath();
+                for (let i = 0; i < snakeVisual.length; i++) {
+                    let px = (snakeVisual[i].x * tileSize) + tileSize / 2;
+                    let py = (snakeVisual[i].y * tileSize) + tileSize / 2;
+                    if (i === 0) ctx.moveTo(px, py);
+                    else ctx.lineTo(px, py);
+                }
+                ctx.stroke();
+
+                let cabezaX = (snakeVisual[0].x * tileSize) + tileSize / 2;
+                let cabezaY = (snakeVisual[0].y * tileSize) + tileSize / 2;
+                ctx.fillStyle = skin.cabeza;
+                ctx.beginPath();
+                ctx.arc(cabezaX, cabezaY, tileSize * 0.42, 0, 2 * Math.PI);
+                ctx.fill();
+            }
+        }
+
+        function dibujarSegmentoVisual(i) {
+            ctx.lineWidth = tileSize - 4;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.beginPath();
+            let px = (snakeVisual[i].x * tileSize) + tileSize / 2;
+            let py = (snakeVisual[i].y * tileSize) + tileSize / 2;
+            ctx.arc(px, py, (tileSize - 4) / 2, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+
+        function generarComida() {
+            comida.x = Math.floor(Math.random() * cols);
+            comida.y = Math.floor(Math.random() * filas);
+
+            snake.forEach(parte => {
+                if (parte.x === comida.x && parte.y === comida.y) {
+                    generarComida();
+                }
+            });
+        }
+
+        function verificarGameOver() {
+            const cabeza = snake[0];
+            if (cabeza.x < 0 || cabeza.x >= cols || cabeza.y < 0 || cabeza.y >= filas) return true;
+            for (let i = 1; i < snake.length; i++) {
+                if (cabeza.x === snake[i].x && cabeza.y === snake[i].y) return true;
+            }
+            return false;
+        }
+
+        dibujarTableroVacio();
+
+        document.addEventListener('keydown', e => {
+            if (!juegoEnCurso) return;
+
+            switch (e.key) {
+                case 'ArrowUp':
+                case 'w':
+                case 'W':
+                    if (dy === 0) { proximoDx = 0; proximoDy = -1; }
+                    break;
+                case 'ArrowDown':
+                case 's':
+                case 'S':
+                    if (dy === 0) { proximoDx = 0; proximoDy = 1; }
+                    break;
+                case 'ArrowLeft':
+                case 'a':
+                case 'A':
+                    if (dx === 0) { proximoDx = -1; proximoDy = 0; }
+                    break;
+                case 'ArrowRight':
+                case 'd':
+                case 'D':
+                    if (dx === 0) { proximoDx = 1; proximoDy = 0; }
+                    break;
+            }
+        });
+    </script>
+</body>
+</html>

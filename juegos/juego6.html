@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscaminas - aldGAME</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2b2b2b;
+            color: #ffffff;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* Panel Lateral */
+        .panel-lateral {
+            width: 320px;
+            background-color: #1e1e1e;
+            border-right: 2px solid #333;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            justify-content: space-between;
+        }
+
+        .panel-lateral h2 {
+            font-size: 1.4rem;
+            color: #e94560;
+            margin-bottom: 6px;
+        }
+
+        .info-estado {
+            font-size: 0.9rem;
+            background: #2b2b2b;
+            padding: 8px 10px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .puntuacion-contenedor {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            margin-bottom: 10px;
+        }
+
+        .caja-puntos {
+            background: #252525;
+            padding: 8px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #333;
+        }
+
+        .caja-puntos span {
+            display: block;
+            font-size: 0.75rem;
+            color: #aaa;
+            text-transform: uppercase;
+        }
+
+        .caja-puntos strong {
+            font-size: 1.2rem;
+            color: #e94560;
+        }
+
+        /* Historial de Partidas */
+        .seccion-historial {
+            background-color: #252525;
+            border-radius: 8px;
+            padding: 8px;
+            margin-bottom: 10px;
+            max-height: 130px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+
+        .seccion-historial h3 {
+            font-size: 0.85rem;
+            color: #e94560;
+            margin-bottom: 4px;
+            text-align: center;
+        }
+
+        .lista-partidas {
+            list-style: none;
+            font-size: 0.75rem;
+        }
+
+        .lista-partidas li {
+            padding: 3px 5px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .lista-partidas li:last-child {
+            border-bottom: none;
+        }
+
+        .tag-victoria { color: #2ecc71; font-weight: bold; }
+        .tag-derrota { color: #e74c3c; font-weight: bold; }
+
+        /* Contenedor principal del juego */
+        .contenedor-juego {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            gap: 15px;
+        }
+
+        /* Tablero de Buscaminas (10x10) */
+        .tablero-buscaminas {
+            background-color: #181818;
+            border: 3px solid #0f3460;
+            border-radius: 8px;
+            display: grid;
+            grid-template-columns: repeat(10, 40px);
+            grid-template-rows: repeat(10, 40px);
+            gap: 3px;
+            padding: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        .celda-mina {
+            background-color: #333;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            transition: background 0.15s;
+        }
+
+        .celda-mina:hover {
+            background-color: #444;
+        }
+
+        .celda-mina.destapada {
+            background-color: #222;
+            border: 1px solid #444;
+            cursor: default;
+        }
+
+        /* Colores según el número de minas cercanas */
+        .n-1 { color: #3498db; }
+        .n-2 { color: #2ecc71; }
+        .n-3 { color: #e74c3c; }
+        .n-4 { color: #9b59b6; }
+        .n-5 { color: #f1c40f; }
+        .n-6 { color: #1abc9c; }
+        .n-7 { color: #e67e22; }
+        .n-8 { color: #ecf0f1; }
+
+        /* Botones */
+        .botones {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .btn {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: background 0.2s;
+            font-weight: bold;
+        }
+
+        .btn:hover {
+            background-color: #cf3a53;
+        }
+
+        .btn-volver {
+            background-color: #444;
+        }
+
+        .btn-volver:hover {
+            background-color: #555;
+        }
+    </style>
+<style id="nexgame-theme">
+/* ===== NexGame · tema común ===== */
+:root{--nx-bg:#0b0d12;--nx-surface:#12151c;--nx-surface2:#181c25;--nx-line:#232836;--nx-text:#e8eaf0;--nx-muted:#8b92a5;--nx-accent:#ff4757;--nx-ok:#35d07f;--nx-bad:#ff5c6c;--nx-warn:#f5c451}
+body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !important;background:var(--nx-bg) !important;color:var(--nx-text) !important;-webkit-font-smoothing:antialiased}
+.panel-lateral{width:300px;background:var(--nx-surface);border-right:1px solid var(--nx-line);padding:26px 20px}
+.panel-lateral h2{font-size:1.2rem;font-weight:700;color:var(--nx-text);margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--nx-line);letter-spacing:.2px}
+.panel-lateral h2::before{content:'NEXGAME';display:block;font-size:.62rem;letter-spacing:3px;color:var(--nx-accent);font-weight:800;margin-bottom:7px}
+.info-estado,.info-turno{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px;padding:12px 14px;font-size:.88rem;font-weight:600;color:var(--nx-text);line-height:1.35}
+.puntuacion-contenedor{gap:10px}
+.caja-puntos,.caja-saldo,.selector-apuesta{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px}
+.caja-puntos span,.caja-saldo span,.selector-apuesta span{color:var(--nx-muted);font-size:.64rem;letter-spacing:1.4px;font-weight:700}
+.caja-puntos strong,.caja-saldo strong{color:var(--nx-text);font-size:1.4rem;font-weight:800;font-variant-numeric:tabular-nums}
+.caja-saldo strong{color:var(--nx-warn)}
+.seccion-historial{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px;padding:12px}
+.seccion-historial h3{color:var(--nx-muted);font-size:.64rem;letter-spacing:1.6px;text-transform:uppercase;font-weight:800;margin-bottom:8px;text-align:left}
+.lista-partidas li{border-bottom:1px solid var(--nx-line);padding:7px 2px;color:var(--nx-muted)}
+.tag-victoria,.tag-ganada{color:var(--nx-ok) !important}.tag-derrota,.tag-perdida{color:var(--nx-bad) !important}.tag-empate{color:var(--nx-warn) !important}.tag-puntos{color:var(--nx-text) !important}
+.btn{background:var(--nx-accent);color:#fff;border:1px solid transparent;border-radius:10px;padding:12px 16px;font-size:.9rem;font-weight:600;letter-spacing:.2px;transition:background .15s,transform .1s,border-color .15s}
+.btn:hover{background:#ff6070}.btn:active{transform:translateY(1px)}
+.btn-volver,.btn-secundario{background:transparent !important;border:1px solid var(--nx-line) !important;color:var(--nx-muted) !important}
+.btn-volver:hover,.btn-secundario:hover{border-color:#3a4258 !important;color:var(--nx-text) !important;background:var(--nx-surface2) !important}
+.btn:disabled{background:#262b38;color:#6b7387}
+.contenedor-juego{background:radial-gradient(800px 500px at 50% 0%,#141826 0%,transparent 70%)}
+
+.tablero-buscaminas{background:#0e1119;border:1px solid var(--nx-line);border-radius:14px;gap:4px;padding:12px;grid-template-columns:repeat(10,42px);grid-template-rows:repeat(10,42px);box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.celda-mina{background:#1f2533;border-radius:8px;font-size:1.05rem;font-weight:800}
+.celda-mina:hover{background:#2a3144}
+.celda-mina.destapada{background:#121620;border:1px solid #1c2230}
+</style>
+</head>
+<body>
+
+    <!-- Panel Lateral -->
+    <div class="panel-lateral">
+        <div>
+            <h2>Buscaminas aldGAME</h2>
+            <div class="info-estado" id="info-estado">¡Evita las minas!</div>
+
+            <div class="puntuacion-contenedor">
+                <div class="caja-puntos">
+                    <span>Minas Restantes</span>
+                    <strong id="contador-minas">12</strong>
+                </div>
+                <div class="caja-puntos">
+                    <span>Tiempo</span>
+                    <strong id="tiempo">0s</strong>
+                </div>
+            </div>
+
+            <!-- Historial de las 10 últimas partidas -->
+            <div class="seccion-historial">
+                <h3>Últimas Partidas</h3>
+                <ul class="lista-partidas" id="lista-historial">
+                    <!-- Se llena dinámicamente -->
+                </ul>
+            </div>
+        </div>
+
+        <div class="botones">
+            <button class="btn" onclick="reiniciarJuego()">Nueva Partida</button>
+            <a href="../index.html" class="btn btn-volver">Volver al Menú</a>
+        </div>
+    </div>
+
+    <!-- Contenedor del Juego -->
+    <div class="contenedor-juego">
+        <div class="tablero-buscaminas" id="tablero">
+            <!-- Celdas generadas por JS -->
+        </div>
+    </div>
+
+    <script>
+        const FILAS = 10;
+        const COLUMNAS = 10;
+        const TOTAL_MINAS = 12;
+
+        let tablero = [];
+        let juegoTerminado = false;
+        let primerClick = true;
+        let minasRestantes = TOTAL_MINAS;
+        let segundos = 0;
+        let temporizador = null;
+
+        function iniciarJuego() {
+            tablero = [];
+            juegoTerminado = false;
+            primerClick = true;
+            minasRestantes = TOTAL_MINAS;
+            segundos = 0;
+            document.getElementById('contador-minas').textContent = minasRestantes;
+            document.getElementById('tiempo').textContent = `${segundos}s`;
+            document.getElementById('info-estado').textContent = "¡Evita las minas!";
+
+            if (temporizador) clearInterval(temporizador);
+
+            const tableroEl = document.getElementById('tablero');
+            tableroEl.innerHTML = '';
+
+            for (let r = 0; r < FILAS; r++) {
+                let fila = [];
+                for (let c = 0; c < COLUMNAS; c++) {
+                    let celdaObj = {
+                        r, c,
+                        esMina: false,
+                        destapada: false,
+                        marcada: false,
+                        vecinas: 0,
+                        elemento: null
+                    };
+
+                    const celdaEl = document.createElement('div');
+                    celdaEl.classList.add('celda-mina');
+                    celdaEl.addEventListener('click', () => manejarClick(r, c));
+                    celdaEl.addEventListener('contextmenu', (e) => {
+                        e.preventDefault();
+                        marcarCelda(r, c);
+                    });
+
+                    celdaObj.elemento = celdaEl;
+                    tableroEl.appendChild(celdaEl);
+                    fila.push(celdaObj);
+                }
+                tablero.push(fila);
+            }
+        }
+
+        // Función que vincula el botón del panel lateral
+        function reiniciarJuego() {
+            if (temporizador) clearInterval(temporizador);
+            iniciarJuego();
+        }
+
+        function colocarMinas(excluirR, excluirC) {
+            let minasColocadas = 0;
+            while (minasColocadas < TOTAL_MINAS) {
+                let r = Math.floor(Math.random() * FILAS);
+                let c = Math.floor(Math.random() * COLUMNAS);
+
+                if ((r === excluirR && c === excluirC) || tablero[r][c].esMina) continue;
+
+                tablero[r][c].esMina = true;
+                minasColocadas++;
+            }
+
+            for (let r = 0; r < FILAS; r++) {
+                for (let c = 0; c < COLUMNAS; c++) {
+                    if (!tablero[r][c].esMina) {
+                        let count = 0;
+                        for (let dr = -1; dr <= 1; dr++) {
+                            for (let dc = -1; dc <= 1; dc++) {
+                                let nr = r + dr, nc = c + dc;
+                                if (nr >= 0 && nr < FILAS && nc >= 0 && nc < COLUMNAS && tablero[nr][nc].esMina) {
+                                    count++;
+                                }
+                            }
+                        }
+                        tablero[r][c].vecinas = count;
+                    }
+                }
+            }
+        }
+
+        function manejarClick(r, c) {
+            if (juegoTerminado || tablero[r][c].marcada || tablero[r][c].destapada) return;
+
+            if (primerClick) {
+                colocarMinas(r, c);
+                primerClick = false;
+                temporizador = setInterval(() => {
+                    segundos++;
+                    document.getElementById('tiempo').textContent = `${segundos}s`;
+                }, 1000);
+            }
+
+            if (tablero[r][c].esMina) {
+                terminarJuego(false);
+                return;
+            }
+
+            destaparCasilla(r, c);
+            verificarVictoria();
+        }
+
+        function destaparCasilla(r, c) {
+            let celda = tablero[r][c];
+            if (celda.destapada || celda.marcada) return;
+
+            celda.destapada = true;
+            celda.elemento.classList.add('destapada');
+
+            if (celda.vecinas > 0) {
+                celda.elemento.textContent = celda.vecinas;
+                celda.elemento.classList.add(`n-${celda.vecinas}`);
+            } else {
+                for (let dr = -1; dr <= 1; dr++) {
+                    for (let dc = -1; dc <= 1; dc++) {
+                        let nr = r + dr, nc = c + dc;
+                        if (nr >= 0 && nr < FILAS && nc >= 0 && nc < COLUMNAS) {
+                            if (!tablero[nr][nc].destapada) {
+                                destaparCasilla(nr, nc);
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        function marcarCelda(r, c) {
+            if (juegoTerminado || tablero[r][c].destapada) return;
+            let celda = tablero[r][c];
+
+            celda.marcada = !celda.marcada;
+            if (celda.marcada) {
+                celda.elemento.textContent = "🚩";
+                minasRestantes--;
+            } else {
+                celda.elemento.textContent = "";
+                minasRestantes++;
+            }
+            document.getElementById('contador-minas').textContent = minasRestantes;
+        }
+
+        function verificarVictoria() {
+            let ganado = true;
+            for (let r = 0; r < FILAS; r++) {
+                for (let c = 0; c < COLUMNAS; c++) {
+                    if (!tablero[r][c].esMina && !tablero[r][c].destapada) {
+                        ganado = false;
+                        break;
+                    }
+                }
+            }
+            if (ganado) {
+                terminarJuego(true);
+            }
+        }
+
+        function terminarJuego(victoria) {
+            juegoTerminado = true;
+            clearInterval(temporizador);
+
+            for (let r = 0; r < FILAS; r++) {
+                for (let c = 0; c < COLUMNAS; c++) {
+                    if (tablero[r][c].esMina) {
+                        tablero[r][c].elemento.textContent = "💣";
+                        tablero[r][c].elemento.classList.add('destapada');
+                    }
+                }
+            }
+
+            if (victoria) {
+                document.getElementById('info-estado').textContent = "¡Has ganado! 🎉";
+                registrarPartida(true, segundos);
+            } else {
+                document.getElementById('info-estado').textContent = "¡Boom! Fin del juego 💥";
+                registrarPartida(false, segundos);
+            }
+        }
+
+        // --- Sistema de Historial (LocalStorage) ---
+        function registrarPartida(victoria, tiempoPartida) {
+            let historial = JSON.parse(localStorage.getItem('buscaminas_historial')) || [];
+            const fecha = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            historial.unshift({ victoria, tiempo: tiempoPartida, fecha });
+
+            if (historial.length > 10) historial.pop();
+
+            localStorage.setItem('buscaminas_historial', JSON.stringify(historial));
+            actualizarHistorialUI();
+        }
+
+        function actualizarHistorialUI() {
+            const listaEl = document.getElementById('lista-historial');
+            listaEl.innerHTML = '';
+            let historial = JSON.parse(localStorage.getItem('buscaminas_historial')) || [];
+
+            if (historial.length === 0) {
+                listaEl.innerHTML = `<li style="color: #777; text-align: center;">Sin partidas aún</li>`;
+                return;
+            }
+
+            historial.forEach(item => {
+                const elementoLi = document.createElement('li');
+                const tagClase = item.victoria ? 'tag-victoria' : 'tag-derrota';
+                const tagTexto = item.victoria ? `Victoria (${item.tiempo}s)` : 'Derrota';
+                elementoLi.innerHTML = `<span>${item.fecha}</span> <span class="${tagClase}">${tagTexto}</span>`;
+                listaEl.appendChild(elementoLi);
+            });
+        }
+
+        iniciarJuego();
+        actualizarHistorialUI();
+    </script>
+</body>
+</html>

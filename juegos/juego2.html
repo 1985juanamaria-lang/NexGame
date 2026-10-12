@@ -1,0 +1,726 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Damas Multivariante - aldGAME</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #2b2b2b;
+            color: #ffffff;
+            display: flex;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* Pantallas de Selección */
+        .pantalla-config {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #2b2b2b;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 10;
+            padding: 20px;
+        }
+
+        .pantalla-config h1 {
+            color: #e94560;
+            font-size: 2.3rem;
+            margin-bottom: 10px;
+        }
+
+        .pantalla-config p {
+            color: #aaa;
+            margin-bottom: 30px;
+            font-size: 1.1rem;
+        }
+
+        .grid-opciones {
+            display: grid;
+            grid-template-columns: repeat(2, 250px);
+            gap: 20px;
+        }
+
+        .tarjeta-opcion {
+            background-color: #1e1e1e;
+            border: 2px solid #0f3460;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.2s, border-color 0.2s;
+        }
+
+        .tarjeta-opcion:hover {
+            background-color: #333;
+            border-color: #e94560;
+            transform: scale(1.03);
+        }
+
+        .tarjeta-opcion h3 {
+            color: #ffffff;
+            margin-bottom: 8px;
+            font-size: 1.2rem;
+        }
+
+        .tarjeta-opcion span {
+            color: #888;
+            font-size: 0.9rem;
+        }
+
+        /* Pantalla de Juego */
+        #pantalla-juego {
+            display: none;
+            width: 100%;
+            height: 100%;
+            display: flex;
+        }
+
+        .panel-lateral {
+            width: 350px;
+            background-color: #1e1e1e;
+            border-right: 2px solid #333;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            justify-content: space-between;
+            overflow-y: auto;
+        }
+
+        .panel-lateral h2 {
+            font-size: 1.3rem;
+            color: #e94560;
+            margin-bottom: 8px;
+        }
+
+        .info-turno {
+            font-size: 1rem;
+            background: #2b2b2b;
+            padding: 10px 15px;
+            border-radius: 8px;
+            border: 1px solid #444;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 12px;
+        }
+
+        /* Historial de Partidas */
+        .seccion-historial {
+            background-color: #252525;
+            border-radius: 8px;
+            padding: 10px;
+            margin-bottom: 15px;
+            max-height: 180px;
+            overflow-y: auto;
+            border: 1px solid #333;
+        }
+
+        .seccion-historial h3 {
+            font-size: 0.95rem;
+            color: #e94560;
+            margin-bottom: 6px;
+            text-align: center;
+        }
+
+        .lista-partidas {
+            list-style: none;
+            font-size: 0.82rem;
+        }
+
+        .lista-partidas li {
+            padding: 4px 6px;
+            border-bottom: 1px solid #333;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .lista-partidas li:last-child {
+            border-bottom: none;
+        }
+
+        .tag-ganada { color: #2ecc71; font-weight: bold; }
+        .tag-perdida { color: #e74c3c; font-weight: bold; }
+        .tag-empate { color: #f1c40f; font-weight: bold; }
+
+        .contenedor-juego {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            overflow: auto;
+        }
+
+        .tablero-damas {
+            display: grid;
+            grid-template-columns: repeat(var(--cols), var(--tam-casilla));
+            grid-template-rows: repeat(var(--rows), var(--tam-casilla));
+            border: 4px solid #111;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            border-radius: 4px;
+        }
+
+        .casilla {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .casilla.clara {
+            background-color: #f0d9b5;
+        }
+
+        .casilla.oscura {
+            background-color: #b58863;
+        }
+
+        .casilla.seleccionada {
+            background-color: #7b61ff !important;
+        }
+
+        .casilla.posible-movimiento::after {
+            content: '';
+            width: 18px;
+            height: 18px;
+            background-color: rgba(46, 204, 113, 0.8);
+            border-radius: 50%;
+            position: absolute;
+        }
+
+        .ficha {
+            width: calc(var(--tam-casilla) - 14px);
+            height: calc(var(--tam-casilla) - 14px);
+            border-radius: 50%;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            user-select: none;
+        }
+
+        .ficha.blanca {
+            background: radial-gradient(circle at 30% 30%, #ffffff, #dcdcdc);
+            color: #333;
+            border: 2px solid #b5b5b5;
+        }
+
+        .ficha.roja {
+            background: radial-gradient(circle at 30% 30%, #ff5252, #c62828);
+            color: white;
+            border: 2px solid #b71c1c;
+        }
+
+        .ficha.reina::after {
+            content: '👑';
+            font-size: 1.1rem;
+        }
+
+        .btn {
+            background-color: #e94560;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 0.95rem;
+            border-radius: 8px;
+            cursor: pointer;
+            text-align: center;
+            text-decoration: none;
+            transition: background 0.2s;
+            font-weight: bold;
+            width: 100%;
+        }
+
+        .btn:hover {
+            background-color: #cf3a53;
+        }
+
+        .btn-secundario {
+            background-color: #444;
+        }
+
+        .btn-secundario:hover {
+            background-color: #555;
+        }
+    </style>
+<style id="nexgame-theme">
+/* ===== NexGame · tema común ===== */
+:root{--nx-bg:#0b0d12;--nx-surface:#12151c;--nx-surface2:#181c25;--nx-line:#232836;--nx-text:#e8eaf0;--nx-muted:#8b92a5;--nx-accent:#ff4757;--nx-ok:#35d07f;--nx-bad:#ff5c6c;--nx-warn:#f5c451}
+body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !important;background:var(--nx-bg) !important;color:var(--nx-text) !important;-webkit-font-smoothing:antialiased}
+.panel-lateral{width:300px;background:var(--nx-surface);border-right:1px solid var(--nx-line);padding:26px 20px}
+.panel-lateral h2{font-size:1.2rem;font-weight:700;color:var(--nx-text);margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--nx-line);letter-spacing:.2px}
+.panel-lateral h2::before{content:'NEXGAME';display:block;font-size:.62rem;letter-spacing:3px;color:var(--nx-accent);font-weight:800;margin-bottom:7px}
+.info-estado,.info-turno{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px;padding:12px 14px;font-size:.88rem;font-weight:600;color:var(--nx-text);line-height:1.35}
+.puntuacion-contenedor{gap:10px}
+.caja-puntos,.caja-saldo,.selector-apuesta{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px}
+.caja-puntos span,.caja-saldo span,.selector-apuesta span{color:var(--nx-muted);font-size:.64rem;letter-spacing:1.4px;font-weight:700}
+.caja-puntos strong,.caja-saldo strong{color:var(--nx-text);font-size:1.4rem;font-weight:800;font-variant-numeric:tabular-nums}
+.caja-saldo strong{color:var(--nx-warn)}
+.seccion-historial{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px;padding:12px}
+.seccion-historial h3{color:var(--nx-muted);font-size:.64rem;letter-spacing:1.6px;text-transform:uppercase;font-weight:800;margin-bottom:8px;text-align:left}
+.lista-partidas li{border-bottom:1px solid var(--nx-line);padding:7px 2px;color:var(--nx-muted)}
+.tag-victoria,.tag-ganada{color:var(--nx-ok) !important}.tag-derrota,.tag-perdida{color:var(--nx-bad) !important}.tag-empate{color:var(--nx-warn) !important}.tag-puntos{color:var(--nx-text) !important}
+.btn{background:var(--nx-accent);color:#fff;border:1px solid transparent;border-radius:10px;padding:12px 16px;font-size:.9rem;font-weight:600;letter-spacing:.2px;transition:background .15s,transform .1s,border-color .15s}
+.btn:hover{background:#ff6070}.btn:active{transform:translateY(1px)}
+.btn-volver,.btn-secundario{background:transparent !important;border:1px solid var(--nx-line) !important;color:var(--nx-muted) !important}
+.btn-volver:hover,.btn-secundario:hover{border-color:#3a4258 !important;color:var(--nx-text) !important;background:var(--nx-surface2) !important}
+.btn:disabled{background:#262b38;color:#6b7387}
+.contenedor-juego{background:radial-gradient(800px 500px at 50% 0%,#141826 0%,transparent 70%)}
+
+.panel-lateral{width:320px}
+.pantalla-config{background:radial-gradient(900px 500px at 50% -10%,#1a2036,transparent 60%),var(--nx-bg)}
+.pantalla-config h1{color:var(--nx-text);font-size:2rem;font-weight:800;letter-spacing:-.3px}
+.pantalla-config p{color:var(--nx-muted);font-size:1rem}
+.grid-opciones{grid-template-columns:repeat(2,260px);gap:16px}
+.tarjeta-opcion{background:var(--nx-surface);border:1px solid var(--nx-line);border-radius:14px;padding:22px;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.tarjeta-opcion:hover{background:var(--nx-surface2);border-color:var(--nx-accent);transform:translateY(-3px)}
+.tarjeta-opcion h3{font-size:1.1rem;font-weight:700}
+.tarjeta-opcion span{color:var(--nx-muted);font-size:.82rem}
+.tablero-damas{border:0;border-radius:12px;overflow:hidden;box-shadow:0 0 0 6px #1b1f2b,0 24px 60px rgba(0,0,0,.55)}
+.casilla.clara{background-color:#e8d8b9}.casilla.oscura{background-color:#9a7552}
+.casilla.seleccionada{background-color:#6d7bff !important}
+.casilla.posible-movimiento::after{width:16px;height:16px;background-color:rgba(53,208,127,.9);box-shadow:0 0 0 5px rgba(53,208,127,.25)}
+.ficha{box-shadow:0 5px 10px rgba(0,0,0,.45),inset 0 -3px 0 rgba(0,0,0,.18)}
+.ficha.blanca{background:radial-gradient(circle at 32% 28%,#fff,#d9dce3);border:2px solid #aeb3bf}
+.ficha.roja{background:radial-gradient(circle at 32% 28%,#ff6b6b,#c0262d);border:2px solid #98181e}
+</style>
+</head>
+<body>
+
+    <!-- Paso 1: Selector de Estilo de Damas -->
+    <div id="pantalla-estilo" class="pantalla-config">
+        <h1>Selecciona el Estilo de Damas</h1>
+        <p>Elige las reglas con las que deseas jugar en aldGAME</p>
+        
+        <div class="grid-opciones">
+            <div class="tarjeta-opcion" onclick="elegirEstilo('angloamericana')">
+                <h3>Angloamericana</h3>
+                <span>Tablero 8x8 • Clásico simple</span>
+            </div>
+            <div class="tarjeta-opcion" onclick="elegirEstilo('internacional')">
+                <h3>Internacional</h3>
+                <span>Tablero 10x10 • Reinas Voladoras</span>
+            </div>
+            <div class="tarjeta-opcion" onclick="elegirEstilo('espanola')">
+                <h3>Española</h3>
+                <span>Tablero 8x8 • Reinas largo alcance</span>
+            </div>
+            <div class="tarjeta-opcion" onclick="elegirEstilo('italiana')">
+                <h3>Italiana</h3>
+                <span>Tablero 8x8 • Captura estricta</span>
+            </div>
+        </div>
+        <br>
+        <a href="../index.html" class="btn btn-secundario" style="width: auto; padding: 10px 20px;">Volver al Menú Principal</a>
+    </div>
+
+    <!-- Paso 2: Selector de Oponente -->
+    <div id="pantalla-oponente" class="pantalla-config" style="display: none;">
+        <h1>¿Contra quién quieres jugar?</h1>
+        <p>Selecciona tu modo de oponente</p>
+        
+        <div class="grid-opciones">
+            <div class="tarjeta-opcion" onclick="iniciarPartidaConOponente('ia')">
+                <h3>Contra la IA</h3>
+                <span>Juega tú (Blancas) vs Máquina (Rojas)</span>
+            </div>
+            <div class="tarjeta-opcion" onclick="iniciarPartidaConOponente('local')">
+                <h3>2 Jugadores</h3>
+                <span>Multijugador local en el mismo PC</span>
+            </div>
+        </div>
+        <br>
+        <button class="btn btn-secundario" onclick="volverAEstilos()" style="width: auto; padding: 10px 20px;">Atrás</button>
+    </div>
+
+    <!-- Pantalla 3: Interfaz del Juego -->
+    <div id="pantalla-juego" style="display: none;">
+        <div class="panel-lateral">
+            <div>
+                <h2 id="titulo-modo">Damas</h2>
+                <div class="info-turno" id="info-turno">Turno: Blancas</div>
+                
+                <!-- Historial de las 10 últimas partidas -->
+                <div class="seccion-historial">
+                    <h3>Últimas Partidas</h3>
+                    <ul class="lista-partidas" id="lista-historial">
+                        <!-- Se llena dinámicamente -->
+                    </ul>
+                </div>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <button class="btn" onclick="reiniciarPartida()">Reiniciar Partida</button>
+                <button class="btn btn-secundario" onclick="volverAlMenu()">Cambiar Modo / Estilo</button>
+            </div>
+        </div>
+
+        <div class="contenedor-juego">
+            <div class="tablero-damas" id="tablero"></div>
+        </div>
+    </div>
+
+    <script>
+        let modoEstilo = 'angloamericana';
+        let modoOponente = 'ia';
+        let turno = 'blanca';
+        let seleccionada = null;
+        let movimientosValidos = [];
+        let juegoActivo = true;
+        let tablero = [];
+        let configuracion = {};
+
+        const configs = {
+            angloamericana: { rows: 8, cols: 8, tam: '52px', reinaVoladora: false },
+            internacional: { rows: 10, cols: 10, tam: '40px', reinaVoladora: true },
+            espanola: { rows: 8, cols: 8, tam: '52px', reinaVoladora: true },
+            italiana: { rows: 8, cols: 8, tam: '52px', reinaVoladora: false }
+        };
+
+        function elegirEstilo(estilo) {
+            modoEstilo = estilo;
+            document.getElementById('pantalla-estilo').style.display = 'none';
+            document.getElementById('pantalla-oponente').style.display = 'flex';
+        }
+
+        function volverAEstilos() {
+            document.getElementById('pantalla-oponente').style.display = 'none';
+            document.getElementById('pantalla-estilo').style.display = 'flex';
+        }
+
+        function iniciarPartidaConOponente(oponente) {
+            modoOponente = oponente;
+            configuracion = configs[modoEstilo];
+
+            document.getElementById('pantalla-oponente').style.display = 'none';
+            document.getElementById('pantalla-juego').style.display = 'flex';
+            document.getElementById('titulo-modo').textContent = `Damas (${modoEstilo.charAt(0).toUpperCase() + modoEstilo.slice(1)})`;
+
+            const tableroEl = document.getElementById('tablero');
+            tableroEl.style.setProperty('--rows', configuracion.rows);
+            tableroEl.style.setProperty('--cols', configuracion.cols);
+            tableroEl.style.setProperty('--tam-casilla', configuracion.tam);
+
+            reiniciarPartida();
+            actualizarHistorialUI();
+        }
+
+        function volverAlMenu() {
+            document.getElementById('pantalla-juego').style.display = 'none';
+            document.getElementById('pantalla-estilo').style.display = 'flex';
+        }
+
+        function reiniciarPartida() {
+            turno = 'blanca';
+            seleccionada = null;
+            movimientosValidos = [];
+            juegoActivo = true;
+            inicializarTablero();
+            renderizarTablero();
+            actualizarTextoTurno();
+        }
+
+        function actualizarTextoTurno() {
+            if (modoOponente === 'ia') {
+                document.getElementById('info-turno').textContent = turno === 'blanca' ? "Tu turno (Blancas)" : "Turno de la IA (Rojas)...";
+            } else {
+                document.getElementById('info-turno').textContent = turno === 'blanca' ? "Turno: Blancas" : "Turno: Rojas";
+            }
+        }
+
+        function inicializarTablero() {
+            const r = configuracion.rows;
+            const c = configuracion.cols;
+            tablero = Array(r).fill(null).map(() => Array(c).fill(null));
+
+            let filasFichas = r === 10 ? 4 : 3;
+
+            for (let f = 0; f < r; f++) {
+                for (let c_idx = 0; c_idx < c; c_idx++) {
+                    if ((f + c_idx) % 2 !== 0) {
+                        if (f < filasFichas) {
+                            tablero[f][c_idx] = 'roja';
+                        } else if (f >= r - filasFichas) {
+                            tablero[f][c_idx] = 'blanca';
+                        }
+                    }
+                }
+            }
+        }
+
+        function renderizarTablero() {
+            const tableroEl = document.getElementById('tablero');
+            tableroEl.innerHTML = '';
+            const r = configuracion.rows;
+            const c = configuracion.cols;
+
+            for (let f = 0; f < r; f++) {
+                for (let c_idx = 0; c_idx < c; c_idx++) {
+                    const casilla = document.createElement('div');
+                    casilla.classList.add('casilla');
+                    casilla.classList.add((f + c_idx) % 2 === 0 ? 'clara' : 'oscura');
+
+                    if (seleccionada && seleccionada.fila === f && seleccionada.col === c_idx) {
+                        casilla.classList.add('seleccionada');
+                    }
+
+                    if (movimientosValidos.some(m => m.fila === f && m.col === c_idx)) {
+                        casilla.classList.add('posible-movimiento');
+                    }
+
+                    const fichaTipo = tablero[f][c_idx];
+                    if (fichaTipo) {
+                        const ficha = document.createElement('div');
+                        ficha.classList.add('ficha');
+                        if (fichaTipo.includes('blanca')) ficha.classList.add('blanca');
+                        if (fichaTipo.includes('roja')) ficha.classList.add('roja');
+                        if (fichaTipo.includes('reina')) ficha.classList.add('reina');
+                        casilla.appendChild(ficha);
+                    }
+
+                    casilla.addEventListener('click', () => manejarClickCasilla(f, c_idx));
+                    tableroEl.appendChild(casilla);
+                }
+            }
+        }
+
+        function manejarClickCasilla(f, c_idx) {
+            if (!juegoActivo) return;
+            if (modoOponente === 'ia' && turno === 'roja') return;
+
+            const ficha = tablero[f][c_idx];
+
+            if (ficha && ficha.includes(turno)) {
+                seleccionada = { fila: f, col: c_idx };
+                movimientosValidos = calcularMovimientos(f, c_idx, tablero);
+                renderizarTablero();
+                return;
+            }
+
+            const movimiento = movimientosValidos.find(m => m.fila === f && m.col === c_idx);
+            if (movimiento) {
+                ejecutarMovimiento(seleccionada, movimiento);
+                seleccionada = null;
+                movimientosValidos = [];
+                renderizarTablero();
+
+                verificarFinJuego();
+
+                if (juegoActivo) {
+                    turno = turno === 'blanca' ? 'roja' : 'blanca';
+                    actualizarTextoTurno();
+
+                    if (modoOponente === 'ia' && turno === 'roja') {
+                        setTimeout(turnoIA, 600);
+                    }
+                }
+            }
+        }
+
+        function calcularMovimientos(f, c_idx, estadoTablero) {
+            const movimientos = [];
+            const tipo = estadoTablero[f][c_idx];
+            if (!tipo) return movimientos;
+
+            const esReina = tipo.includes('reina');
+            const color = tipo.includes('blanca') ? 'blanca' : 'roja';
+            const r = configuracion.rows;
+            const c = configuracion.cols;
+            const direcciones = [];
+
+            if (color === 'blanca' || esReina) direcciones.push(-1);
+            if (color === 'roja' || esReina) direcciones.push(1);
+
+            if (configuracion.reinaVoladora && esReina) {
+                [-1, 1].forEach(df => {
+                    [-1, 1].forEach(dc => {
+                        let nf = f + df;
+                        let nc = c_idx + dc;
+                        let piezaEncontrada = null;
+
+                        while (nf >= 0 && nf < r && nc >= 0 && nc < c) {
+                            const destino = estadoTablero[nf][nc];
+                            if (!piezaEncontrada) {
+                                if (!destino) {
+                                    movimientos.push({ origenF: f, origenC: c_idx, fila: nf, col: nc });
+                                } else if (destino.includes(color)) {
+                                    break;
+                                } else {
+                                    piezaEncontrada = { fila: nf, col: nc };
+                                }
+                            } else {
+                                if (destino) break;
+                                movimientos.push({ origenF: f, origenC: c_idx, fila: nf, col: nc, salto: piezaEncontrada });
+                            }
+                            nf += df;
+                            nc += dc;
+                        }
+                    });
+                });
+            } else {
+                direcciones.forEach(df => {
+                    [-1, 1].forEach(dc => {
+                        const nf = f + df;
+                        const nc = c_idx + dc;
+
+                        if (nf >= 0 && nf < r && nc >= 0 && nc < c) {
+                            const destino = estadoTablero[nf][nc];
+                            if (!destino && !esReina && (color === 'blanca' ? df === -1 : df === 1)) {
+                                movimientos.push({ origenF: f, origenC: c_idx, fila: nf, col: nc });
+                            } else if (esReina && !destino) {
+                                movimientos.push({ origenF: f, origenC: c_idx, fila: nf, col: nc });
+                            } else if (destino && !destino.includes(color)) {
+                                const nnf = nf + df;
+                                const nnc = nc + dc;
+                                if (nnf >= 0 && nnf < r && nnc >= 0 && nnc < c && !estadoTablero[nnf][nnc]) {
+                                    movimientos.push({ origenF: f, origenC: c_idx, fila: nnf, col: nnc, salto: { fila: nf, col: nc } });
+                                }
+                            }
+                        }
+                    });
+                });
+            }
+
+            return movimientos;
+        }
+
+        function ejecutarMovimiento(origen, movimiento) {
+            tablero[movimiento.fila][movimiento.col] = tablero[origen.fila][origen.col];
+            tablero[origen.fila][origen.col] = null;
+
+            if (movimiento.salto) {
+                tablero[movimiento.salto.fila][movimiento.salto.col] = null;
+            }
+
+            const r = configuracion.rows;
+            if (tablero[movimiento.fila][movimiento.col] === 'blanca' && movimiento.fila === 0) {
+                tablero[movimiento.fila][movimiento.col] = 'blanca-reina';
+            }
+            if (tablero[movimiento.fila][movimiento.col] === 'roja' && movimiento.fila === r - 1) {
+                tablero[movimiento.fila][movimiento.col] = 'roja-reina';
+            }
+        }
+
+        function turnoIA() {
+            if (!juegoActivo) return;
+
+            const r = configuracion.rows;
+            const c = configuracion.cols;
+            let todosLosMovimientos = [];
+
+            for (let f = 0; f < r; f++) {
+                for (let c_idx = 0; c_idx < c; c_idx++) {
+                    if (tablero[f][c_idx] && tablero[f][c_idx].includes('roja')) {
+                        const moves = calcularMovimientos(f, c_idx, tablero);
+                        todosLosMovimientos = todosLosMovimientos.concat(moves);
+                    }
+                }
+            }
+
+            if (todosLosMovimientos.length === 0) {
+                document.getElementById('info-turno').textContent = "¡Has ganado! La IA no tiene movimientos 🎉";
+                juegoActivo = false;
+                registrarPartida('Ganada');
+                return;
+            }
+
+            let saltos = todosLosMovimientos.filter(m => m.salto);
+            let movimientoElegido = saltos.length > 0 
+                ? saltos[Math.floor(Math.random() * saltos.length)] 
+                : todosLosMovimientos[Math.floor(Math.random() * todosLosMovimientos.length)];
+
+            ejecutarMovimiento({ fila: movimientoElegido.origenF, col: movimientoElegido.origenC }, movimientoElegido);
+            renderizarTablero();
+            verificarFinJuego();
+
+            if (juegoActivo) {
+                turno = 'blanca';
+                actualizarTextoTurno();
+            }
+        }
+
+        function verificarFinJuego() {
+            const r = configuracion.rows;
+            const c = configuracion.cols;
+            let blancasVivas = false;
+            let rojasVivas = false;
+
+            for (let f = 0; f < r; f++) {
+                for (let c_idx = 0; c_idx < c; c_idx++) {
+                    if (tablero[f][c_idx] && tablero[f][c_idx].includes('blanca')) blancasVivas = true;
+                    if (tablero[f][c_idx] && tablero[f][c_idx].includes('roja')) rojasVivas = true;
+                }
+            }
+
+            if (!blancasVivas) {
+                document.getElementById('info-turno').textContent = modoOponente === 'ia' ? "¡La IA ha ganado! 🤖" : "¡Ganan las Rojas! 🎉";
+                juegoActivo = false;
+                registrarPartida(modoOponente === 'ia' ? 'Perdida' : 'Rojas Ganan');
+            } else if (!rojasVivas) {
+                document.getElementById('info-turno').textContent = modoOponente === 'ia' ? "¡Has ganado! 🎉" : "¡Ganan las Blancas! 🎉";
+                juegoActivo = false;
+                registrarPartida(modoOponente === 'ia' ? 'Ganada' : 'Blancas Ganan');
+            }
+        }
+
+        // --- Sistema de Historial (LocalStorage) ---
+        function obtenerClaveStorage() {
+            return `damas_historial_${modoEstilo}_${modoOponente}`;
+        }
+
+        function registrarPartida(resultado) {
+            let historial = JSON.parse(localStorage.getItem(obtenerClaveStorage())) || [];
+            
+            const fecha = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            historial.unshift({ resultado, fecha }); // Añadir al principio
+
+            if (historial.length > 10) {
+                historial.pop(); // Mantener solo las últimas 10
+            }
+
+            localStorage.setItem(obtenerClaveStorage(), JSON.stringify(historial));
+            actualizarHistorialUI();
+        }
+
+        function actualizarHistorialUI() {
+            const listaEl = document.getElementById('lista-historial');
+            listaEl.innerHTML = '';
+
+            let historial = JSON.parse(localStorage.getItem(obtenerClaveStorage())) || [];
+
+            if (historial.length === 0) {
+                listaEl.innerHTML = `<li style="color: #777; text-align: center;">Sin partidas aún</li>`;
+                return;
+            }
+
+            historial.forEach(item => {
+                const li = document.createElement('li');
+                
+                let claseTag = 'tag-empate';
+                if (item.resultado === 'Ganada' || item.resultado === 'Blancas Ganan') claseTag = 'tag-ganada';
+                if (item.resultado === 'Perdida' || item.resultado === 'Rojas Ganan') claseTag = 'tag-perdida';
+
+                li.innerHTML = `<span>${item.fecha}</span> <span class="${claseTag}">${item.resultado}</span>`;
+                listaEl.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>
