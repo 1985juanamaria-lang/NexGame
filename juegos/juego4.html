@@ -131,14 +131,9 @@
             background-color: #bbada0;
             border-radius: 10px;
             padding: 15px;
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-template-rows: repeat(4, 1fr);
-            gap: 15px;
             position: relative;
         }
 
-        /* Capa de fondo con los huecos estáticos */
         .grid-fondo {
             position: absolute;
             top: 15px; left: 15px; right: 15px; bottom: 15px;
@@ -154,7 +149,6 @@
             border-radius: 6px;
         }
 
-        /* Contenedor dinámico de fichas con posicionamiento absoluto para animar */
         .capa-fichas {
             position: absolute;
             top: 15px; left: 15px; right: 15px; bottom: 15px;
@@ -166,39 +160,27 @@
             position: absolute;
             width: calc((100% - 45px) / 4);
             height: calc((100% - 45px) / 4);
-            background-color: #eee4da;
             border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.8rem;
             font-weight: bold;
-            color: #776e65;
             user-select: none;
-            transition: transform 0.15s ease-in-out, background-color 0.15s, color 0.15s;
+            transition: transform 0.12s ease-in-out;
         }
 
-        /* Animación de aparición (nuevo número) y combinación */
-        @keyframes aparecer {
-            0% { transform: scale(0); }
+        @keyframes pop {
+            0% { transform: scale(0.8); }
+            50% { transform: scale(1.12); }
             100% { transform: scale(1); }
-        }
-
-        @keyframes fusionar {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.18); }
-            100% { transform: scale(1); }
-        }
-
-        .ficha.nueva {
-            animation: aparecer 0.2s ease-in-out;
         }
 
         .ficha.fusionada {
-            animation: fusionar 0.2s ease-in-out;
+            animation: pop 0.15s ease-in-out;
         }
 
-        /* Colores dinámicos para las fichas de 2048 */
+        /* Colores estándar 2048 */
         .f-2 { background-color: #eee4da; color: #776e65; }
         .f-4 { background-color: #ede0c8; color: #776e65; }
         .f-8 { background-color: #f2b179; color: #f9f6f2; }
@@ -233,48 +215,35 @@
             font-weight: bold;
         }
 
-        .btn:hover {
-            background-color: #cf3a53;
-        }
-
-        .btn-volver {
-            background-color: #444;
-        }
-
-        .btn-volver:hover {
-            background-color: #555;
-        }
+        .btn:hover { background-color: #cf3a53; }
+        .btn-volver { background-color: #444; }
+        .btn-volver:hover { background-color: #555; }
     </style>
 <style id="nexgame-theme">
-/* ===== NexGame · tema común ===== */
 :root{--nx-bg:#0b0d12;--nx-surface:#12151c;--nx-surface2:#181c25;--nx-line:#232836;--nx-text:#e8eaf0;--nx-muted:#8b92a5;--nx-accent:#ff4757;--nx-ok:#35d07f;--nx-bad:#ff5c6c;--nx-warn:#f5c451}
 body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !important;background:var(--nx-bg) !important;color:var(--nx-text) !important;-webkit-font-smoothing:antialiased}
 .panel-lateral{width:300px;background:var(--nx-surface);border-right:1px solid var(--nx-line);padding:26px 20px}
 .panel-lateral h2{font-size:1.2rem;font-weight:700;color:var(--nx-text);margin-bottom:16px;padding-bottom:16px;border-bottom:1px solid var(--nx-line);letter-spacing:.2px}
 .panel-lateral h2::before{content:'NEXGAME';display:block;font-size:.62rem;letter-spacing:3px;color:var(--nx-accent);font-weight:800;margin-bottom:7px}
-.info-estado,.info-turno{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px;padding:12px 14px;font-size:.88rem;font-weight:600;color:var(--nx-text);line-height:1.35}
+.info-estado{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px;padding:12px 14px;font-size:.88rem;font-weight:600;color:var(--nx-text);line-height:1.35}
 .puntuacion-contenedor{gap:10px}
-.caja-puntos,.caja-saldo,.selector-apuesta{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px}
-.caja-puntos span,.caja-saldo span,.selector-apuesta span{color:var(--nx-muted);font-size:.64rem;letter-spacing:1.4px;font-weight:700}
-.caja-puntos strong,.caja-saldo strong{color:var(--nx-text);font-size:1.4rem;font-weight:800;font-variant-numeric:tabular-nums}
-.caja-saldo strong{color:var(--nx-warn)}
+.caja-puntos{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px}
+.caja-puntos span{color:var(--nx-muted);font-size:.64rem;letter-spacing:1.4px;font-weight:700}
+.caja-puntos strong{color:var(--nx-text);font-size:1.4rem;font-weight:800}
 .seccion-historial{background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px;padding:12px}
 .seccion-historial h3{color:var(--nx-muted);font-size:.64rem;letter-spacing:1.6px;text-transform:uppercase;font-weight:800;margin-bottom:8px;text-align:left}
 .lista-partidas li{border-bottom:1px solid var(--nx-line);padding:7px 2px;color:var(--nx-muted)}
-.tag-victoria,.tag-ganada{color:var(--nx-ok) !important}.tag-derrota,.tag-perdida{color:var(--nx-bad) !important}.tag-empate{color:var(--nx-warn) !important}.tag-puntos{color:var(--nx-text) !important}
-.btn{background:var(--nx-accent);color:#fff;border:1px solid transparent;border-radius:10px;padding:12px 16px;font-size:.9rem;font-weight:600;letter-spacing:.2px;transition:background .15s,transform .1s,border-color .15s}
-.btn:hover{background:#ff6070}.btn:active{transform:translateY(1px)}
-.btn-volver,.btn-secundario{background:transparent !important;border:1px solid var(--nx-line) !important;color:var(--nx-muted) !important}
-.btn-volver:hover,.btn-secundario:hover{border-color:#3a4258 !important;color:var(--nx-text) !important;background:var(--nx-surface2) !important}
-.btn:disabled{background:#262b38;color:#6b7387}
+.tag-puntos{color:var(--nx-text) !important}
+.btn{background:var(--nx-accent);color:#fff;border:1px solid transparent;border-radius:10px;padding:12px 16px;font-size:.9rem;font-weight:600;transition:background .15s}
+.btn:hover{background:#ff6070}
+.btn-volver{background:transparent !important;border:1px solid var(--nx-line) !important;color:var(--nx-muted) !important}
+.btn-volver:hover{border-color:#3a4258 !important;color:var(--nx-text) !important;background:var(--nx-surface2) !important}
 .contenedor-juego{background:radial-gradient(800px 500px at 50% 0%,#141826 0%,transparent 70%)}
-
-.tablero-2048{width:min(440px,calc(100vh - 80px));height:min(440px,calc(100vh - 80px));background:#161a24;border:1px solid var(--nx-line);border-radius:16px;padding:12px;gap:12px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.tablero-2048{width:min(440px,calc(100vh - 80px));height:min(440px,calc(100vh - 80px));background:#161a24;border:1px solid var(--nx-line);border-radius:16px;padding:12px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
 .grid-fondo{top:12px;left:12px;right:12px;bottom:12px;gap:12px}
 .celda-vacia{background:#1d2230;border-radius:10px}
 .capa-fichas{top:12px;left:12px;right:12px;bottom:12px}
 .ficha{border-radius:10px;font-weight:800;width:calc((100% - 36px) / 4);height:calc((100% - 36px) / 4)}
-
 .f-2{background:#e9edf5;color:#2b3142}.f-4{background:#d5ddf0;color:#2b3142}
 .f-8{background:#ffb067;color:#fff}.f-16{background:#ff9548;color:#fff}.f-32{background:#ff7a45;color:#fff}.f-64{background:#ff5a47;color:#fff}
 .f-128{background:#f5d061;color:#2b2406}.f-256{background:#f0c53f;color:#2b2406}.f-512{background:#e9b923;color:#2b2406}
@@ -303,11 +272,10 @@ html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
 </head>
 <body>
 
-    <!-- Panel Lateral -->
     <div class="panel-lateral">
         <div>
             <h2>Juego 2048</h2>
-            <div class="info-estado" id="info-estado">Flechas o desliza el dedo para mover</div>
+            <div class="info-estado" id="info-estado">Usa flechas o desliza</div>
 
             <div class="puntuacion-contenedor">
                 <div class="caja-puntos">
@@ -320,22 +288,18 @@ html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
                 </div>
             </div>
 
-            <!-- Historial de las 10 últimas partidas -->
             <div class="seccion-historial">
                 <h3>Últimas Partidas</h3>
-                <ul class="lista-partidas" id="lista-historial">
-                    <!-- Se llena dinámicamente -->
-                </ul>
+                <ul class="lista-partidas" id="lista-historial"></ul>
             </div>
         </div>
 
         <div class="botones">
-            <button class="btn" onclick="reiniciarJuego()">Reiniciar Partida</button>
-            <a href="../index.html" class="btn btn-volver">Volver al Menú</a>
+            <button class="btn" onclick="reiniciarJuego()">Reiniciar</button>
+            <a href="../index.html" class="btn btn-volver">Menú</a>
         </div>
     </div>
 
-    <!-- Contenedor del Juego -->
     <div class="contenedor-juego">
         <div class="tablero-2048" id="tablero">
             <div class="grid-fondo">
@@ -353,77 +317,63 @@ html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
         let puntuacion = 0;
         let record = localStorage.getItem('2048_record') || 0;
         let juegoTerminado = false;
+        let contadorId = 1;
 
         document.getElementById('record').textContent = record;
 
         function iniciarJuego() {
-            tablero = [
-                [0, 0, 0, 0],
-                [0, 0, 0, 0],
-                [0, 0, 0, 0],
-                [0, 0, 0, 0]
-            ];
+            tablero = Array(4).fill(null).map(() => Array(4).fill(null));
             puntuacion = 0;
             juegoTerminado = false;
             document.getElementById('puntuacion').textContent = puntuacion;
-            document.getElementById('info-estado').textContent = "Combina hasta llegar a 2048";
+            document.getElementById('info-estado').textContent = "¡A por el 2048!";
             
-            agregarNumeroAleatorio(true);
-            agregarNumeroAleatorio(true);
+            agregarAleatorio();
+            agregarAleatorio();
             actualizarTableroUI();
         }
 
         function reiniciarJuego() {
-            if (puntuacion > 0) {
-                registrarPartida(puntuacion);
-            }
+            if (puntuacion > 0) registrarPartida(puntuacion);
             iniciarJuego();
         }
 
-        function agregarNumeroAleatorio(esNuevoInicial = false) {
-            let celdasVacias = [];
+        function agregarAleatorio() {
+            let vacias = [];
             for (let r = 0; r < 4; r++) {
                 for (let c = 0; c < 4; c++) {
-                    if (tablero[r][c] === 0) {
-                        celdasVacias.push({r, c});
-                    }
+                    if (!tablero[r][c]) vacias.push({r, c});
                 }
             }
-            if (celdasVacias.length > 0) {
-                let aleatoria = celdasVacias[Math.floor(Math.random() * celdasVacias.length)];
-                let valor = Math.random() < 0.9 ? 2 : 4;
-                tablero[aleatoria.r][aleatoria.c] = {
-                    valor: valor,
-                    id: Math.random().toString(36).substr(2, 9),
-                    esNuevo: !esNuevoInicial,
+            if (vacias.length > 0) {
+                let pos = vacias[Math.floor(Math.random() * vacias.length)];
+                tablero[pos.r][pos.c] = {
+                    id: contadorId++,
+                    valor: Math.random() < 0.9 ? 2 : 4,
                     fusionado: false
                 };
             }
         }
 
         function actualizarTableroUI() {
-            const capaFichas = document.getElementById('capa-fichas');
-            capaFichas.innerHTML = '';
+            const capa = document.getElementById('capa-fichas');
+            capa.innerHTML = '';
 
             for (let r = 0; r < 4; r++) {
                 for (let c = 0; c < 4; c++) {
-                    let item = tablero[r][c];
-                    if (item !== 0) {
-                        let ficha = document.createElement('div');
-                        ficha.className = `ficha f-${item.valor <= 2048 ? item.valor : 'mas'}`;
-                        if (item.esNuevo) ficha.classList.add('nueva');
-                        if (item.fusionado) ficha.classList.add('fusionada');
-                        
-                        ficha.textContent = item.valor;
+                    let tile = tablero[r][c];
+                    if (tile) {
+                        let div = document.createElement('div');
+                        let claseValor = tile.valor <= 2048 ? tile.valor : 'mas';
+                        div.className = `ficha f-${claseValor}`;
+                        if (tile.fusionado) div.classList.add('fusionada');
+                        div.textContent = tile.valor;
 
-                        // Posicionamiento calculado para que se deslicen de una celda a otra con CSS transform
-                        ficha.style.transform = `translate(calc(${c} * (100% + 15px)), calc(${r} * (100% + 15px)))`;
-                        
-                        capaFichas.appendChild(ficha);
-                        
-                        // Limpiar flags de animación
-                        item.esNuevo = false;
-                        item.fusionado = false;
+                        // Posicionamiento absoluto fluido con transform
+                        div.style.transform = `translate(calc(${c} * (100% + 15px)), calc(${r} * (100% + 15px)))`;
+                        capa.appendChild(div);
+
+                        tile.fusionado = false; // Resetear flag
                     }
                 }
             }
@@ -436,173 +386,143 @@ html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
             }
         }
 
-        // Control mediante teclado y táctil (deslizar el dedo)
-        function intentarMover(dir) {
+        function procesarLinea(linea) {
+            let filtrada = linea.filter(t => t !== null);
+            let nuevaLinea = [];
+            let huboCambio = false;
+            let i = 0;
+
+            while (i < filtrada.length) {
+                if (i + 1 < filtrada.length && filtrada[i].valor === filtrada[i + 1].valor) {
+                    let valDoble = filtrada[i].valor * 2;
+                    puntuacion += valDoble;
+                    nuevaLinea.push({
+                        id: filtrada[i].id,
+                        valor: valDoble,
+                        fusionado: true
+                    });
+                    i += 2;
+                    huboCambio = true;
+                } else {
+                    nuevaLinea.push(filtrada[i]);
+                    i++;
+                }
+            }
+
+            while (nuevaLinea.length < 4) nuevaLinea.push(null);
+
+            for (let j = 0; j < 4; j++) {
+                let idAnt = linea[j] ? linea[j].id : null;
+                let idNue = nuevaLinea[j] ? nuevaLinea[j].id : null;
+                let valAnt = linea[j] ? linea[j].valor : 0;
+                let valNue = nuevaLinea[j] ? nuevaLinea[j].valor : 0;
+                if (idAnt !== idNue || valAnt !== valNue) huboCambio = true;
+            }
+
+            return { linea: nuevaLinea, cambio: huboCambio };
+        }
+
+        function mover(dir) {
             if (juegoTerminado) return;
             let movido = false;
-            if (dir === 'L') movido = moverIzquierda();
-            else if (dir === 'R') movido = moverDerecha();
-            else if (dir === 'U') movido = moverArriba();
-            else if (dir === 'D') movido = moverAbajo();
+
+            if (dir === 'L') {
+                for (let r = 0; r < 4; r++) {
+                    let res = procesarLinea(tablero[r]);
+                    tablero[r] = res.linea;
+                    if (res.cambio) movido = true;
+                }
+            } else if (dir === 'R') {
+                for (let r = 0; r < 4; r++) {
+                    let rev = [...tablero[r]].reverse();
+                    let res = procesarLinea(rev);
+                    tablero[r] = res.linea.reverse();
+                    if (res.cambio) movido = true;
+                }
+            } else if (dir === 'U') {
+                for (let c = 0; c < 4; c++) {
+                    let col = [tablero[0][c], tablero[1][c], tablero[2][c], tablero[3][c]];
+                    let res = procesarLinea(col);
+                    for (let r = 0; r < 4; r++) tablero[r][c] = res.linea[r];
+                    if (res.cambio) movido = true;
+                }
+            } else if (dir === 'D') {
+                for (let c = 0; c < 4; c++) {
+                    let col = [tablero[0][c], tablero[1][c], tablero[2][c], tablero[3][c]].reverse();
+                    let res = procesarLinea(col);
+                    let colRes = res.linea.reverse();
+                    for (let r = 0; r < 4; r++) tablero[r][c] = colRes[r];
+                    if (res.cambio) movido = true;
+                }
+            }
 
             if (movido) {
-                agregarNumeroAleatorio(false);
+                agregarAleatorio();
                 actualizarTableroUI();
 
-                if (verificarFinJuego()) {
+                if (verificarFin()) {
                     juegoTerminado = true;
-                    document.getElementById('info-estado').textContent = "¡Juego terminado! 🤖";
+                    document.getElementById('info-estado').textContent = "¡Partida Finalizada!";
                     registrarPartida(puntuacion);
                 }
             }
         }
 
-        document.addEventListener('keydown', (e) => {
-            const m = { ArrowLeft: 'L', ArrowRight: 'R', ArrowUp: 'U', ArrowDown: 'D' }[e.key];
-            if (m) { e.preventDefault(); intentarMover(m); }
-        });
-
-        let swipe2048 = null;
-        document.addEventListener('touchstart', (e) => {
-            if (e.touches.length !== 1 || (e.target.closest && e.target.closest('a,button'))) { swipe2048 = null; return; }
-            swipe2048 = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        }, { passive: true });
-        document.addEventListener('touchmove', (e) => { if (swipe2048) e.preventDefault(); }, { passive: false });
-        document.addEventListener('touchend', (e) => {
-            if (!swipe2048) return;
-            const t = e.changedTouches[0], dx = t.clientX - swipe2048.x, dy = t.clientY - swipe2048.y;
-            swipe2048 = null;
-            if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;
-            intentarMover(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'R' : 'L') : (dy > 0 ? 'D' : 'U'));
-        }, { passive: true });
-
-        // Lógica de movimientos con objetos para conservar IDs y animar
-        function deslizarFila(fila) {
-            let arr = fila.filter(cell => cell !== 0);
-            let nuevaFila = [0, 0, 0, 0];
-            let i = 0;
-            let huboCambio = false;
-
-            while (i < arr.length) {
-                if (i + 1 < arr.length && arr[i].valor === arr[i + 1].valor) {
-                    // Combinación
-                    let valorDoblado = arr[i].valor * 2;
-                    puntuacion += valorDoblado;
-                    nuevaFila[nuevaFila.filter(x => x !== 0).length] = {
-                        valor: valorDoblado,
-                        id: arr[i].id,
-                        esNuevo: false,
-                        fusionado: true
-                    };
-                    i += 2;
-                    huboCambio = true;
-                } else {
-                    nuevaFila[nuevaFila.filter(x => x !== 0).length] = arr[i];
-                    i++;
-                }
-            }
-
-            // Comprobar si hubo cambios reales en la disposición
-            for (let j = 0; j < 4; j++) {
-                let valAnt = fila[j] === 0 ? 0 : fila[j].valor;
-                let valNue = nuevaFila[j] === 0 ? 0 : nuevaFila[j].valor;
-                if (valAnt !== valNue) huboCambio = true;
-            }
-
-            return { fila: nuevaFila, cambio: huboCambio };
-        }
-
-        function moverIzquierda() {
-            let cambiadoGlobal = false;
-            for (let r = 0; r < 4; r++) {
-                let resultado = deslizarFila(tablero[r]);
-                tablero[r] = resultado.fila;
-                if (resultado.cambio) cambiadoGlobal = true;
-            }
-            return cambiadoGlobal;
-        }
-
-        function moverDerecha() {
-            let cambiadoGlobal = false;
-            for (let r = 0; r < 4; r++) {
-                let invertida = [...tablero[r]].reverse();
-                let resultado = deslizarFila(invertida);
-                tablero[r] = resultado.fila.reverse();
-                if (resultado.cambio) cambiadoGlobal = true;
-            }
-            return cambiadoGlobal;
-        }
-
-        function moverArriba() {
-            let cambiadoGlobal = false;
-            for (let c = 0; c < 4; c++) {
-                let columna = [tablero[0][c], tablero[1][c], tablero[2][c], tablero[3][c]];
-                let resultado = deslizarFila(columna);
-                for (let r = 0; r < 4; r++) {
-                    tablero[r][c] = resultado.fila[r];
-                }
-                if (resultado.cambio) cambiadoGlobal = true;
-            }
-            return cambiadoGlobal;
-        }
-
-        function moverAbajo() {
-            let cambiadoGlobal = false;
-            for (let c = 0; c < 4; c++) {
-                let columna = [tablero[0][c], tablero[1][c], tablero[2][c], tablero[3][c]].reverse();
-                let resultado = deslizarFila(columna);
-                let colResuelta = resultado.fila.reverse();
-                for (let r = 0; r < 4; r++) {
-                    tablero[r][c] = colResuelta[r];
-                }
-                if (resultado.cambio) cambiadoGlobal = true;
-            }
-            return cambiadoGlobal;
-        }
-
-        function verificarFinJuego() {
+        function verificarFin() {
             for (let r = 0; r < 4; r++) {
                 for (let c = 0; c < 4; c++) {
-                    if (tablero[r][c] === 0) return false;
-                    if (c < 3 && tablero[r][c].valor === tablero[r][c + 1].valor) return false;
-                    if (r < 3 && tablero[r][c].valor === tablero[r + 1][c].valor) return false;
+                    if (!tablero[r][c]) return false;
+                    if (c < 3 && tablero[r][c].valor === tablero[r][c+1].valor) return false;
+                    if (r < 3 && tablero[r][c].valor === tablero[r+1][c].valor) return false;
                 }
             }
             return true;
         }
 
-        // --- Sistema de Historial (LocalStorage) ---
-        function registrarPartida(puntosFinales) {
-            let historial = JSON.parse(localStorage.getItem('2048_historial')) || [];
-            const fecha = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-            historial.unshift({ puntos: puntosFinales, fecha });
+        document.addEventListener('keydown', (e) => {
+            const map = { ArrowLeft: 'L', ArrowRight: 'R', ArrowUp: 'U', ArrowDown: 'D' };
+            if (map[e.key]) { e.preventDefault(); mover(map[e.key]); }
+        });
 
-            if (historial.length > 10) historial.pop();
+        let touchX = null, touchY = null;
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length === 1) {
+                touchX = e.touches[0].clientX;
+                touchY = e.touches[0].clientY;
+            }
+        }, {passive: true});
 
-            localStorage.setItem('2048_historial', JSON.stringify(historial));
-            actualizarHistorialUI();
+        document.addEventListener('touchend', (e) => {
+            if (!touchX || !touchY) return;
+            let dx = e.changedTouches[0].clientX - touchX;
+            let dy = e.changedTouches[0].clientY - touchY;
+            if (Math.max(Math.abs(dx), Math.abs(dy)) > 25) {
+                mover(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'R' : 'L') : (dy > 0 ? 'D' : 'U'));
+            }
+            touchX = null; touchY = null;
+        }, {passive: true});
+
+        function registrarPartida(pts) {
+            let hist = JSON.parse(localStorage.getItem('2048_hist')) || [];
+            hist.unshift({ pts, hora: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
+            if (hist.length > 10) hist.pop();
+            localStorage.setItem('2048_hist', JSON.stringify(hist));
+            renderHistorial();
         }
 
-        function actualizarHistorialUI() {
-            const listaEl = document.getElementById('lista-historial');
-            listaEl.innerHTML = '';
-            let historial = JSON.parse(localStorage.getItem('2048_historial')) || [];
-
-            if (historial.length === 0) {
-                listaEl.innerHTML = `<li style="color: #777; text-align: center;">Sin partidas aún</li>`;
-                return;
-            }
-
-            historial.forEach(item => {
-                const elementoLi = document.createElement('li');
-                elementoLi.innerHTML = `<span>${item.fecha}</span> <span class="tag-puntos">${item.puntos} pts</span>`;
-                listaEl.appendChild(elementoLi);
+        function renderHistorial() {
+            let hist = JSON.parse(localStorage.getItem('2048_hist')) || [];
+            let lista = document.getElementById('lista-historial');
+            lista.innerHTML = hist.length ? '' : `<li style="text-align:center; color:#777;">Sin registros</li>`;
+            hist.forEach(h => {
+                let li = document.createElement('li');
+                li.innerHTML = `<span>${h.hora}</span><span class="tag-puntos">${h.pts} pts</span>`;
+                lista.appendChild(li);
             });
         }
 
-        // Inicializar al cargar
         iniciarJuego();
-        actualizarHistorialUI();
+        renderHistorial();
     </script>
 </body>
 </html>
