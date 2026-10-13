@@ -138,8 +138,35 @@
             position: relative;
         }
 
-        .celda-2048 {
+        /* Capa de fondo con los huecos estáticos */
+        .grid-fondo {
+            position: absolute;
+            top: 15px; left: 15px; right: 15px; bottom: 15px;
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            grid-template-rows: repeat(4, 1fr);
+            gap: 15px;
+            z-index: 1;
+        }
+
+        .celda-vacia {
             background-color: rgba(238, 228, 218, 0.35);
+            border-radius: 6px;
+        }
+
+        /* Contenedor dinámico de fichas con posicionamiento absoluto para animar */
+        .capa-fichas {
+            position: absolute;
+            top: 15px; left: 15px; right: 15px; bottom: 15px;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .ficha {
+            position: absolute;
+            width: calc((100% - 45px) / 4);
+            height: calc((100% - 45px) / 4);
+            background-color: #eee4da;
             border-radius: 6px;
             display: flex;
             align-items: center;
@@ -148,7 +175,27 @@
             font-weight: bold;
             color: #776e65;
             user-select: none;
-            transition: all 0.1s ease-in-out;
+            transition: transform 0.15s ease-in-out, background-color 0.15s, color 0.15s;
+        }
+
+        /* Animación de aparición (nuevo número) y combinación */
+        @keyframes aparecer {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes fusionar {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.18); }
+            100% { transform: scale(1); }
+        }
+
+        .ficha.nueva {
+            animation: aparecer 0.2s ease-in-out;
+        }
+
+        .ficha.fusionada {
+            animation: fusionar 0.2s ease-in-out;
         }
 
         /* Colores dinámicos para las fichas de 2048 */
@@ -223,7 +270,11 @@ body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !imp
 .contenedor-juego{background:radial-gradient(800px 500px at 50% 0%,#141826 0%,transparent 70%)}
 
 .tablero-2048{width:min(440px,calc(100vh - 80px));height:min(440px,calc(100vh - 80px));background:#161a24;border:1px solid var(--nx-line);border-radius:16px;padding:12px;gap:12px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
-.celda-2048{background:#1d2230;border-radius:10px;color:#d6dbe8;font-weight:800}
+.grid-fondo{top:12px;left:12px;right:12px;bottom:12px;gap:12px}
+.celda-vacia{background:#1d2230;border-radius:10px}
+.capa-fichas{top:12px;left:12px;right:12px;bottom:12px}
+.ficha{border-radius:10px;font-weight:800;width:calc((100% - 36px) / 4);height:calc((100% - 36px) / 4)}
+
 .f-2{background:#e9edf5;color:#2b3142}.f-4{background:#d5ddf0;color:#2b3142}
 .f-8{background:#ffb067;color:#fff}.f-16{background:#ff9548;color:#fff}.f-32{background:#ff7a45;color:#fff}.f-64{background:#ff5a47;color:#fff}
 .f-128{background:#f5d061;color:#2b2406}.f-256{background:#f0c53f;color:#2b2406}.f-512{background:#e9b923;color:#2b2406}
@@ -242,8 +293,10 @@ html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
   .caja-puntos{padding:4px 8px}.caja-puntos strong{font-size:1rem}
   .botones{display:flex;gap:6px;flex:none}.botones .btn{padding:8px 10px;font-size:.72rem;white-space:nowrap;margin:0}
   .contenedor-juego{padding:8px;gap:8px;min-height:0;flex:1}
-  .tablero-2048{width:min(94vw,calc(100vh - 120px));height:min(94vw,calc(100vh - 120px));padding:8px;gap:8px}
-  .celda-2048{font-size:clamp(1rem,6.5vw,1.8rem)}
+  .tablero-2048{width:min(94vw,calc(100vh - 120px));height:min(94vw,calc(100vh - 120px));padding:8px}
+  .grid-fondo{top:8px;left:8px;right:8px;bottom:8px;gap:8px}
+  .capa-fichas{top:8px;left:8px;right:8px;bottom:8px}
+  .ficha{font-size:clamp(1rem,6.5vw,1.8rem);width:calc((100% - 24px) / 4);height:calc((100% - 24px) / 4)}
 }
 @supports (height:100dvh){@media (max-width:800px), (pointer:coarse) and (max-width:1100px){body{height:100dvh}.tablero-2048{width:min(94vw,calc(100dvh - 120px));height:min(94vw,calc(100dvh - 120px))}}}
 </style>
@@ -285,7 +338,13 @@ html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
     <!-- Contenedor del Juego -->
     <div class="contenedor-juego">
         <div class="tablero-2048" id="tablero">
-            <!-- Se generan dinámicamente las 16 celdas -->
+            <div class="grid-fondo">
+                <div class="celda-vacia"></div><div class="celda-vacia"></div><div class="celda-vacia"></div><div class="celda-vacia"></div>
+                <div class="celda-vacia"></div><div class="celda-vacia"></div><div class="celda-vacia"></div><div class="celda-vacia"></div>
+                <div class="celda-vacia"></div><div class="celda-vacia"></div><div class="celda-vacia"></div><div class="celda-vacia"></div>
+                <div class="celda-vacia"></div><div class="celda-vacia"></div><div class="celda-vacia"></div><div class="celda-vacia"></div>
+            </div>
+            <div class="capa-fichas" id="capa-fichas"></div>
         </div>
     </div>
 
@@ -309,8 +368,8 @@ html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
             document.getElementById('puntuacion').textContent = puntuacion;
             document.getElementById('info-estado').textContent = "Combina hasta llegar a 2048";
             
-            agregarNumeroAleatorio();
-            agregarNumeroAleatorio();
+            agregarNumeroAleatorio(true);
+            agregarNumeroAleatorio(true);
             actualizarTableroUI();
         }
 
@@ -321,7 +380,7 @@ html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
             iniciarJuego();
         }
 
-        function agregarNumeroAleatorio() {
+        function agregarNumeroAleatorio(esNuevoInicial = false) {
             let celdasVacias = [];
             for (let r = 0; r < 4; r++) {
                 for (let c = 0; c < 4; c++) {
@@ -332,31 +391,43 @@ html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
             }
             if (celdasVacias.length > 0) {
                 let aleatoria = celdasVacias[Math.floor(Math.random() * celdasVacias.length)];
-                tablero[aleatoria.r][aleatoria.c] = Math.random() < 0.9 ? 2 : 4;
+                let valor = Math.random() < 0.9 ? 2 : 4;
+                tablero[aleatoria.r][aleatoria.c] = {
+                    valor: valor,
+                    id: Math.random().toString(36).substr(2, 9),
+                    esNuevo: !esNuevoInicial,
+                    fusionado: false
+                };
             }
         }
 
         function actualizarTableroUI() {
-            const tableroEl = document.getElementById('tablero');
-            tableroEl.innerHTML = '';
+            const capaFichas = document.getElementById('capa-fichas');
+            capaFichas.innerHTML = '';
 
             for (let r = 0; r < 4; r++) {
                 for (let c = 0; c < 4; c++) {
-                    let valor = tablero[r][c];
-                    let celda = document.createElement('div');
-                    celda.classList.add('celda-2048');
-                    
-                    if (valor > 0) {
-                        celda.textContent = valor;
-                        if (valor <= 2048) {
-                            celda.classList.add(`f-${valor}`);
-                        } else {
-                            celda.classList.add('f-mas');
-                        }
+                    let item = tablero[r][c];
+                    if (item !== 0) {
+                        let ficha = document.createElement('div');
+                        ficha.className = `ficha f-${item.valor <= 2048 ? item.valor : 'mas'}`;
+                        if (item.esNuevo) ficha.classList.add('nueva');
+                        if (item.fusionado) ficha.classList.add('fusionada');
+                        
+                        ficha.textContent = item.valor;
+
+                        // Posicionamiento calculado para que se deslicen de una celda a otra con CSS transform
+                        ficha.style.transform = `translate(calc(${c} * (100% + 15px)), calc(${r} * (100% + 15px)))`;
+                        
+                        capaFichas.appendChild(ficha);
+                        
+                        // Limpiar flags de animación
+                        item.esNuevo = false;
+                        item.fusionado = false;
                     }
-                    tableroEl.appendChild(celda);
                 }
             }
+
             document.getElementById('puntuacion').textContent = puntuacion;
             if (puntuacion > record) {
                 record = puntuacion;
@@ -375,7 +446,7 @@ html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
             else if (dir === 'D') movido = moverAbajo();
 
             if (movido) {
-                agregarNumeroAleatorio();
+                agregarNumeroAleatorio(false);
                 actualizarTableroUI();
 
                 if (verificarFinJuego()) {
@@ -405,85 +476,96 @@ html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
             intentarMover(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'R' : 'L') : (dy > 0 ? 'D' : 'U'));
         }, { passive: true });
 
-        // Lógica de movimientos de 2048
-        function filtrarCeros(fila) {
-            return fila.filter(num => num !== 0);
-        }
+        // Lógica de movimientos con objetos para conservar IDs y animar
+        function deslizarFila(fila) {
+            let arr = fila.filter(cell => cell !== 0);
+            let nuevaFila = [0, 0, 0, 0];
+            let i = 0;
+            let huboCambio = false;
 
-        function deslizarIzquierda(fila) {
-            let arr = filtrarCeros(fila);
-            for (let i = 0; i < arr.length - 1; i++) {
-                if (arr[i] === arr[i + 1]) {
-                    arr[i] *= 2;
-                    puntuacion += arr[i];
-                    arr[i + 1] = 0;
+            while (i < arr.length) {
+                if (i + 1 < arr.length && arr[i].valor === arr[i + 1].valor) {
+                    // Combinación
+                    let valorDoblado = arr[i].valor * 2;
+                    puntuacion += valorDoblado;
+                    nuevaFila[nuevaFila.filter(x => x !== 0).length] = {
+                        valor: valorDoblado,
+                        id: arr[i].id,
+                        esNuevo: false,
+                        fusionado: true
+                    };
+                    i += 2;
+                    huboCambio = true;
+                } else {
+                    nuevaFila[nuevaFila.filter(x => x !== 0).length] = arr[i];
+                    i++;
                 }
             }
-            arr = filtrarCeros(arr);
-            while (arr.length < 4) {
-                arr.push(0);
+
+            // Comprobar si hubo cambios reales en la disposición
+            for (let j = 0; j < 4; j++) {
+                let valAnt = fila[j] === 0 ? 0 : fila[j].valor;
+                let valNue = nuevaFila[j] === 0 ? 0 : nuevaFila[j].valor;
+                if (valAnt !== valNue) huboCambio = true;
             }
-            return arr;
+
+            return { fila: nuevaFila, cambio: huboCambio };
         }
 
         function moverIzquierda() {
-            let cambiado = false;
+            let cambiadoGlobal = false;
             for (let r = 0; r < 4; r++) {
-                let filaOriginal = [...tablero[r]];
-                tablero[r] = deslizarIzquierda(tablero[r]);
-                if (JSON.stringify(filaOriginal) !== JSON.stringify(tablero[r])) cambiado = true;
+                let resultado = deslizarFila(tablero[r]);
+                tablero[r] = resultado.fila;
+                if (resultado.cambio) cambiadoGlobal = true;
             }
-            return cambiado;
+            return cambiadoGlobal;
         }
 
         function moverDerecha() {
-            let cambiado = false;
+            let cambiadoGlobal = false;
             for (let r = 0; r < 4; r++) {
-                let filaOriginal = [...tablero[r]];
-                let filaInvertida = [...tablero[r]].reverse();
-                filaInvertida = deslizarIzquierda(filaInvertida);
-                tablero[r] = filaInvertida.reverse();
-                if (JSON.stringify(filaOriginal) !== JSON.stringify(tablero[r])) cambiado = true;
+                let invertida = [...tablero[r]].reverse();
+                let resultado = deslizarFila(invertida);
+                tablero[r] = resultado.fila.reverse();
+                if (resultado.cambio) cambiadoGlobal = true;
             }
-            return cambiado;
+            return cambiadoGlobal;
         }
 
         function moverArriba() {
-            let cambiado = false;
+            let cambiadoGlobal = false;
             for (let c = 0; c < 4; c++) {
                 let columna = [tablero[0][c], tablero[1][c], tablero[2][c], tablero[3][c]];
-                let columnaOriginal = [...columna];
-                columna = deslizarIzquierda(columna);
+                let resultado = deslizarFila(columna);
                 for (let r = 0; r < 4; r++) {
-                    tablero[r][c] = columna[r];
+                    tablero[r][c] = resultado.fila[r];
                 }
-                if (JSON.stringify(columnaOriginal) !== JSON.stringify(columna)) cambiado = true;
+                if (resultado.cambio) cambiadoGlobal = true;
             }
-            return cambiado;
+            return cambiadoGlobal;
         }
 
         function moverAbajo() {
-            let cambiado = false;
+            let cambiadoGlobal = false;
             for (let c = 0; c < 4; c++) {
-                let columna = [tablero[0][c], tablero[1][c], tablero[2][c], tablero[3][c]];
-                let columnaOriginal = [...columna];
-                columna = columna.reverse();
-                columna = deslizarIzquierda(columna);
-                columna = columna.reverse();
+                let columna = [tablero[0][c], tablero[1][c], tablero[2][c], tablero[3][c]].reverse();
+                let resultado = deslizarFila(columna);
+                let colResuelta = resultado.fila.reverse();
                 for (let r = 0; r < 4; r++) {
-                    tablero[r][c] = columna[r];
+                    tablero[r][c] = colResuelta[r];
                 }
-                if (JSON.stringify(columnaOriginal) !== JSON.stringify(columna)) cambiado = true;
+                if (resultado.cambio) cambiadoGlobal = true;
             }
-            return cambiado;
+            return cambiadoGlobal;
         }
 
         function verificarFinJuego() {
             for (let r = 0; r < 4; r++) {
                 for (let c = 0; c < 4; c++) {
                     if (tablero[r][c] === 0) return false;
-                    if (c < 3 && tablero[r][c] === tablero[r][c + 1]) return false;
-                    if (r < 3 && tablero[r][c] === tablero[r + 1][c]) return false;
+                    if (c < 3 && tablero[r][c].valor === tablero[r][c + 1].valor) return false;
+                    if (r < 3 && tablero[r][c].valor === tablero[r + 1][c].valor) return false;
                 }
             }
             return true;
