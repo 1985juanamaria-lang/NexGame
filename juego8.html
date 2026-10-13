@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruleta de Casino - aldGAME</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #0b0b0b;
+            color: #ffffff;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+        }
+
+        /* Barra superior flotante de estado y saldo */
+        .barra-superior {
+            position: absolute;
+            top: 15px;
+            width: 95%;
+            max-width: 1100px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(24, 24, 24, 0.9);
+            padding: 12px 25px;
+            border-radius: 12px;
+            border: 1px solid #333;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
+            z-index: 10;
+        }
+
+        .info-estado {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: #00e676;
+        }
+
+        .caja-saldo-chips {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .saldo-container span {
+            font-size: 0.7rem;
+            color: #aaa;
+            display: block;
+            text-transform: uppercase;
+        }
+
+        .saldo-container strong {
+            font-size: 1.3rem;
+            color: #f1c40f;
+        }
+
+        /* Selector de Fichas */
+        .selector-fichas {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-ficha {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            border: 3px dashed #fff;
+            font-weight: bold;
+            font-size: 0.75rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: transform 0.1s, box-shadow 0.2s;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.5);
+            text-shadow: 0 1px 2px rgba(0,0,0,0.8);
+        }
+
+        .ficha-10 { background: #2980b9; color: #fff; }
+        .ficha-25 { background: #27ae60; color: #fff; }
+        .ficha-50 { background: #c0392b; color: #fff; }
+        .ficha-100 { background: #ff69b4; color: #fff; border-color: #fff; } /* Ficha Rosa */
+
+        .btn-ficha.activo {
+            transform: scale(1.15);
+            box-shadow: 0 0 12px #fff, 0 4px 8px rgba(0,0,0,0.7);
+            border-style: solid;
+        }
+
+        /* Botón de reset de monedas */
+        .btn-reset-monedas {
+            background: #27ae60;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-reset-monedas:hover {
+            background: #219653;
+        }
+
+        /* Contenedor central de la mesa */
+        .contenedor-juego {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-top: 40px;
+        }
+
+        .mesa-casino {
+            position: relative;
+            width: 1050px;
+            height: 520px;
+            background: #0d4a22;
+            border: 14px solid #4a2c11;
+            border-radius: 35px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9), inset 0 0 35px rgba(0,0,0,0.6);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 25px;
+        }
+
+        /* Rueda Grande y Fluida */
+        .rueda-container {
+            position: relative;
+            width: 380px;
+            height: 380px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .rueda {
+            width: 360px;
+            height: 360px;
+            border-radius: 50%;
+            border: 8px solid #d4af37;
+            position: relative;
+            box-shadow: 0 0 20px rgba(0,0,0,0.8);
+            transition: transform 5s cubic-bezier(0.1, 0.8, 0.1, 1);
+            overflow: hidden;
+        }
+
+        .centro-rueda {
+            position: absolute;
+            width: 90px;
+            height: 90px;
+            background: radial-gradient(circle, #fff 0%, #ccc 60%, #888 100%);
+            border-radius: 50%;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 5;
+            border: 3px solid #d4af37;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.6);
+        }
+
+        .indicador {
+            position: absolute;
+            top: -16px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 12px solid transparent;
+            border-right: 12px solid transparent;
+            border-top: 22px solid #ffcc00;
+            z-index: 10;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.7));
+        }
+
+        /* Tablero de Apuestas */
+        .tablero-apuestas {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            background: #0b3d1b;
+            padding: 15px;
+            border-radius: 12px;
+            border: 2px solid #d4af37;
+        }
+
+        .grid-numeros {
+            display: grid;
+            grid-template-columns: repeat(13, 42px);
+            grid-template-rows: repeat(3, 42px);
+            gap: 3px;
+        }
+
+        .casilla {
+            background: #145a32;
+            border: 1px solid #d4af37;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #fff;
+            cursor: pointer;
+            border-radius: 4px;
+            transition: background 0.15s;
+            position: relative;
+        }
+
+        .casilla:hover { background: #1e8449; }
+        .casilla.rojo { background: #b03a2e; }
+        .casilla.rojo:hover { background: #cb4335; }
+        .casilla.negro { background: #212529; }
+        .casilla.negro:hover { background: #343a40; }
+        .casilla.verde { 
+            background: #196f3d; 
+            background: repeating-linear-gradient(45deg, #196f3d, #196f3d 8px, #114e2a 8px, #114e2a 16px);
+        }
+
+        .casilla-especial {
+            grid-row: span 3;
+            writing-mode: vertical-lr;
+            text-orientation: upright;
+            font-size: 0.8rem;
+        }
+
+        .apuestas-externas {
+            display: grid;
+            grid-template-columns: repeat(6, 91px);
+            grid-template-rows: 36px 36px;
+            gap: 4px;
+        }
+
+        .btn-externo {
+            background: #145a32;
+            border: 1px solid #d4af37;
+            color: #fff;
+            font-size: 0.75rem;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border-radius: 4px;
+        }
+        .btn-externo:hover { background: #1e8449; }
+
+        .controles-ruleta {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
+
+        .btn-girar {
+            flex: 2;
+            background: linear-gradient(to bottom, #d4af37, #aa820a);
+            color: #000;
+            border: none;
+            padding: 10px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+            text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.4);
+        }
+        .btn-girar:hover { background: linear-gradient(to bottom, #e5c158, #b88f0b); }
+        .btn-girar:disabled { background: #555; color: #888; cursor: not-allowed; }
+
+        .btn-limpiar {
+            flex: 1;
+            background: #c0392b;
+            color: #fff;
+            border: none;
+            padding: 10px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+        .btn-limpiar:hover { background: #d9534f; }
+
+        .btn-volver-menu {
+            position: absolute;
+            bottom: 15px;
+            left: 20px;
+            background: #252525;
+            color: #fff;
+            padding: 8px 16px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-size: 0.85rem;
+            font-weight: bold;
+            border: 1px solid #444;
+        }
+        .btn-volver-menu:hover { background: #333; }
+
+        /* Ficha de Casino en la casilla */
+        .ficha-casino-apuesta {
+            position: absolute;
+            bottom: 2px;
+            right: 2px;
+            border-radius: 50%;
+            width: 24px;
+            height: 24px;
+            font-size: 0.6rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            border: 2px dashed #ffffff;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.7);
+            z-index: 5;
+            text-shadow: 0 1px 1px rgba(0,0,0,0.8);
+        }
+    </style>
+<style id="nexgame-theme">:root{--nx-bg:#0b0d12;--nx-surface:#12151c;--nx-surface2:#181c25;--nx-line:#232836;--nx-text:#e8eaf0;--nx-muted:#8b92a5;--nx-accent:#ff4757;--nx-ok:#35d07f}
+body{background:radial-gradient(900px 600px at 50% 0,#10241a,transparent 60%),#0a0c10 !important}
+.barra-superior{background:rgba(18,21,28,.92);border:1px solid var(--nx-line);border-radius:14px}
+.info-estado{background:none;border:0;padding:0;color:var(--nx-ok)}
+.saldo-container strong{font-variant-numeric:tabular-nums}
+.mesa-casino{background:radial-gradient(ellipse at center,#12552b,#0b3a1c);border:10px solid #2a1c10;border-radius:30px;box-shadow:0 0 0 2px #b8962e,0 30px 70px rgba(0,0,0,.7),inset 0 0 50px rgba(0,0,0,.5)}
+.tablero-apuestas{background:rgba(0,0,0,.18);border:1px solid rgba(212,175,55,.5);border-radius:14px}
+.casilla,.btn-externo{border:1px solid rgba(212,175,55,.45)}
+.btn-girar{background:linear-gradient(#e4c25a,#b8921f);border-radius:10px}
+.btn-limpiar{border-radius:10px}
+.btn-volver-menu{background:var(--nx-surface) !important;border:1px solid var(--nx-line) !important;border-radius:10px !important;color:var(--nx-muted) !important}
+@media (max-width:1180px){.mesa-casino{zoom:.84}}
+@media (max-width:1020px){.mesa-casino{zoom:.7}}
+@media (max-height:720px){.mesa-casino{zoom:.8}}
+</style>
+</head>
+<body>
+
+    <!-- Barra Superior -->
+    <div class="barra-superior">
+        <div class="info-estado" id="info-estado">¡Coloca tus fichas en la mesa y gira!</div>
+        <div class="caja-saldo-chips">
+            <button class="btn-reset-monedas" onclick="resetearMonedas()">🎁 1000 Monedas</button>
+            <div class="selector-fichas">
+                <button class="btn-ficha ficha-10 activo" onclick="seleccionarFicha(10, 10, this)">10</button>
+                <button class="btn-ficha ficha-25" onclick="seleccionarFicha(25, 25, this)">25</button>
+                <button class="btn-ficha ficha-50" onclick="seleccionarFicha(50, 50, this)">50</button>
+                <button class="btn-ficha ficha-100" onclick="seleccionarFicha(100, 100, this)">100</button>
+            </div>
+            <div class="saldo-container">
+                <span>Saldo</span>
+                <strong id="saldo-actual">$1000</strong>
+            </div>
+        </div>
+    </div>
+
+    <!-- Botón volver al menú -->
+    <a href="../index.html" class="btn-volver-menu">Volver al Menú</a>
+
+    <!-- Contenedor del Juego -->
+    <div class="contenedor-juego">
+        <div class="mesa-casino">
+            
+            <!-- Rueda Grande y Fluida -->
+            <div class="rueda-container">
+                <div class="indicador"></div>
+                <div class="rueda" id="rueda">
+                    <div class="centro-rueda"></div>
+                </div>
+            </div>
+
+            <!-- Tablero de Apuestas -->
+            <div class="tablero-apuestas">
+                <div class="grid-numeros" id="grid-numeros">
+                    <div class="casilla verde casilla-especial" onclick="apostar('0')">0</div>
+                    <div class="casilla verde casilla-especial" onclick="apostar('00')">00</div>
+                </div>
+
+                <div class="apuestas-externas">
+                    <div class="btn-externo" style="grid-column: span 2;" onclick="apostar('1st12')">1ª DOCENA</div>
+                    <div class="btn-externo" style="grid-column: span 2;" onclick="apostar('2nd12')">2ª DOCENA</div>
+                    <div class="btn-externo" style="grid-column: span 2;" onclick="apostar('3rd12')">3ª DOCENA</div>
+                    
+                    <div class="btn-externo" onclick="apostar('1-18')">1-18</div>
+                    <div class="btn-externo" onclick="apostar('par')">PAR</div>
+                    <div class="btn-externo" style="background:#b03a2e;" onclick="apostar('rojo')">🔴</div>
+                    <div class="btn-externo" style="background:#212529;" onclick="apostar('negro')">⚫</div>
+                    <div class="btn-externo" onclick="apostar('impar')">IMPAR</div>
+                    <div class="btn-externo" onclick="apostar('19-36')">19-36</div>
+                </div>
+
+                <div class="controles-ruleta">
+                    <button class="btn-limpiar" onclick="limpiarApuestas()">Borrar Apuestas</button>
+                    <button class="btn-girar" id="btn-girar" onclick="girarRuleta()">¡Girar Ruleta!</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <script>
+        let saldo = parseInt(localStorage.getItem('pachinko_dinero'));
+        if (isNaN(saldo)) {
+            saldo = 1000;
+            localStorage.setItem('pachinko_dinero', saldo);
+        }
+
+        let fichaActualValor = 10;
+        let fichaActualEstilo = 10;
+        let apuestas = {};
+        let totalApostado = 0;
+
+        function actualizarSaldoUI() {
+            document.getElementById('saldo-actual').textContent = `$${saldo}`;
+            localStorage.setItem('pachinko_dinero', saldo);
+        }
+        actualizarSaldoUI();
+
+        function resetearMonedas() {
+            saldo = 1000;
+            actualizarSaldoUI();
+            document.getElementById('info-estado').textContent = "✨ ¡Saldo reseteado a $1000!";
+        }
+
+        function seleccionarFicha(valor, estilo, btn) {
+            fichaActualValor = valor;
+            fichaActualEstilo = estilo;
+            document.querySelectorAll('.btn-ficha').forEach(b => b.classList.remove('activo'));
+            btn.classList.add('activo');
+        }
+
+        const numerosRuleta = [0, 28, 9, 26, 30, 11, 7, 20, 32, 17, 5, 22, 34, 15, 3, 24, 36, 13, 1, '00', 27, 10, 25, 29, 12, 8, 19, 31, 18, 6, 21, 33, 16, 4, 23, 35, 14, 2];
+        const rojos = [1, 3, 5, 7, 9, 12, 14, 16, 18, 19, 21, 23, 25, 27, 30, 32, 34, 36];
+
+        const ruedaEl = document.getElementById('rueda');
+        const totalCasillas = numerosRuleta.length;
+        const anguloPorCasilla = 360 / totalCasillas;
+
+        // Crear sectores usando conic-gradient exacto para que encajen a la perfección con los números
+        numerosRuleta.forEach((num, index) => {
+            let rotacionInicio = index * anguloPorCasilla;
+            let rotacionFin = (index + 1) * anguloPorCasilla;
+            
+            let colorFondo = '#1e1e1e'; // Negro por defecto
+            if (num === 0 || num === '00') {
+                colorFondo = '#27ae60'; // Verde
+            } else if (rojos.includes(Number(num))) {
+                colorFondo = '#c0392b'; // Rojo
+            }
+
+            // Franja de color usando gradiente radial/cónico exacto por sectores
+            let franja = document.createElement('div');
+            franja.style.position = 'absolute';
+            franja.style.width = '100%';
+            franja.style.height = '100%';
+            franja.style.top = '0';
+            franja.style.left = '0';
+            franja.style.borderRadius = '50%';
+            franja.style.background = colorFondo;
+            franja.style.clipPath = `polygon(50% 50%, ${50 + 50 * Math.cos((rotacionInicio - 90) * Math.PI / 180)}% ${50 + 50 * Math.sin((rotacionInicio - 90) * Math.PI / 180)}%, ${50 + 50 * Math.cos((rotacionFin - 90) * Math.PI / 180)}% ${50 + 50 * Math.sin((rotacionFin - 90) * Math.PI / 180)}%)`;
+            ruedaEl.appendChild(franja);
+
+            // Contenedor para el número en negro centrado en su sector
+            let divNum = document.createElement('div');
+            divNum.style.position = 'absolute';
+            divNum.style.width = '100%';
+            divNum.style.height = '100%';
+            divNum.style.top = '0';
+            divNum.style.left = '0';
+            divNum.style.transform = `rotate(${rotacionInicio + (anguloPorCasilla / 2)}deg)`;
+            divNum.style.display = 'flex';
+            divNum.style.justifyContent = 'center';
+            divNum.style.paddingTop = '10px';
+            divNum.style.zIndex = '2';
+
+            let span = document.createElement('span');
+            span.textContent = num;
+            span.style.fontSize = '0.75rem';
+            span.style.fontWeight = '900';
+            span.style.color = '#000000'; // Números en negro nítido
+            span.style.textShadow = '0 0 2px rgba(255,255,255,0.7)'; // Resalte para legibilidad
+
+            divNum.appendChild(span);
+            ruedaEl.appendChild(divNum);
+        });
+
+        const gridNumeros = document.getElementById('grid-numeros');
+        for (let fila = 3; fila >= 1; fila--) {
+            for (let col = 0; col < 12; col++) {
+                let num = col * 3 + fila;
+                let colorClase = rojos.includes(num) ? 'rojo' : 'negro';
+                
+                let div = document.createElement('div');
+                div.className = `casilla ${colorClase}`;
+                div.id = `casilla-${num}`;
+                div.innerHTML = `${num}`;
+                div.onclick = () => apostar(num.toString());
+                gridNumeros.appendChild(div);
+            }
+        }
+
+        function apostar(clave) {
+            if (saldo < fichaActualValor) {
+                document.getElementById('info-estado').textContent = "⚠️ ¡Saldo insuficiente!";
+                return;
+            }
+
+            saldo -= fichaActualValor;
+            totalApostado += fichaActualValor;
+            actualizarSaldoUI();
+
+            if (!apuestas[clave]) {
+                apuestas[clave] = { total: 0, tipo: fichaActualEstilo };
+            }
+            apuestas[clave].total += fichaActualValor;
+            apuestas[clave].tipo = fichaActualEstilo;
+
+            document.getElementById('info-estado').textContent = `Apuesta total en mesa: $${totalApostado}`;
+            actualizarVisualApuestas();
+        }
+
+        function actualizarVisualApuestas() {
+            document.querySelectorAll('.ficha-casino-apuesta').forEach(el => el.remove());
+
+            for (let clave in apuestas) {
+                let elemento = null;
+                if (clave === '0' || clave === '00') {
+                    let especiales = document.querySelectorAll('.casilla-especial');
+                    elemento = clave === '0' ? especiales[0] : especiales[1];
+                } else if (!isNaN(clave)) {
+                    elemento = document.getElementById(`casilla-${clave}`);
+                }
+                
+                if (elemento) {
+                    let datos = apuestas[clave];
+                    let fichaBadge = document.createElement('div');
+                    fichaBadge.className = `ficha-casino-apuesta ficha-${datos.tipo}`;
+                    fichaBadge.textContent = datos.total;
+                    
+                    if(datos.tipo === 100) {
+                        fichaBadge.style.background = '#ff69b4';
+                        fichaBadge.style.borderColor = '#ffffff';
+                    }
+
+                    elemento.appendChild(fichaBadge);
+                }
+            }
+        }
+
+        function limpiarApuestas() {
+            saldo += totalApostado;
+            apuestas = {};
+            totalApostado = 0;
+            actualizarSaldoUI();
+            actualizarVisualApuestas();
+            document.getElementById('info-estado').textContent = "Apuestas borradas. Haz tu jugada.";
+        }
+
+        let rotacionAcumulada = 0;
+
+        function girarRuleta() {
+            if (totalApostado === 0) {
+                document.getElementById('info-estado').textContent = "⚠️ ¡Haz al menos una apuesta para girar!";
+                return;
+            }
+
+            document.getElementById('btn-girar').disabled = true;
+            document.getElementById('info-estado').textContent = "🎲 Girando ruleta...";
+
+            let indiceGanador = Math.floor(Math.random() * numerosRuleta.length);
+            let numeroGanador = numerosRuleta[indiceGanador];
+
+            let gradosPorCasilla = 360 / numerosRuleta.length;
+            let gradosObjetivo = 360 - (indiceGanador * gradosPorCasilla);
+            rotacionAcumulada += 360 * 6 + (gradosObjetivo - (rotacionAcumulada % 360));
+
+            let rueda = document.getElementById('rueda');
+            rueda.style.transform = `rotate(${rotacionAcumulada}deg)`;
+
+            setTimeout(() => {
+                let premio = calcularPremio(numeroGanador);
+                saldo += premio;
+                actualizarSaldoUI();
+
+                if (premio > 0) {
+                    document.getElementById('info-estado').textContent = `🎉 ¡Salió el ${numeroGanador}! Ganaste $${premio}`;
+                } else {
+                    document.getElementById('info-estado').textContent = `❌ Salió el ${numeroGanador}. ¡Más suerte la próxima!`;
+                }
+
+                apuestas = {};
+                totalApostado = 0;
+                actualizarVisualApuestas();
+                document.getElementById('btn-girar').disabled = false;
+            }, 5000);
+        }
+
+        function calcularPremio(ganador) {
+            let gananciasTotal = 0;
+            for (let clave in apuestas) {
+                let monto = apuestas[clave].total;
+                if (clave === ganador.toString()) {
+                    gananciasTotal += monto * 36;
+                } else if (clave === 'rojo' && rojos.includes(Number(ganador))) {
+                    gananciasTotal += monto * 2;
+                } else if (clave === 'negro' && !rojos.includes(Number(ganador)) && ganador !== 0 && ganador !== '00') {
+                    gananciasTotal += monto * 2;
+                } else if (clave === 'par' && ganador !== 0 && ganador !== '00' && Number(ganador) % 2 === 0) {
+                    gananciasTotal += monto * 2;
+                } else if (clave === 'impar' && ganador !== 0 && ganador !== '00' && Number(ganador) % 2 !== 0) {
+                    gananciasTotal += monto * 2;
+                } else if (clave === '1-18' && ganador !== 0 && ganador !== '00' && Number(ganador) <= 18) {
+                    gananciasTotal += monto * 2;
+                } else if (clave === '19-36' && ganador !== 0 && ganador !== '00' && Number(ganador) >= 19) {
+                    gananciasTotal += monto * 2;
+                } else if (clave === '1st12' && Number(ganador) >= 1 && Number(ganador) <= 12) {
+                    gananciasTotal += monto * 3;
+                } else if (clave === '2nd12' && Number(ganador) >= 13 && Number(ganador) <= 24) {
+                    gananciasTotal += monto * 3;
+                } else if (clave === '3rd12' && Number(ganador) >= 25 && Number(ganador) <= 36) {
+                    gananciasTotal += monto * 3;
+                }
+            }
+            return gananciasTotal;
+        }
+    </script>
+</body>
+</html>
