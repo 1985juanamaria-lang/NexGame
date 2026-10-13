@@ -14,7 +14,7 @@ html,body{height:100%;width:100%;overflow:hidden;background:#000;color:#fff;font
 canvas#cv{position:fixed;inset:0;width:100%;height:100%;display:block;touch-action:none}
 button{font-family:inherit;cursor:pointer;touch-action:manipulation;border:0;background:none;color:inherit}
 svg{display:block;overflow:visible}
-.tx{color:#fff;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 3px 0 #000,0 0 6px rgba(0,0,0,.5);letter-spacing:.02em}
+.tx{color:#fff;text-shadow:-.06em -.06em 0 #000,.06em -.06em 0 #000,-.06em .06em 0 #000,.06em .06em 0 #000,0 .09em 0 #000,-.07em 0 0 #000,.07em 0 0 #000,0 0 .14em rgba(0,0,0,.55);letter-spacing:.02em}
 .ty{color:#ffc21a;text-shadow:-2px -2px 0 #000,2px -2px 0 #000,-2px 2px 0 #000,2px 2px 0 #000,0 3px 0 #000}
 .screen{position:fixed;inset:0;display:none;z-index:10}
 .screen.on{display:block}
@@ -34,7 +34,7 @@ svg{display:block;overflow:visible}
 .coinbar svg{width:calc(var(--u)*4.4);height:calc(var(--u)*4.4)}
 /* principal */
 #s-main .xbtn{position:absolute;left:calc(var(--u)*1.5);top:calc(var(--u)*1.2);width:calc(var(--u)*10);height:calc(var(--u)*10);z-index:5}
-#titulo{position:absolute;left:50%;top:15.5%;transform:translate(-50%,-50%);font-family:'Press Start 2P','Arial Black',Impact,monospace;font-size:calc(var(--u)*8.2);white-space:nowrap;text-align:center;line-height:1;color:#000;-webkit-text-stroke:calc(var(--u)*1.7) #000;filter:drop-shadow(0 0 calc(var(--u)*.45) #fff) drop-shadow(0 calc(var(--u)*1) 0 rgba(0,0,0,.55))}
+#titulo{position:absolute;left:50%;top:16%;transform:translate(-50%,-50%);font-family:'Press Start 2P','Arial Black',Impact,monospace;font-size:min(calc(var(--u)*10.6),7.2vw);white-space:nowrap;text-align:center;line-height:1;color:#000;-webkit-text-stroke:calc(var(--u)*2.1) #000;filter:drop-shadow(0 0 calc(var(--u)*.45) #fff) drop-shadow(0 calc(var(--u)*1) 0 rgba(0,0,0,.55))}
 #titulo:after{content:attr(data-t);position:absolute;left:0;top:0;right:0;-webkit-text-stroke:0;background:linear-gradient(#e6ff7a 0 40%,#9be236 40% 64%,#58b013 64%);-webkit-background-clip:text;background-clip:text;color:transparent}
 .pbtn{position:absolute;background:none;padding:0;filter:drop-shadow(calc(var(--u)*.8) calc(var(--u)*1.2) 0 rgba(0,0,0,.35))}
 .pbtn:active{transform:scale(.92)}
@@ -91,6 +91,7 @@ svg{display:block;overflow:visible}
 #cu-modes button{width:calc(var(--u)*9.6);height:calc(var(--u)*9.6);border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#bbb 55%,#7c7c7c);border:calc(var(--u)*.4) solid #222;display:flex;align-items:center;justify-content:center;box-shadow:0 calc(var(--u)*.6) 0 rgba(0,0,0,.35)}
 #cu-modes button.on{background:radial-gradient(circle at 35% 30%,#caffff,#27e0e8 55%,#0a98a8);box-shadow:0 0 0 calc(var(--u)*.4) #fff,0 calc(var(--u)*.6) 0 rgba(0,0,0,.35)}
 #cu-modes canvas{width:70%;height:70%}
+#cu-modes button>svg{width:62%;height:62%}
 #cu-hint{position:absolute;left:50%;top:calc(var(--u)*53.5);transform:translateX(-50%);font-size:calc(var(--u)*3.8);white-space:nowrap;display:flex;gap:calc(var(--u)*1.2);align-items:center}
 #cu-gridw{position:absolute;left:50%;top:calc(var(--u)*58.5);transform:translateX(-50%);background:rgba(0,0,0,.62);border-radius:calc(var(--u)*2.8);padding:calc(var(--u)*2.2);width:min(86vw,calc(var(--u)*118))}
 #cu-grid{display:grid;grid-template-columns:repeat(12,1fr);gap:calc(var(--u)*.9)}
@@ -114,7 +115,7 @@ svg{display:block;overflow:visible}
 .tabs .gb:not(.on){filter:saturate(.3) brightness(.85)}
 #sh-tend{position:absolute;left:calc(var(--u)*17);top:calc(var(--u)*15.5);font-size:calc(var(--u)*3.3);max-width:70vw;font-style:normal}
 #m-sh{flex-direction:row;gap:calc(var(--u)*3);align-items:center}
-#sh-list{position:absolute;left:5%;right:5%;top:calc(var(--u)*23);bottom:calc(var(--u)*3);overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(calc(var(--u)*24),1fr));gap:calc(var(--u)*2);align-content:start;padding:calc(var(--u)*1.5);touch-action:pan-y}
+#sh-list{position:absolute;left:9%;right:9%;top:calc(var(--u)*23);bottom:calc(var(--u)*3);overflow-y:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(calc(var(--u)*24),1fr));gap:calc(var(--u)*2);align-content:start;padding:calc(var(--u)*1.5);touch-action:pan-y}
 .prod{background:rgba(0,0,40,.55);border:calc(var(--u)*.4) solid #fff;border-radius:calc(var(--u)*2);padding:calc(var(--u)*1.6);display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*1);text-align:center;font-size:calc(var(--u)*2.8)}
 .prod canvas{width:calc(var(--u)*13);height:calc(var(--u)*13)}
 .prod .gb{width:100%;font-size:calc(var(--u)*3);padding:calc(var(--u)*.7) 0}
@@ -313,6 +314,15 @@ const SPK = (L, x, y, down) => addTo(L.haz, x, { t: down ? 'spkd' : 'spk', x, y 
 function SAW(L, x, y, r) { const o = { t: 'saw', x, y, r }; for (let c = Math.floor(x - r); c <= Math.floor(x + r); c++) addTo(L.haz, c, o); }
 function IT(L, o) { o.id = L.nid++; L.items.push(o); addTo(L.itemCol, Math.floor(o.x), o); return o; }
 const CEILRANGE = (L, a, b) => { for (let x = Math.floor(a); x <= Math.ceil(b); x++) L.ceilOn[x] = true; };
+/* portal con pared: bloques desde el suelo hasta el hueco y desde el hueco hasta el techo (2 columnas de grosor),
+   así el único camino es atravesar el portal. Hueco = celdas [y0, y1) */
+function GATE(L, k, x, y0, y1) {
+  for (let c = x - 1; c <= x; c++) {
+    for (let y = 0; y < y0; y++) B(L, c, y);
+    for (let y = y1; y < CEIL; y++) B(L, c, y);
+  }
+  return IT(L, { t: 'port', k, x, y: (y0 + y1) / 2, h: y1 - y0 });
+}
 
 /* patrones de cubo (suelo): cada uno devuelve el ancho que ocupa */
 const PAT = {
@@ -377,18 +387,18 @@ const PTABLE = [
   ['bridge', 2.2, 3], ['pair', 2.4, 2], ['orbs2', 3, 2], ['hop', 3.4, 2], ['saw', 4, 2], ['sawspk', 4.4, 2], ['s4', 5, 2]
 ];
 function cubeSection(L, x0, len, d, r) {
-  const beat = SPD * 60 / (L.bpm || 120), end = x0 + len; let x = x0 + 12, prev = null;
-  while (x < end - 14) {
+  const beat = SPD * 60 / (L.bpm || 120), end = x0 + len; let x = x0 + 10, prev = null;
+  while (x < end - 12) {
     const dl = d + ((x - x0) / len) * 0.9;
     let pick, seed, gap;
-    if (prev && r() < 0.34) { pick = prev.pick; seed = prev.seed; gap = prev.gap; }
+    if (prev && r() < 0.4) { pick = prev.pick; seed = prev.seed; gap = prev.gap; }
     else {
       const cand = PTABLE.filter(p => p[1] <= dl && !(prev && p[0] === prev.pick && p[0][0] !== 's'));
       let tot = 0; cand.forEach(p => tot += p[2]); let t = r() * tot; pick = cand[0][0];
       for (const p of cand) { t -= p[2]; if (t <= 0) { pick = p[0]; break; } }
       seed = Math.floor(r() * 1e9);
-      const gb = dl < 2 ? [2, 2.5, 3] : dl < 4 ? [1.5, 2, 2.5] : [1.25, 1.5, 2];
-      gap = Math.max(dl < 4 ? 7 : 6, Math.round(beat * gb[Math.floor(r() * gb.length)]));
+      const gb = dl < 2 ? [1.6, 2, 2.4] : dl < 4 ? [1.2, 1.6, 2] : [1, 1.25, 1.6];
+      gap = Math.max(dl < 2 ? 7 : dl < 4 ? 6 : 5, Math.round(beat * gb[Math.floor(r() * gb.length)]));
     }
     const used = PAT[pick](L, x, rngS(seed), dl);
     prev = { pick, seed, gap }; x += used + gap;
@@ -416,9 +426,9 @@ function flightSection(L, x0, len, d, r, kind) {
   }
   const cAt = k => { const kk = Math.max(0, k - ramp); let a = pts[0], b = pts[pts.length - 1]; for (let j = 0; j < pts.length - 1; j++) if (kk >= pts[j][0] && kk <= pts[j + 1][0]) { a = pts[j]; b = pts[j + 1]; break; } if (kk >= pts[pts.length - 1][0]) return pts[pts.length - 1][1]; return a[1] + (b[1] - a[1]) * (kk - a[0]) / Math.max(1, b[0] - a[0]); };
   const gAt = k => { const e = Math.min(k, len - k); return e >= ramp ? g : CEIL - (CEIL - g) * (e / ramp); };
-  corridor(L, x0, len, k => k < ramp ? 4.5 : (len - k < ramp ? cAt(len - ramp) : cAt(k)), gAt);
-  for (let k = ramp + 6; k < len - ramp - 6; k += 9 + Math.floor(r() * 6)) {
-    if (d >= 3 && r() < 0.5) { const cc = cAt(k), fl = Math.max(0, Math.round(cc - g / 2)); const sl = Math.abs(cAt(k + 2) - cAt(k - 2)); if (sl < 0.5) { SPK(L, x0 + k, fl, false); } }
+  corridor(L, x0, len, k => k < ramp ? 4.5 : (len - k < ramp ? 5 + (cAt(len - ramp) - 5) * ((len - k) / ramp) : cAt(k)), gAt);
+  for (let k = ramp + 6; k < len - ramp - 6; k += 7 + Math.floor(r() * 5)) {
+    if (d >= 2.5 && r() < 0.6) { const cc = cAt(k), fl = Math.max(0, Math.round(cc - g / 2)); const sl = Math.abs(cAt(k + 2) - cAt(k - 2)); if (sl < 0.5) { SPK(L, x0 + k, fl, false); } }
   }
   for (let t = 0; t < 2; t++) { const k = Math.floor(len * (0.3 + t * 0.4)); L.coinSpots.push([x0 + k, cAt(k)]); }
   return x0 + len;
@@ -440,44 +450,46 @@ function waveSection(L, x0, len, d, r) {
 }
 function ballSection(L, x0, len, d, r) {
   CEILRANGE(L, x0, x0 + len);
-  let x = x0 + 12, floor = true; const sp = 11 - Math.min(3, d - 1);
+  let x = x0 + 12, floor = true; const sp = 9 - Math.min(3, d - 1);
   while (x < x0 + len - 12) {
     const n = 1 + Math.floor(r() * (d >= 3 ? 2 : 1));
     for (let i = 0; i < n; i++) SPK(L, x + i, floor ? 0 : CEIL - 1, !floor);
     if (r() < 0.25) L.coinSpots.push([x, CEIL / 2]);
-    x += n + sp + Math.floor(r() * 3); floor = !floor;
+    x += n + sp + Math.floor(r() * 2); floor = !floor;
   }
   return x0 + len;
 }
 function gravSection(L, x0, len, d, r) {
   CEILRANGE(L, x0, x0 + len);
-  let x = x0 + 10, up = false; IT(L, { t: 'port', k: 'gdn', x: x0 + 2, y: 2 });
-  while (x < x0 + len - 22) {
-    IT(L, { t: 'port', k: up ? 'gdn' : 'gup', x, y: up ? CEIL - 3 : 3 });
-    const sx = x + 10, n = 1 + Math.floor(r() * (d >= 3 ? 3 : 2));
+  let x = x0 + 10, up = false; GATE(L, 'gdn', x0 + 2, 0, 3);
+  while (x < x0 + len - 20) {
+    if (up) GATE(L, 'gdn', x, CEIL - 3, CEIL); else GATE(L, 'gup', x, 0, 3);
+    const sx = x + 9, n = 1 + Math.floor(r() * (d >= 3 ? 3 : 2));
     for (let i = 0; i < n; i++) SPK(L, sx + i, up ? CEIL - 1 : 0, up);
     // al revés: cuando up=false vamos hacia arriba, la superficie "suelo" es el techo
-    x = sx + n + 8 + Math.floor(r() * 4); up = !up;
+    x = sx + n + 7 + Math.floor(r() * 3); up = !up;
   }
-  IT(L, { t: 'port', k: 'gdn', x: x0 + len - 6, y: CEIL / 2 });
+  if (up) GATE(L, 'gdn', x0 + len - 6, CEIL - 3, CEIL); else GATE(L, 'gdn', x0 + len - 6, 0, 3);
   return x0 + len;
 }
 /* orden: portal de modo -> sección -> portal a cubo */
 function buildLevel(def) {
   const r = rngS(def.seed), L = newLevel(); L.bpm = def.bpm; let x = 0;
+  const D = def.d + (def.d >= 3 ? 0.9 : 0.5); /* niveles más exigentes que la dificultad mostrada */
   for (const [kind, len] of def.secs) {
-    if (kind === 'cube') { cubeSection(L, x, len, def.d, r); x += len; continue; }
-    x += 6;
-    const midY = kind === 'wave' || kind === 'ship' || kind === 'ufo' ? 4.5 : 2;
-    IT(L, { t: 'port', k: kind === 'grav' ? 'cube' : kind, x: x + 1, y: midY });
+    if (kind === 'cube') { cubeSection(L, x, len, D, r); x += len; continue; }
+    x += 5;
+    /* portal de entrada: el jugador va por el suelo, hueco en [0,3) */
+    GATE(L, kind === 'grav' ? 'cube' : kind, x + 1, 0, 3);
     let e;
-    if (kind === 'ship' || kind === 'ufo') e = flightSection(L, x + 4, len, def.d, r, kind);
-    else if (kind === 'wave') e = waveSection(L, x + 4, len, def.d, r);
-    else if (kind === 'ball') { IT(L, { t: 'port', k: 'ball', x: x + 1, y: 2 }); e = ballSection(L, x + 4, len, def.d, r); }
-    else e = gravSection(L, x + 4, len, def.d, r);
-    IT(L, { t: 'port', k: 'cube', x: e + 2, y: kind === 'ball' || kind === 'grav' ? CEIL / 2 : 4.5 });
+    if (kind === 'ship' || kind === 'ufo') e = flightSection(L, x + 4, len, D, r, kind);
+    else if (kind === 'wave') e = waveSection(L, x + 4, len, D, r);
+    else if (kind === 'ball') e = ballSection(L, x + 4, len, D, r);
+    else e = gravSection(L, x + 4, len, D, r);
+    /* portal de salida: en pasillos de vuelo hueco central [3,7); con bola/gravedad se sale por el suelo [0,3) */
+    if (kind === 'ball' || kind === 'grav') GATE(L, 'cube', e + 2, 0, 3); else GATE(L, 'cube', e + 2, 3, 7);
     if (kind === 'ball' || kind === 'grav') { /* mantener techo unos bloques tras salir */ CEILRANGE(L, e, e + 4); }
-    x = e + 10;
+    x = e + 8;
   }
   if (def.speedPorts) def.speedPorts.forEach(([px, s]) => IT(L, { t: 'port', k: 's' + s, x: px, y: 2 }));
   // monedas: 3 repartidas por tercios
@@ -507,7 +519,7 @@ function buildSongLevel(times, dur, seed) {
 }
 
 /* ---------- física ---------- */
-function newPlayer() { return { x: 0, y: 0.45, vy: 0, mode: 'cube', grav: 1, spd: 1, og: true, rot: 0, dead: false, done: false, prev: false, buf: 0, used: [], coins: [false, false, false], t: 0, jumped: false }; }
+function newPlayer() { return { x: 0, y: 0.45, vy: 0, mode: 'cube', grav: 1, spd: 1, og: true, rot: 0, dead: false, done: false, prev: false, buf: 0, used: [], coins: [false, false, false], t: 0, jumped: false, wg: 0 }; }
 function clonePlayer(P) { const q = Object.assign({}, P); q.used = P.used.slice(); q.coins = P.coins.slice(); return q; }
 function solidAt(L, cx, y0, y1) { const a = L.cells.get(cx); if (!a) return null; for (let i = 0; i < a.length; i++) { const cy = a[i]; if (cy < y1 - 1e-4 && cy + 1 > y0 + 1e-4) return cy; } return null; }
 const isFlip = k => k === 'gup' || k === 'gdn';
@@ -516,7 +528,7 @@ function stepP(L, P, dt, hold, ev) {
   const press = hold && !P.prev; P.prev = hold;
   if (press) P.buf = 0.13; else P.buf = Math.max(0, P.buf - dt);
   const v = SPD * (SPEEDS[P.spd] || 1), hs = P.mode === 'wave' ? 0.2 : 0.45, hh = P.mode === 'wave' ? 0.13 : 0.28;
-  const ox = P.x; P.x += v * dt; P.t += dt;
+  const ox = P.x; P.x += v * dt; P.t += dt; if (P.wg > 0) P.wg -= dt;
   // objetos
   for (let c = Math.floor(ox - 1.2); c <= Math.floor(P.x + 1.2); c++) {
     const arr = L.itemCol.get(c); if (!arr) continue;
@@ -527,7 +539,7 @@ function stepP(L, P, dt, hold, ev) {
           const k = it.k;
           if (k === 'gup') P.grav = -1; else if (k === 'gdn') P.grav = 1;
           else if (/^s\d$/.test(k)) P.spd = +k[1];
-          else { if (P.mode !== k) { P.mode = k; if (k === 'wave') P.vy = 0; if (k === 'ball') P.vy = 0; } }
+          else { if (P.mode !== k) { P.mode = k; if (k === 'wave') { P.vy = 0; P.wg = 0.22; } if (k === 'ball') P.vy = 0; } }
           if (ev) ev('port', it);
         }
       } else if (it.t === 'coin') {
@@ -576,6 +588,12 @@ function stepP(L, P, dt, hold, ev) {
   }
   // movimiento vertical
   P.y += P.vy * dt;
+  /* la onda MUERE al tocar suelo, techo o cualquier bloque (salvo unos instantes tras entrar por el portal) */
+  if (m === 'wave' && P.wg <= 0) {
+    let bad = P.y - hs < 0 || (L.ceilOn[Math.floor(P.x)] && P.y + hs > CEIL);
+    for (let c = Math.floor(P.x - hs); !bad && c <= Math.floor(P.x + hs - 1e-4); c++) if (solidAt(L, c, P.y - hs, P.y + hs) !== null) bad = true;
+    if (bad) { P.dead = true; if (ev) ev('die'); return; }
+  }
   let landed = false;
   const hit = (dir, edge) => { // dir=-1 abajo, 1 arriba
     if (dir < 0) { P.y = edge + hs; if (P.vy < 0) P.vy = 0; if (P.grav === 1) landed = true; }
@@ -630,18 +648,18 @@ function solveLevel(L, W, sub) {
 }
 
 const LEVELS = [
- { id: 'l1', n: 'Primer Salto', d: 1, st: 1, seed: 1229, bpm: 120, hue: 215, secs: [['cube', 460]] },
- { id: 'l2', n: 'Neón Básico', d: 1, st: 2, seed: 2875, bpm: 124, hue: 290, secs: [['cube', 190], ['ship', 150], ['cube', 170]] },
- { id: 'l3', n: 'Ciudad Eléctrica', d: 2, st: 3, seed: 3966, bpm: 128, hue: 160, secs: [['cube', 180], ['ship', 140], ['ball', 120], ['cube', 150]] },
- { id: 'l4', n: 'Pulso', d: 2, st: 4, seed: 4502, bpm: 130, hue: 25, secs: [['cube', 170], ['ufo', 140], ['cube', 140], ['ship', 130]] },
- { id: 'l5', n: 'Cruce Cósmico', d: 3, st: 5, seed: 5460, bpm: 132, hue: 260, secs: [['cube', 150], ['grav', 160], ['ship', 140], ['cube', 150]] },
- { id: 'l6', n: 'Ritmo Vertical', d: 3, st: 6, seed: 6840, bpm: 136, hue: 340, secs: [['cube', 100], ['ball', 130], ['grav', 150], ['cube', 140], ['ufo', 130]] },
- { id: 'l7', n: 'Onda Letal', d: 4, st: 7, seed: 7665, bpm: 140, hue: 130, secs: [['cube', 140], ['wave', 140], ['cube', 120], ['ship', 130], ['wave', 130]] },
- { id: 'l8', n: 'Fábrica Hexa', d: 4, st: 8, seed: 8912, bpm: 144, hue: 45, secs: [['cube', 120], ['ufo', 120], ['wave', 120], ['ball', 120], ['cube', 120]] },
- { id: 'l9', n: 'Abismo Digital', d: 5, st: 9, seed: 9604, bpm: 148, hue: 280, secs: [['cube', 120], ['grav', 140], ['wave', 130], ['ship', 120], ['cube', 120]] },
- { id: 'l10', n: 'Núcleo', d: 5, st: 10, seed: 10718, bpm: 152, hue: 190, secs: [['ball', 120], ['wave', 130], ['ufo', 120], ['grav', 130], ['cube', 130]] },
- { id: 'l11', n: 'Tormenta Solar', d: 6, st: 10, seed: 11277, bpm: 156, hue: 15, secs: [['cube', 110], ['wave', 140], ['ship', 120], ['ball', 120], ['wave', 130], ['cube', 110]] },
- { id: 'l12', n: 'Infierno Final', d: 6, st: 10, seed: 12258, bpm: 160, hue: 0, secs: [['cube', 110], ['grav', 130], ['wave', 150], ['ufo', 120], ['ball', 120], ['ship', 120], ['wave', 150], ['cube', 110]] }
+ { id: 'l1', n: 'Primer Salto', d: 1, st: 1, seed: 1229, bpm: 120, hue: 215, secs: [['cube', 400]] },
+ { id: 'l2', n: 'Neón Básico', d: 1, st: 2, seed: 2875, bpm: 124, hue: 290, secs: [['cube', 165], ['ship', 131], ['cube', 148]] },
+ { id: 'l3', n: 'Ciudad Eléctrica', d: 2, st: 3, seed: 3966, bpm: 128, hue: 160, secs: [['cube', 157], ['ship', 122], ['ball', 104], ['cube', 131]] },
+ { id: 'l4', n: 'Pulso', d: 2, st: 4, seed: 4502, bpm: 130, hue: 25, secs: [['cube', 148], ['ufo', 122], ['cube', 122], ['ship', 113]] },
+ { id: 'l5', n: 'Cruce Cósmico', d: 3, st: 5, seed: 5460, bpm: 132, hue: 260, secs: [['cube', 131], ['grav', 139], ['ship', 122], ['cube', 131]] },
+ { id: 'l6', n: 'Ritmo Vertical', d: 3, st: 6, seed: 6840, bpm: 136, hue: 340, secs: [['cube', 90], ['ball', 113], ['grav', 131], ['cube', 122], ['ufo', 113]] },
+ { id: 'l7', n: 'Onda Letal', d: 4, st: 7, seed: 7665, bpm: 140, hue: 130, secs: [['cube', 122], ['wave', 122], ['cube', 104], ['ship', 113], ['wave', 113]] },
+ { id: 'l8', n: 'Fábrica Hexa', d: 4, st: 8, seed: 8912, bpm: 144, hue: 45, secs: [['cube', 104], ['ufo', 104], ['wave', 104], ['ball', 104], ['cube', 104]] },
+ { id: 'l9', n: 'Abismo Digital', d: 5, st: 9, seed: 9604, bpm: 148, hue: 280, secs: [['cube', 104], ['grav', 122], ['wave', 113], ['ship', 104], ['cube', 104]] },
+ { id: 'l10', n: 'Núcleo', d: 5, st: 10, seed: 10718, bpm: 152, hue: 190, secs: [['ball', 104], ['wave', 113], ['ufo', 104], ['grav', 113], ['cube', 113]] },
+ { id: 'l11', n: 'Tormenta Solar', d: 6, st: 10, seed: 11277, bpm: 156, hue: 15, secs: [['cube', 96], ['wave', 122], ['ship', 104], ['ball', 104], ['wave', 113], ['cube', 96]] },
+ { id: 'l12', n: 'Infierno Final', d: 6, st: 10, seed: 12258, bpm: 160, hue: 0, secs: [['cube', 96], ['grav', 113], ['wave', 131], ['ufo', 104], ['ball', 104], ['ship', 104], ['wave', 131], ['cube', 96]] }
 ];
 
 /* ================= Utilidades ================= */
@@ -1048,6 +1066,50 @@ function actualizar(dt) {
 /* ================= Render ================= */
 const CPORT = { cube: '#3cff6a', ship: '#ff5ad2', ball: '#ff9a2e', ufo: '#ffe14d', wave: '#3ec9ff', gup: '#ffd24c', gdn: '#4f8bff', s0: '#4ffff0', s1: '#ffe14d', s2: '#ff7a3c', s3: '#ff3c8b' };
 const lbl = { cube: '■', ship: '🚀', ball: '●', ufo: '◆', wave: '◣', gup: '↑', gdn: '↓' };
+const PNAME = { cube: 'CUBO', ship: 'NAVE', ball: 'BOLA', ufo: 'OVNI', wave: 'ONDA', gup: 'GRAVEDAD ↑', gdn: 'GRAVEDAD ↓' };
+/* portal: anillo con el icono del modo dentro, borde de color en la pared y cartel con el nombre.
+   front=true dibuja solo el arco delantero (por encima del jugador) */
+function portalDraw(it, front) {
+  const col = CPORT[it.k] || '#fff', h = it.h || 3.2, x = wx(it.x), y = wy(it.y), rx = sc * 0.52, ry = h / 2 * sc;
+  if (x < -sc * 3 || x > W + sc * 3) return;
+  g.save(); g.translate(x, y); g.lineJoin = 'round';
+  if (front) {
+    g.beginPath(); g.ellipse(0, 0, rx, ry, 0, Math.PI / 2, Math.PI * 1.5);
+    g.lineWidth = Math.max(5, sc * 0.2); g.strokeStyle = '#000'; g.stroke();
+    g.lineWidth = Math.max(3, sc * 0.11); g.strokeStyle = col; g.shadowColor = col; g.shadowBlur = 12; g.stroke(); g.restore(); return;
+  }
+  const top = it.y + h / 2, bot = it.y - h / 2;
+  /* borde de color del hueco en la pared (2 columnas) */
+  g.fillStyle = col; g.shadowColor = col; g.shadowBlur = 10;
+  const tw = sc * 2, tx = -sc;
+  if (top < CEIL - 0.01) g.fillRect(tx, -ry - 4, tw, 8);
+  if (bot > 0.01) g.fillRect(tx, ry - 4, tw, 8);
+  g.shadowBlur = 0;
+  /* interior */
+  g.save(); g.beginPath(); g.ellipse(0, 0, rx, ry, 0, 0, 7); g.clip();
+  const gr = g.createRadialGradient(0, 0, 0, 0, 0, ry); gr.addColorStop(0, '#fff'); gr.addColorStop(0.35, col); gr.addColorStop(1, 'rgba(0,0,0,.65)');
+  g.globalAlpha = 0.55; g.fillStyle = gr; g.fillRect(-rx, -ry, rx * 2, ry * 2); g.globalAlpha = 0.5; g.strokeStyle = '#fff'; g.lineWidth = Math.max(1.5, sc * 0.05);
+  for (let i = 0; i < 5; i++) { const yy = (((bgT * 0.9 + i / 5) % 1) * 2 - 1) * ry; g.beginPath(); g.moveTo(-rx, yy); g.quadraticCurveTo(0, yy + sc * 0.25, rx, yy); g.stroke(); }
+  g.restore();
+  /* icono del modo / flechas de gravedad */
+  g.globalAlpha = 1;
+  if (it.k === 'gup' || it.k === 'gdn') {
+    const dir = it.k === 'gup' ? -1 : 1; g.strokeStyle = '#000'; g.lineWidth = sc * 0.2; g.lineCap = 'round';
+    for (let pass = 0; pass < 2; pass++) for (let i = -1; i <= 1; i++) { const a = 0.45 + 0.55 * Math.max(0, Math.sin(bgT * 6 - i * dir * 1.3)); const yy = i * sc * 0.55; g.globalAlpha = pass ? a : 1; g.strokeStyle = pass ? '#fff' : '#000'; g.lineWidth = pass ? sc * 0.1 : sc * 0.22; g.beginPath(); g.moveTo(-rx * 0.7, yy - dir * sc * 0.18); g.lineTo(0, yy + dir * sc * 0.18); g.lineTo(rx * 0.7, yy - dir * sc * 0.18); g.stroke(); }
+    g.globalAlpha = 1;
+  } else if (MODOS.some(m => m[0] === it.k)) {
+    const sz = sc * (it.k === 'wave' ? 0.62 : 0.8); g.save(); g.shadowColor = '#000'; g.shadowBlur = 6; drawIcon(g, it.k, 0, '#fff', col, sz); g.restore();
+  } else { g.fillStyle = '#fff'; g.font = `800 ${sc * 0.5}px sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText('»'.repeat((+it.k[1] || 0) + 1), 0, 0); }
+  /* anillo */
+  g.beginPath(); g.ellipse(0, 0, rx, ry, 0, 0, 7); g.lineWidth = Math.max(6, sc * 0.24); g.strokeStyle = '#000'; g.stroke();
+  g.lineWidth = Math.max(4, sc * 0.13); g.strokeStyle = col; g.shadowColor = col; g.shadowBlur = 18; g.stroke(); g.shadowBlur = 0;
+  /* cartel con el nombre, sobre la pared (o debajo del hueco si el hueco toca el techo) */
+  const name = PNAME[it.k]; if (name) {
+    const below = top >= CEIL - 0.01, ty = below ? ry + sc * 0.9 : -ry - sc * 0.9;
+    g.font = `400 ${sc * 0.46}px 'Lilita One',Impact,sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.lineWidth = sc * 0.16; g.strokeStyle = '#000'; g.fillStyle = col; g.strokeText(name, 0, ty); g.fillText(name, 0, ty);
+  }
+  g.restore();
+}
 function wx(x) { return (x - camX) * sc; }
 function wy(y) { return H - (y - camY) * sc; }
 function hash2(a, b) { let h = (a * 374761393 + b * 668265263) | 0; h = (h ^ (h >>> 13)) * 1274126177 | 0; return ((h ^ (h >>> 16)) >>> 0) / 4294967296; }
@@ -1108,8 +1170,7 @@ function dibujarMundo() {
     for (const it of arr) {
       const x = wx(it.x + (it.t === 'pad' ? 0.5 : 0)), y = wy(it.y);
       if (it.t === 'port') {
-        const col = CPORT[it.k] || '#fff'; g.save(); g.translate(x, y); g.strokeStyle = col; g.shadowColor = col; g.shadowBlur = 18; g.lineWidth = 4;
-        g.beginPath(); g.ellipse(0, 0, sc * 0.42, sc * 1.6, 0, 0, 7); g.stroke(); g.globalAlpha = 0.2 + 0.1 * Math.sin(bgT * 5); g.fillStyle = col; g.fill(); g.globalAlpha = 1; g.shadowBlur = 0; g.fillStyle = '#fff'; g.font = `800 ${sc * 0.5}px sans-serif`; g.textAlign = 'center'; g.textBaseline = 'middle'; g.fillText(/^s\d$/.test(it.k) ? '»'.repeat(+it.k[1] + 1) : (lbl[it.k] || ''), 0, 0); g.restore();
+        portalDraw(it, false);
       } else if (it.t === 'orb') {
         const col = it.c === 'y' ? '#ffe14d' : it.c === 'p' ? '#ff5ad2' : '#4fd0ff', pu = 1 + Math.sin(bgT * 6) * 0.08;
         g.save(); g.translate(x, y); g.strokeStyle = col; g.shadowColor = col; g.shadowBlur = 16; g.lineWidth = 3; g.beginPath(); g.arc(0, 0, sc * 0.55 * pu, 0, 7); g.stroke(); g.fillStyle = col; g.globalAlpha = 0.9; g.beginPath(); g.arc(0, 0, sc * 0.3 * pu, 0, 7); g.fill(); g.restore();
@@ -1143,6 +1204,7 @@ function dibujarMundo() {
     drawIcon(g, m, S.icons[m] || 0, col1, col2, sc * (m === 'wave' ? 0.7 : 0.95)); g.restore();
     if (m === 'ship' || m === 'ufo') { g.save(); g.translate(x, y - (P.grav === 1 ? 1 : -1) * sc * 0.18); drawIcon(g, 'cube', S.icons.cube || 0, col1, col2, sc * 0.4); g.restore(); }
   }
+  for (let c = c0 - 1; c <= c1; c++) { const arr = LV.itemCol.get(c); if (arr) for (const it of arr) if (it.t === 'port') portalDraw(it, true); }
   if (S.fx.part) for (const p of particulas) {
     g.globalAlpha = clamp(p.life / p.max, 0, 1); g.fillStyle = p.col; const x = wx(p.x), y = wy(p.y), s = p.s * sc;
     if (p.t === 1) { g.strokeStyle = p.col; g.lineWidth = 3; g.beginPath(); g.arc(x, y, s * (2 + (1 - p.life / p.max) * 4), 0, 7); g.stroke(); }
@@ -1159,9 +1221,9 @@ function actualizarCam(dt) {
 }
 const MT = {
   main: { a: '#ee0ed8', b: '#8a0079', tile: 'rgba(120,0,110,.35)', gl: 0.715, g1: '#7b0a78', g2: '#35003a', line: '#ffc0f8' },
-  blue: { a: '#2f6bff', b: '#0000c4', tile: 'rgba(0,0,120,.28)', corners: true },
+  blue: { a: '#2f6bff', b: '#0000c4', tile: 'rgba(0,0,120,.28)', corners: true, bridge: true },
   gray: { a: '#bdbdbd', b: '#6f6f6f', tile: 'rgba(0,0,0,.08)', corners: true },
-  chest: { a: '#7a3cff', b: '#2a0a9a', tile: 'rgba(20,0,100,.3)', corners: true }
+  chest: { a: '#7a3cff', b: '#2a0a9a', tile: 'rgba(20,0,100,.3)', corners: true, bridge: true }
 };
 let menuTheme = MT.main;
 function gdBlock(x, y, w, h, cyan) {
@@ -1184,7 +1246,7 @@ function dibujarMenu(dt) {
       const dir = sx ? -1 : 1, bx = sx ? W : 0;
       [[4, 0], [2, 1], [1, 2]].forEach(([n, ci]) => { for (let k = 0; k < n; k++) { const x = bx + dir * ci * u - (sx ? u : 0), y = H - (k + 1) * u; gdBlock(x, y, u, u, (k + ci) % 2 === 0); } });
     }
-    const tw = W * 0.52, tx = (W - tw) / 2; gdBlock(tx, -4, tw * 0.4, u * 1.05, false); gdBlock(tx + tw * 0.6, -4, tw * 0.4, u * 1.05, false); gdBlock(tx + tw * 0.4, -4, tw * 0.2, u * 1.45, true);
+    if (T.bridge) { const tw = W * 0.52, tx = (W - tw) / 2; gdBlock(tx, -4, tw * 0.4, u * 1.05, false); gdBlock(tx + tw * 0.6, -4, tw * 0.4, u * 1.05, false); gdBlock(tx + tw * 0.4, -4, tw * 0.2, u * 1.45, true); }
   }
 }
 function render(dt) {
@@ -1215,7 +1277,7 @@ const SV = {
   info: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="44" fill="url(#gB)" stroke="#000" stroke-width="7"/><circle cx="50" cy="50" r="44" fill="none" stroke="#fff" stroke-width="3.5"/><circle cx="50" cy="28" r="6.5" fill="#fff"/><rect x="43.5" y="40" width="13" height="34" rx="3" fill="#fff"/></svg>`,
   round: inner => `<svg viewBox="0 0 100 100"><circle cx="50" cy="52" r="46" fill="rgba(0,0,0,.35)"/><circle cx="50" cy="50" r="46" fill="url(#gG)" stroke="#000" stroke-width="6"/><circle cx="50" cy="50" r="46" fill="none" stroke="#fff" stroke-width="3.5"/>${inner}</svg>`,
   x: `<svg viewBox="0 0 100 100"><circle cx="50" cy="50" r="46" fill="url(#gG)" stroke="#000" stroke-width="7"/><circle cx="50" cy="50" r="46" fill="none" stroke="#fff" stroke-width="3"/><path d="M28 28L72 72M72 28L28 72" stroke="#000" stroke-width="18" stroke-linecap="round"/><path d="M28 28L72 72M72 28L28 72" stroke="#ffc800" stroke-width="11" stroke-linecap="round"/></svg>`,
-  plus: inner => `<svg viewBox="-6 -6 112 112" stroke-linejoin="round">${[[2, 2], [68, 2], [2, 68], [68, 68]].map(([x, y]) => `<rect x="${x}" y="${y}" width="30" height="30" rx="3" fill="url(#gC)" stroke="#000" stroke-width="5"/><rect x="${x}" y="${y}" width="30" height="30" rx="3" fill="none" stroke="#fff" stroke-width="2"/>`).join('')}<path d="M34 0H66V34H100V66H66V100H34V66H0V34H34Z" fill="url(#gG)" stroke="#fff" stroke-width="12"/><path d="M34 0H66V34H100V66H66V100H34V66H0V34H34Z" fill="url(#gG)" stroke="#000" stroke-width="5"/><path d="M38 6H62V30H38z" fill="#fff" opacity=".25"/>${inner}</svg>`,
+  plus: inner => `<svg viewBox="-6 -6 112 112" stroke-linejoin="round">${[[2, 2], [68, 2], [2, 68], [68, 68]].map(([x, y]) => `<rect x="${x}" y="${y}" width="30" height="30" rx="3" fill="#fff" stroke="#fff" stroke-width="12"/>`).join('')}<path d="M34 0H66V34H100V66H66V100H34V66H0V34H34Z" fill="#fff" stroke="#fff" stroke-width="12"/><path d="M34 0H66V34H100V66H66V100H34V66H0V34H34Z" fill="url(#gG)" stroke="#000" stroke-width="5"/><path d="M38 6H62V30H38z" fill="#fff" opacity=".25"/>${[[2, 2], [68, 2], [2, 68], [68, 68]].map(([x, y]) => `<rect x="${x}" y="${y}" width="30" height="30" rx="3" fill="url(#gC)" stroke="#000" stroke-width="4"/><path d="M${x + 4} ${y + 4}h22v7h-22z" fill="#fff" opacity=".3"/>`).join('')}${inner}</svg>`,
   face(di) {
     const c = DIFC[di], br = di >= 3, hr = di === 5;
     return `<svg viewBox="0 0 100 100"><defs><radialGradient id="fg${di}" cx=".4" cy=".3" r=".8"><stop offset="0" stop-color="#fff" stop-opacity=".8"/><stop offset=".35" stop-color="${c}"/><stop offset="1" stop-color="${c}" stop-opacity=".75"/></radialGradient></defs>${hr ? '<path d="M14 36L4 4l32 18zM86 36L96 4 64 22z" fill="#fff" stroke="#000" stroke-width="6" stroke-linejoin="round"/>' : ''}<circle cx="50" cy="52" r="42" fill="${c}" stroke="#000" stroke-width="7"/><circle cx="50" cy="52" r="42" fill="url(#fg${di})"/>
