@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<title>Block Blast - NexGame</title>
+<style>
+:root{--cs:40px}
+*{box-sizing:border-box;margin:0;padding:0;user-select:none;-webkit-user-select:none;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;overflow:hidden;background:radial-gradient(circle at 50% 0,#2a3270,#0d1030 70%);color:#fff;font-family:'Trebuchet MS','Segoe UI',Tahoma,sans-serif;touch-action:none;overscroll-behavior:none}
+#app{height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:calc(var(--cs)*.35);padding:env(safe-area-inset-top,0) 8px env(safe-area-inset-bottom,0)}
+#top{width:calc(var(--cs)*8 + 26px);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.btn{background:linear-gradient(#4b5bd6,#2b34a0);border:2px solid #0a0e2a;box-shadow:0 3px 0 #0a0e2a;color:#fff;font-weight:900;padding:8px 14px;border-radius:10px;font-size:.95rem;text-decoration:none;cursor:pointer;font-family:inherit}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #0a0e2a}
+.stat{text-align:center;line-height:1.1}
+.stat small{display:block;font-size:.7rem;color:#9aa4e6;letter-spacing:.1em}
+.stat b{font-size:clamp(1.4rem,5vh,2.2rem)}
+#msg{height:calc(var(--cs)*.8);font-weight:900;font-size:clamp(1rem,3.4vh,1.5rem);color:#ffd93d;text-shadow:0 2px 0 #000;opacity:0;transition:opacity .25s}
+#msg.on{opacity:1}
+#board{display:grid;grid-template-columns:repeat(8,var(--cs));gap:2px;padding:6px;background:#161b45;border:3px solid #3a44a0;border-radius:14px;position:relative}
+.c{width:var(--cs);height:var(--cs);background:#222a62;border-radius:calc(var(--cs)*.16)}
+.c.f{box-shadow:inset 0 calc(var(--cs)*.1) 0 rgba(255,255,255,.35),inset 0 calc(var(--cs)*-.1) 0 rgba(0,0,0,.25)}
+.c.pv{opacity:.55;box-shadow:inset 0 0 0 2px #fff}
+.c.lp{outline:2px solid #ffd93d;outline-offset:-2px}
+.c.clr{background:#fff!important;transform:scale(.8);transition:transform .2s,background .2s}
+#tray{display:flex;gap:6px;justify-content:center;width:calc(var(--cs)*8 + 26px)}
+.slot{flex:1;height:calc(var(--cs)*3.3);display:flex;align-items:center;justify-content:center;background:rgba(255,255,255,.05);border-radius:14px;cursor:grab}
+.pc{display:grid;gap:2px;pointer-events:none}
+.pc i{display:block;border-radius:22%;box-shadow:inset 0 3px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(0,0,0,.25)}
+.ghost{position:fixed;z-index:50;pointer-events:none;display:grid;gap:2px;filter:drop-shadow(0 6px 8px rgba(0,0,0,.5))}
+.ghost i{display:block;border-radius:22%;box-shadow:inset 0 3px 0 rgba(255,255,255,.35),inset 0 -3px 0 rgba(0,0,0,.25)}
+#over{position:fixed;inset:0;z-index:80;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:rgba(5,6,24,.82);text-align:center}
+#over.on{display:flex}
+#over h2{font-size:2.4rem;text-shadow:0 3px 0 #000}
+#over .big{font-size:3rem;font-weight:900;color:#ffd93d}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="top">
+    <a class="btn" href="../index.html">← Menú</a>
+    <div class="stat"><small>PUNTOS</small><b id="sc">0</b></div>
+    <div class="stat"><small>RÉCORD</small><b id="bs">0</b></div>
+    <button class="btn" id="nw">Nueva</button>
+  </div>
+  <div id="msg"></div>
+  <div id="board"></div>
+  <div id="tray"></div>
+</div>
+<div id="over"><h2>¡Sin movimientos!</h2><div>Puntos</div><div class="big" id="ov-s">0</div><div id="ov-b"></div><button class="btn" id="ov-r" style="font-size:1.2rem;padding:12px 28px">Jugar otra vez</button></div>
+<script>
+(() => {
+'use strict';
+const N = 8, KEY = 'nexgame_blockblast_best';
+const COLS = ['#ff4d6d', '#ff9f1c', '#ffd93d', '#4ade80', '#38bdf8', '#a78bfa', '#f472b6'];
+const BASE = [['1'], ['11'], ['111'], ['1111'], ['11111'], ['11', '11'], ['111', '111', '111'], ['111', '111'], ['10', '11'], ['100', '100', '111'], ['111', '010'], ['011', '110'], ['110', '011']];
+const rot = cs => { const r = cs.map(([x, y]) => [-y, x]), mx = Math.min(...r.map(c => c[0])), my = Math.min(...r.map(c => c[1])); return r.map(([x, y]) => [x - mx, y - my]); };
+const SHAPES = [];
+BASE.forEach(rows => {
+  let c = []; rows.forEach((row, y) => [...row].forEach((v, x) => { if (v === '1') c.push([x, y]); }));
+  const seen = new Set();
+  for (let i = 0; i < 4; i++) { const k = c.map(a => a.join()).sort().join('|'); if (!seen.has(k)) { seen.add(k); SHAPES.push(c); } c = rot(c); }
+});
+const $ = id => document.getElementById(id), board = $('board'), tray = $('tray');
+let cs = 40, grid, pieces, score, combo, over, busy, best = +localStorage.getItem(KEY) || 0, drag = null;
+const cells = [];
+for (let i = 0; i < N * N; i++) { const d = document.createElement('div'); d.className = 'c'; board.appendChild(d); cells.push(d); }
+
+/* sonido */
+let AC = null;
+function beep(f, d, t, v) { try { AC = AC || new (window.AudioContext || window.webkitAudioContext)(); const o = AC.createOscillator(), g = AC.createGain(), n = AC.currentTime; o.type = t || 'triangle'; o.frequency.value = f; g.gain.setValueAtTime(v || .15, n); g.gain.exponentialRampToValueAtTime(.001, n + d); o.connect(g); g.connect(AC.destination); o.start(n); o.stop(n + d); } catch (e) {} }
+
+function size() { cs = Math.floor(Math.min(innerWidth * 0.94 - 26, innerHeight * 0.52) / N); cs = Math.max(26, Math.min(cs, 64)); document.documentElement.style.setProperty('--cs', cs + 'px'); }
+addEventListener('resize', () => { size(); drawTray(); });
+
+const dims = cs => ({ w: Math.max(...cs.map(c => c[0])) + 1, h: Math.max(...cs.map(c => c[1])) + 1 });
+function newPiece() { const cl = SHAPES[Math.floor(Math.random() * SHAPES.length)]; return { cells: cl, color: COLS[Math.floor(Math.random() * COLS.length)], ...dims(cl) }; }
+const fits = (p, ox, oy) => p.cells.every(([x, y]) => { const gx = ox + x, gy = oy + y; return gx >= 0 && gy >= 0 && gx < N && gy < N && !grid[gy][gx]; });
+const canPlace = p => { for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) if (fits(p, x, y)) return true; return false; };
+
+function newSet() {
+  let s;
+  for (let t = 0; t < 40; t++) { s = [newPiece(), newPiece(), newPiece()]; if (s.some(canPlace)) break; }
+  pieces = s; drawTray();
+}
+function drawTray() {
+  tray.innerHTML = '';
+  pieces.forEach((p, i) => {
+    const slot = document.createElement('div'); slot.className = 'slot'; slot.dataset.i = i;
+    if (p) { const m = Math.max(1, Math.floor(cs * 0.55)); slot.appendChild(mini(p, m)); }
+    tray.appendChild(slot);
+  });
+}
+function mini(p, m) {
+  const d = document.createElement('div'); d.className = 'pc'; d.style.gridTemplateColumns = `repeat(${p.w},${m}px)`; d.style.gridTemplateRows = `repeat(${p.h},${m}px)`;
+  for (let y = 0; y < p.h; y++) for (let x = 0; x < p.w; x++) { const i = document.createElement('i'); if (p.cells.some(c => c[0] === x && c[1] === y)) i.style.background = p.color; else i.style.visibility = 'hidden'; d.appendChild(i); }
+  return d;
+}
+function render() {
+  for (let y = 0; y < N; y++) for (let x = 0; x < N; x++) { const e = cells[y * N + x], v = grid[y][x]; e.className = 'c' + (v ? ' f' : ''); e.style.background = v || ''; }
+  $('sc').textContent = score; $('bs').textContent = best;
+}
+function say(t) { const m = $('msg'); m.textContent = t; m.classList.add('on'); clearTimeout(say.t); say.t = setTimeout(() => m.classList.remove('on'), 1100); }
+
+function start() {
+  grid = Array.from({ length: N }, () => Array(N).fill(null)); score = 0; combo = 0; over = false; busy = false;
+  $('over').classList.remove('on'); newSet(); render(); say('¡Rellena filas y columnas!');
+}
+function place(p, ox, oy, idx) {
+  busy = true; p.cells.forEach(([x, y]) => grid[oy + y][ox + x] = p.color); score += p.cells.length; pieces[idx] = null; beep(330, .08);
+  const rows = [], colsF = [];
+  for (let i = 0; i < N; i++) { if (grid[i].every(Boolean)) rows.push(i); if (grid.every(r => r[i])) colsF.push(i); }
+  const lines = rows.length + colsF.length;
+  render();
+  const done = () => { busy = false; if (pieces.every(q => !q)) newSet(); else drawTray(); if (pieces.some(q => q && canPlace(q)) === false) finish(); };
+  if (!lines) { combo = 0; done(); return; }
+  combo++;
+  const set = new Set(); rows.forEach(r => { for (let x = 0; x < N; x++) set.add(r * N + x); }); colsF.forEach(c => { for (let y = 0; y < N; y++) set.add(y * N + c); });
+  set.forEach(i => cells[i].classList.add('clr'));
+  const gain = Math.round(10 * lines * lines * (1 + (combo - 1) * 0.25)); score += gain;
+  say((lines > 1 ? lines + ' líneas · ' : '') + '+' + gain + (combo > 1 ? ' · Combo x' + combo : '')); beep(520 + lines * 90, .25, 'square', .12); if (lines > 1) setTimeout(() => beep(780 + lines * 90, .3, 'square', .1), 90);
+  setTimeout(() => { set.forEach(i => { grid[Math.floor(i / N)][i % N] = null; }); render(); done(); }, 230);
+  drawTray();
+}
+function finish() {
+  over = true; if (score > best) { best = score; try { localStorage.setItem(KEY, best); } catch (e) {} $('ov-b').textContent = '¡Nuevo récord!'; } else $('ov-b').textContent = 'Récord: ' + best;
+  render(); $('ov-s').textContent = score; setTimeout(() => $('over').classList.add('on'), 350); beep(180, .5, 'sawtooth', .15);
+}
+
+/* arrastrar y soltar */
+function target(e) {
+  const r = cells[0].getBoundingClientRect(), step = cs + 2, lift = e.pointerType === 'mouse' ? cs * 0.4 : cs * 1.9;
+  const left = e.clientX - drag.p.w * cs / 2, top = e.clientY - drag.p.h * cs / 2 - lift;
+  drag.g.style.left = left + 'px'; drag.g.style.top = top + 'px';
+  return [Math.round((left - r.left) / step), Math.round((top - r.top) / step)];
+}
+function preview(ox, oy) {
+  cells.forEach(c => c.classList.remove('pv', 'lp')); cells.forEach(c => { if (!c.classList.contains('f')) c.style.background = ''; });
+  drag.ok = fits(drag.p, ox, oy); drag.ox = ox; drag.oy = oy;
+  if (!drag.ok) return;
+  drag.p.cells.forEach(([x, y]) => { const c = cells[(oy + y) * N + ox + x]; c.classList.add('pv'); c.style.background = drag.p.color; });
+  /* resalta líneas que se completarían */
+  const tmp = grid.map(r => r.slice()); drag.p.cells.forEach(([x, y]) => tmp[oy + y][ox + x] = 1);
+  for (let i = 0; i < N; i++) {
+    if (tmp[i].every(Boolean)) for (let x = 0; x < N; x++) cells[i * N + x].classList.add('lp');
+    if (tmp.every(r => r[i])) for (let y = 0; y < N; y++) cells[y * N + i].classList.add('lp');
+  }
+}
+tray.addEventListener('pointerdown', e => {
+  const slot = e.target.closest('.slot'); if (!slot || over || busy || drag) return;
+  const idx = +slot.dataset.i, p = pieces[idx]; if (!p) return; e.preventDefault();
+  const g = document.createElement('div'); g.className = 'ghost'; g.style.gridTemplateColumns = `repeat(${p.w},${cs}px)`; g.style.gridTemplateRows = `repeat(${p.h},${cs}px)`;
+  for (let y = 0; y < p.h; y++) for (let x = 0; x < p.w; x++) { const i = document.createElement('i'); if (p.cells.some(c => c[0] === x && c[1] === y)) i.style.background = p.color; else i.style.visibility = 'hidden'; g.appendChild(i); }
+  document.body.appendChild(g); slot.firstChild.style.opacity = .25;
+  drag = { idx, p, g, slot, ok: false, id: e.pointerId }; const [ox, oy] = target(e); preview(ox, oy); beep(440, .04, 'sine', .08);
+});
+addEventListener('pointermove', e => { if (!drag || e.pointerId !== drag.id) return; e.preventDefault(); const [ox, oy] = target(e); preview(ox, oy); }, { passive: false });
+const drop = e => {
+  if (!drag || e.pointerId !== drag.id) return;
+  const d = drag; drag = null; d.g.remove(); cells.forEach(c => c.classList.remove('pv', 'lp'));
+  if (d.ok) place(d.p, d.ox, d.oy, d.idx); else { render(); if (d.slot.firstChild) d.slot.firstChild.style.opacity = 1; }
+};
+addEventListener('pointerup', drop); addEventListener('pointercancel', drop);
+document.addEventListener('contextmenu', e => e.preventDefault());
+document.addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+$('nw').onclick = start; $('ov-r').onclick = start;
+size(); start();
+})();
+</script>
+</body>
+</html>
