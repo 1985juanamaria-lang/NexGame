@@ -171,6 +171,10 @@ body{background:radial-gradient(circle at 50% 0,#151a26 0,#080a10 70%) !importan
             ¡Selecciona tu apuesta y baja la palanca!
         </div>
         <div class="flex items-center gap-6">
+            <!-- Reset Button -->
+            <button onclick="resetearMonedas()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold px-3 py-2 rounded-xl text-xs transition tracking-wide shadow">
+                🎁 1000 Monedas
+            </button>
             <!-- Chip Selector -->
             <div class="flex gap-2">
                 <button class="chip chip-10 active" onclick="setChip(10, this)">10</button>
@@ -266,6 +270,15 @@ body{background:radial-gradient(circle at 50% 0,#151a26 0,#080a10 70%) !importan
             localStorage.setItem('pachinko_dinero', saldo);
         }
         updateBalanceUI();
+
+        function resetearMonedas() {
+            if (isSpinning) return;
+            saldo = 1000;
+            updateBalanceUI();
+            const statusEl = document.getElementById('info-estado');
+            statusEl.textContent = "✨ ¡Saldo reseteado a $1000!";
+            statusEl.className = "font-orbitron text-sm font-bold text-emerald-400 tracking-wide text-center sm:text-left";
+        }
 
         function setChip(value, btnElement) {
             if (isSpinning) return;

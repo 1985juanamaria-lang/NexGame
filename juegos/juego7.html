@@ -218,6 +218,13 @@
         .btn-volver:hover {
             background-color: #555;
         }
+
+        .btn-monedas {
+            background-color: #27ae60;
+        }
+        .btn-monedas:hover {
+            background-color: #219653;
+        }
     </style>
 <style id="nexgame-theme">
 /* ===== NexGame · tema común ===== */
@@ -280,6 +287,7 @@ body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !imp
         </div>
 
         <div class="botones">
+            <button class="btn btn-monedas" onclick="resetearMonedas()">🎁 Dar 1000 Monedas</button>
             <a href="../index.html" class="btn btn-volver">Volver al Menú</a>
         </div>
     </div>
@@ -315,6 +323,12 @@ body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !imp
             localStorage.setItem('pachinko_dinero', saldo);
         }
         actualizarSaldoUI();
+
+        function resetearMonedas() {
+            saldo = 1000;
+            actualizarSaldoUI();
+            document.getElementById('info-estado').textContent = "✨ ¡Saldo reseteado a $1000!";
+        }
 
         function cambiarApuesta(valor) {
             apuestaActual = valor;

@@ -98,6 +98,22 @@
             border-style: solid;
         }
 
+        /* Botón de reset de monedas */
+        .btn-reset-monedas {
+            background: #27ae60;
+            color: #fff;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .btn-reset-monedas:hover {
+            background: #219653;
+        }
+
         /* Contenedor central de la mesa */
         .contenedor-juego {
             display: flex;
@@ -331,6 +347,7 @@ body{background:radial-gradient(900px 600px at 50% 0,#10241a,transparent 60%),#0
     <div class="barra-superior">
         <div class="info-estado" id="info-estado">¡Coloca tus fichas en la mesa y gira!</div>
         <div class="caja-saldo-chips">
+            <button class="btn-reset-monedas" onclick="resetearMonedas()">🎁 1000 Monedas</button>
             <div class="selector-fichas">
                 <button class="btn-ficha ficha-10 activo" onclick="seleccionarFicha(10, 10, this)">10</button>
                 <button class="btn-ficha ficha-25" onclick="seleccionarFicha(25, 25, this)">25</button>
@@ -405,6 +422,12 @@ body{background:radial-gradient(900px 600px at 50% 0,#10241a,transparent 60%),#0
             localStorage.setItem('pachinko_dinero', saldo);
         }
         actualizarSaldoUI();
+
+        function resetearMonedas() {
+            saldo = 1000;
+            actualizarSaldoUI();
+            document.getElementById('info-estado').textContent = "✨ ¡Saldo reseteado a $1000!";
+        }
 
         function seleccionarFicha(valor, estilo, btn) {
             fichaActualValor = valor;
