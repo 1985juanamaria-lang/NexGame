@@ -274,6 +274,43 @@ canvas{max-width:calc(100vw - 40px);max-height:calc(100vh - 150px);touch-action:
   .btn-volver-menu{bottom:8px;left:8px;padding:6px 12px;font-size:.72rem}
 }
 </style>
+<style id="mejoras">
+body{background:radial-gradient(ellipse at 50% 20%,#2a4a22 0%,#142014 55%,#0a110a 100%);letter-spacing:.2px}
+.juego-wrapper{background:linear-gradient(160deg,#3a4d2f,#26331f);border:1px solid rgba(255,255,255,.08);border-radius:28px;padding:18px 18px 20px;box-shadow:0 30px 70px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.12)}
+.barra-superior{padding:0 6px 14px}
+.score-info-mini{background:rgba(0,0,0,.28);padding:6px 18px 6px 12px;border-radius:40px;box-shadow:inset 0 2px 6px rgba(0,0,0,.35);text-shadow:0 2px 4px rgba(0,0,0,.4);min-width:96px}
+.icono-fruta-mini{filter:drop-shadow(0 2px 3px rgba(0,0,0,.4))}
+.btn-audio{background:rgba(0,0,0,.28);width:42px;height:42px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem;transition:transform .15s,background .2s}
+.btn-audio:hover{transform:scale(1.1);background:rgba(0,0,0,.4)}
+canvas{border-radius:16px;border:4px solid #1c2916;box-shadow:0 0 0 2px rgba(255,255,255,.07),0 8px 24px rgba(0,0,0,.5),inset 0 0 30px rgba(0,0,0,.4)}
+.menu-inicio-overlay{background:linear-gradient(165deg,rgba(38,125,176,.95),rgba(20,80,120,.95));backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.25);border-radius:24px;box-shadow:0 25px 60px rgba(0,0,0,.65),inset 0 1px 0 rgba(255,255,255,.25);animation:aparece .45s cubic-bezier(.2,1.3,.4,1)}
+@keyframes aparece{from{opacity:0;margin-top:30px}to{opacity:1;margin-top:0}}
+.tarjeta-estadisticas{background:rgba(0,0,0,.2);border-radius:16px;padding:14px 0;box-shadow:inset 0 2px 8px rgba(0,0,0,.3)}
+.stat-item span.emoji-stat{filter:drop-shadow(0 3px 4px rgba(0,0,0,.4));animation:flota 2.4s ease-in-out infinite}
+.stat-item:nth-child(2) span.emoji-stat{animation-delay:-1.2s}
+@keyframes flota{50%{transform:translateY(-5px)}}
+.btn-jugar-google{background:linear-gradient(#ffd54a,#f5a623);color:#3a2500;border:none;border-bottom:4px solid #b97a0b;text-shadow:0 1px 0 rgba(255,255,255,.4);letter-spacing:.5px}
+.btn-jugar-google:hover{background:linear-gradient(#ffe070,#ffb733);transform:translateY(-2px)}
+.btn-jugar-google:active{transform:translateY(2px);border-bottom-width:1px}
+.btn-ajustes-google{background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);box-shadow:none}
+.btn-ajustes-google:hover{background:rgba(255,255,255,.28)}
+.select-personalizado{background:linear-gradient(#35452b,#26331f);border:1px solid #5a7048;box-shadow:0 3px 8px rgba(0,0,0,.35)}
+.modal-ajustes{backdrop-filter:blur(5px)}
+.modal-contenido-skin{background:linear-gradient(165deg,#2e3f26,#1c2616);border-radius:22px;border:1px solid rgba(255,255,255,.12)}
+.btn-opcion-grid:hover{transform:translateY(-2px);background:#37472c}
+.btn-opcion-grid.activo{box-shadow:0 0 14px rgba(76,175,80,.5);transform:scale(1.03)}
+.btn-cerrar-modal{background:linear-gradient(#5cc460,#3d9a41);border-bottom:3px solid #2a6e2d}
+.btn-volver-menu{background:rgba(0,0,0,.3);backdrop-filter:blur(4px);border-radius:12px}
+.btn-volver-menu:hover{background:rgba(0,0,0,.5)}
+.serpiente-ilustracion{height:110px;margin-bottom:18px}
+.serpiente-ilustracion svg{overflow:visible;filter:drop-shadow(0 6px 8px rgba(0,0,0,.25));animation:serpMece 3.2s ease-in-out infinite}
+@keyframes serpMece{50%{transform:translateY(-4px) rotate(-1deg)}}
+.lengua{transform-box:fill-box;transform-origin:left center;animation:lenguaje 2.2s infinite}
+@keyframes lenguaje{0%,55%,100%{transform:scaleX(.1);opacity:0}62%,82%{transform:scaleX(1);opacity:1}}
+.ojos{transform-box:fill-box;transform-origin:center;animation:parpadeo 4s infinite}
+@keyframes parpadeo{0%,94%,100%{transform:scaleY(1)}97%{transform:scaleY(.1)}}
+</style>
+
 </head>
 <body>
 
@@ -303,14 +340,30 @@ canvas{max-width:calc(100vw - 40px);max-height:calc(100vh - 150px);touch-action:
             </div>
 
             <div class="serpiente-ilustracion">
-                <svg viewBox="0 0 200 60" width="100%" height="100%">
-                    <path d="M 10,40 Q 100,40 160,40 Q 185,40 185,25 Q 185,10 160,10 L 30,10" fill="none" stroke="#4a8bc2" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"/>
-                    <circle cx="170" cy="18" r="4" fill="white"/>
-                    <circle cx="171" cy="18" r="1.5" fill="black"/>
-                    <circle cx="180" cy="18" r="4" fill="white"/>
-                    <circle cx="181" cy="18" r="1.5" fill="black"/>
-                    <path d="M 168,26 Q 175,31 182,26" fill="none" stroke="black" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
+                <svg viewBox="0 0 260 100" width="100%" height="100%" aria-hidden="true">
+                <defs>
+                    <path id="cuerpo" d="M 16,72 C 52,76 62,34 104,36 C 146,38 150,66 184,64 L 204,64" pathLength="100" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+                    <linearGradient id="gCuerpo" gradientUnits="userSpaceOnUse" x1="16" y1="0" x2="210" y2="0"><stop offset="0" stop-color="#9bd3f7"/><stop offset="1" stop-color="#4f9de0"/></linearGradient>
+                    <radialGradient id="gCabeza" cx=".35" cy=".3" r=".9"><stop offset="0" stop-color="#8fcbf5"/><stop offset=".6" stop-color="#4f9de0"/><stop offset="1" stop-color="#3a7fc4"/></radialGradient>
+                </defs>
+                <g opacity=".3" transform="translate(0,6)"><use href="#cuerpo" stroke="#031c33" stroke-width="15.4" stroke-dasharray="0 0 8.6 200" /><use href="#cuerpo" stroke="#031c33" stroke-width="21.8" stroke-dasharray="0 8 8.6 200" /><use href="#cuerpo" stroke="#031c33" stroke-width="28.0" stroke-dasharray="0 16 84 200" /></g>
+                <use href="#cuerpo" stroke="#1b5a8c" stroke-width="17.6" stroke-dasharray="0 0 8.6 200" /><use href="#cuerpo" stroke="#1b5a8c" stroke-width="25.0" stroke-dasharray="0 8 8.6 200" /><use href="#cuerpo" stroke="#1b5a8c" stroke-width="32.0" stroke-dasharray="0 16 84 200" />
+                <use href="#cuerpo" stroke="url(#gCuerpo)" stroke-width="14.3" stroke-dasharray="0 0 8.6 200" /><use href="#cuerpo" stroke="url(#gCuerpo)" stroke-width="20.3" stroke-dasharray="0 8 8.6 200" /><use href="#cuerpo" stroke="url(#gCuerpo)" stroke-width="26.0" stroke-dasharray="0 16 84 200" />
+                <use href="#cuerpo" stroke="#2f78bd" stroke-width="9" stroke-dasharray="0.01 5.2" stroke-dashoffset="-14" opacity=".45" transform="translate(0,0)"/>
+                <use href="#cuerpo" stroke="#fff" stroke-width="5" stroke-dasharray="0 18 82 200" opacity=".35" transform="translate(0,-7)"/>
+                <ellipse cx="210" cy="72" rx="20" ry="4" fill="#031c33" opacity=".3"/>
+                <path class="lengua" d="M 228,65 L 244,65 L 251,60 M 244,65 L 251,70" fill="none" stroke="#e53935" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/>
+                <ellipse cx="212" cy="64" rx="23" ry="19" fill="#1b5a8c"/>
+                <ellipse cx="212" cy="63" rx="21" ry="17.5" fill="url(#gCabeza)"/>
+                <ellipse cx="204" cy="55" rx="9" ry="4" fill="#fff" opacity=".25"/>
+                <circle cx="224" cy="68" r="2" fill="#1b5a8c" opacity=".7"/>
+                <ellipse cx="205" cy="70" rx="4.5" ry="3" fill="#ff8aa0" opacity=".55"/>
+                <g class="ojos">
+                    <circle cx="206" cy="55" r="7" fill="#fff"/><circle cx="208.2" cy="55.5" r="3.8" fill="#111"/><circle cx="209.4" cy="54" r="1.3" fill="#fff"/>
+                    <circle cx="221" cy="55" r="7" fill="#fff"/><circle cx="223.2" cy="55.5" r="3.8" fill="#111"/><circle cx="224.4" cy="54" r="1.3" fill="#fff"/>
+                </g>
+                <path d="M 207,70 Q 217,78 227,70" fill="none" stroke="#12324f" stroke-width="2" stroke-linecap="round"/>
+            </svg>
             </div>
 
             <div class="contenedor-botones-menu">
@@ -514,6 +567,8 @@ canvas{max-width:calc(100vw - 40px);max-height:calc(100vh - 150px);touch-action:
             if (!juegoEnCurso) return;
 
             let delta = tiempoActual - ultimoTiempo;
+            const dtF = Math.min(50, tiempoActual - (window._pf || tiempoActual)); window._pf = tiempoActual;
+            const k = 1 - Math.pow(0.01, dtF / 110);
 
             if (delta >= velocidadMovimiento) {
                 ultimoTiempo = tiempoActual;
@@ -527,8 +582,8 @@ canvas{max-width:calc(100vw - 40px);max-height:calc(100vh - 150px);touch-action:
                 }
                 let target = snake[i];
                 let current = snakeVisual[i];
-                current.x += (target.x - current.x) * 0.4;
-                current.y += (target.y - current.y) * 0.4;
+                current.x += (target.x - current.x) * k;
+                current.y += (target.y - current.y) * k;
             }
 
             dibujarEscenario();
@@ -542,11 +597,11 @@ canvas{max-width:calc(100vw - 40px);max-height:calc(100vh - 150px);touch-action:
             const cabeza = { x: snake[0].x + dx, y: snake[0].y + dy };
             snake.unshift(cabeza);
             // Sincronizamos también el array visual al añadir la cabeza
-            snakeVisual.unshift({ x: cabeza.x, y: cabeza.y });
+            snakeVisual.unshift({ x: snakeVisual[0].x, y: snakeVisual[0].y });
 
             if (cabeza.x === comida.x && cabeza.y === comida.y) {
                 puntuacion += 10;
-                reproducirSonido('comer');
+                reproducirSonido('comer'); crearParticulas(comida.x, comida.y);
                 actualizarEstadisticasUI();
                 generarComida();
             } else {
@@ -557,7 +612,7 @@ canvas{max-width:calc(100vw - 40px);max-height:calc(100vh - 150px);touch-action:
 
             if (verificarGameOver()) {
                 juegoEnCurso = false;
-                reproducirSonido('gameover');
+                reproducirSonido('gameover'); flashMuerte();
 
                 if (puntuacion > records[modoMapa]) {
                     records[modoMapa] = puntuacion;
@@ -569,6 +624,34 @@ canvas{max-width:calc(100vw - 40px);max-height:calc(100vh - 150px);touch-action:
             }
         }
 
+        let particulas = [];
+        let angCabeza = 0;
+        let tAnim = 0;
+
+        function crearParticulas(gx, gy) {
+            const cx = gx * tileSize + tileSize / 2, cy = gy * tileSize + tileSize / 2;
+            const cols_ = ['#fff', '#ffd54a', '#ff8a65', '#aed581'];
+            for (let i = 0; i < 16; i++) {
+                const a = Math.random() * Math.PI * 2, v = 40 + Math.random() * 120;
+                particulas.push({ x: cx, y: cy, vx: Math.cos(a) * v, vy: Math.sin(a) * v, vida: 1, c: cols_[i % 4], r: 2 + Math.random() * 3 });
+            }
+        }
+
+        function hexARgb(h) { return [parseInt(h.slice(1, 3), 16), parseInt(h.slice(3, 5), 16), parseInt(h.slice(5, 7), 16)]; }
+        function mezclar(c1, c2, t) {
+            const a = hexARgb(c1), b = hexARgb(c2);
+            return `rgb(${Math.round(a[0] + (b[0] - a[0]) * t)},${Math.round(a[1] + (b[1] - a[1]) * t)},${Math.round(a[2] + (b[2] - a[2]) * t)})`;
+        }
+        function colorSegmento(i, n) {
+            if (skinSeleccionada === 'arcoiris') return `hsl(${(tAnim * 60 - i * 22) % 360},80%,58%)`;
+            const sk = paletaSkins[skinSeleccionada];
+            return mezclar(sk.cabeza, sk.cuerpo, Math.min(1, i / Math.max(4, n * 0.5)));
+        }
+        function colorCabeza() {
+            if (skinSeleccionada === 'arcoiris') return `hsl(${(tAnim * 60) % 360},80%,50%)`;
+            return paletaSkins[skinSeleccionada].cabeza;
+        }
+
         function dibujarTableroVacio() {
             for (let x = 0; x < cols; x++) {
                 for (let y = 0; y < filas; y++) {
@@ -576,67 +659,136 @@ canvas{max-width:calc(100vw - 40px);max-height:calc(100vh - 150px);touch-action:
                     ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
                 }
             }
+            const g = ctx.createRadialGradient(canvas.width / 2, canvas.height / 2, canvas.width * 0.25, canvas.width / 2, canvas.height / 2, canvas.width * 0.75);
+            g.addColorStop(0, 'rgba(255,255,255,0.08)');
+            g.addColorStop(1, 'rgba(20,50,10,0.28)');
+            ctx.fillStyle = g;
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function dibujarFruta() {
+            const t = tileSize, fx = comida.x * t + t / 2;
+            const bob = Math.sin(tAnim * 4) * t * 0.06;
+            const pulso = 1 + Math.sin(tAnim * 5) * 0.05;
+            const fy = comida.y * t + t / 2 + bob;
+            ctx.save();
+            ctx.fillStyle = 'rgba(0,0,0,0.22)';
+            ctx.beginPath();
+            ctx.ellipse(fx, comida.y * t + t * 0.88, t * 0.3 * (1 - bob / t), t * 0.09, 0, 0, Math.PI * 2);
+            ctx.fill();
+            const gl = ctx.createRadialGradient(fx, fy, 0, fx, fy, t * 0.8);
+            gl.addColorStop(0, 'rgba(255,255,200,0.35)');
+            gl.addColorStop(1, 'rgba(255,255,200,0)');
+            ctx.fillStyle = gl;
+            ctx.fillRect(fx - t, fy - t, t * 2, t * 2);
+            ctx.translate(fx, fy);
+            ctx.scale(pulso, pulso);
+            ctx.font = `${t * 0.8}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(emojiFrutaActual, 0, 1);
+            ctx.restore();
+        }
+
+        function dibujarSerpiente() {
+            const n = snakeVisual.length, t = tileSize;
+            const P = i => [snakeVisual[i].x * t + t / 2, snakeVisual[i].y * t + t / 2];
+            const ancho = i => t * (0.5 + 0.42 * (1 - i / Math.max(n, 6)));
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            // sombra
+            for (let i = n - 1; i >= 1; i--) {
+                const a = P(i), b = P(i - 1);
+                ctx.strokeStyle = 'rgba(0,0,0,0.22)';
+                ctx.lineWidth = ancho(i) + 2;
+                ctx.beginPath(); ctx.moveTo(a[0] + 2, a[1] + 4); ctx.lineTo(b[0] + 2, b[1] + 4); ctx.stroke();
+            }
+            // cuerpo con borde y degradado
+            for (let i = n - 1; i >= 1; i--) {
+                const a = P(i), b = P(i - 1);
+                ctx.strokeStyle = 'rgba(0,0,0,0.28)';
+                ctx.lineWidth = ancho(i) + 3;
+                ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+            }
+            for (let i = n - 1; i >= 1; i--) {
+                const a = P(i), b = P(i - 1);
+                ctx.strokeStyle = colorSegmento(i, n);
+                ctx.lineWidth = ancho(i);
+                ctx.beginPath(); ctx.moveTo(a[0], a[1]); ctx.lineTo(b[0], b[1]); ctx.stroke();
+            }
+            // brillo superior
+            for (let i = n - 1; i >= 1; i--) {
+                const a = P(i), b = P(i - 1);
+                ctx.strokeStyle = 'rgba(255,255,255,0.22)';
+                ctx.lineWidth = ancho(i) * 0.3;
+                ctx.beginPath(); ctx.moveTo(a[0] - 1, a[1] - ancho(i) * 0.2); ctx.lineTo(b[0] - 1, b[1] - ancho(i) * 0.2); ctx.stroke();
+            }
+            // cabeza
+            const [hx, hy] = P(0);
+            const objetivo = Math.atan2(dy, dx);
+            let d = objetivo - angCabeza;
+            d = Math.atan2(Math.sin(d), Math.cos(d));
+            angCabeza += d * 0.25;
+            const rc = t * 0.46;
+            ctx.save();
+            ctx.translate(hx, hy);
+            ctx.rotate(angCabeza);
+            // lengua cuando la fruta esta cerca
+            const dist = Math.hypot(comida.x - snake[0].x, comida.y - snake[0].y);
+            if (dist < 4 && Math.sin(tAnim * 14) > -0.3) {
+                ctx.strokeStyle = '#e53935'; ctx.lineWidth = Math.max(1.5, t * 0.07);
+                ctx.beginPath(); ctx.moveTo(rc * 0.8, 0); ctx.lineTo(rc * 1.5, 0);
+                ctx.lineTo(rc * 1.8, -t * 0.1); ctx.moveTo(rc * 1.5, 0); ctx.lineTo(rc * 1.8, t * 0.1); ctx.stroke();
+            }
+            ctx.fillStyle = 'rgba(0,0,0,0.28)';
+            ctx.beginPath(); ctx.ellipse(1, 2, rc * 1.12, rc * 1.02, 0, 0, Math.PI * 2); ctx.fill();
+            const gh = ctx.createRadialGradient(-rc * 0.3, -rc * 0.35, rc * 0.1, 0, 0, rc * 1.1);
+            gh.addColorStop(0, 'rgba(255,255,255,0.35)');
+            gh.addColorStop(0.4, colorCabeza());
+            gh.addColorStop(1, colorCabeza());
+            ctx.fillStyle = colorCabeza();
+            ctx.beginPath(); ctx.ellipse(0, 0, rc * 1.08, rc, 0, 0, Math.PI * 2); ctx.fill();
+            ctx.fillStyle = gh;
+            ctx.beginPath(); ctx.ellipse(0, 0, rc * 1.08, rc, 0, 0, Math.PI * 2); ctx.fill();
+            // ojos
+            const ex = rc * 0.35, ey = rc * 0.52, er = rc * 0.32;
+            for (const sg of [-1, 1]) {
+                ctx.fillStyle = '#fff';
+                ctx.beginPath(); ctx.arc(ex, ey * sg, er, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#111';
+                ctx.beginPath(); ctx.arc(ex + er * 0.3, ey * sg, er * 0.55, 0, Math.PI * 2); ctx.fill();
+                ctx.fillStyle = '#fff';
+                ctx.beginPath(); ctx.arc(ex + er * 0.45, ey * sg - er * 0.2, er * 0.18, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.restore();
+        }
+
+        function dibujarParticulas() {
+            for (let i = particulas.length - 1; i >= 0; i--) {
+                const p = particulas[i];
+                p.x += p.vx * 0.016; p.y += p.vy * 0.016;
+                p.vx *= 0.94; p.vy *= 0.94; p.vida -= 0.035;
+                if (p.vida <= 0) { particulas.splice(i, 1); continue; }
+                ctx.globalAlpha = p.vida;
+                ctx.fillStyle = p.c;
+                ctx.beginPath(); ctx.arc(p.x, p.y, p.r * p.vida, 0, Math.PI * 2); ctx.fill();
+            }
+            ctx.globalAlpha = 1;
         }
 
         function dibujarEscenario() {
-            for (let x = 0; x < cols; x++) {
-                for (let y = 0; y < filas; y++) {
-                    ctx.fillStyle = (x + y) % 2 === 0 ? '#aad751' : '#a2d149';
-                    ctx.fillRect(x * tileSize, y * tileSize, tileSize, tileSize);
-                }
-            }
-
-            // Fruta
-            let fx = (comida.x * tileSize) + tileSize / 2;
-            let fy = (comida.y * tileSize) + tileSize / 2;
-            ctx.font = `${tileSize * 0.8}px sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(emojiFrutaActual, fx, fy + 1);
-
-            // Serpiente
-            if (skinSeleccionada === 'arcoiris') {
-                for (let i = snakeVisual.length - 1; i >= 0; i--) {
-                    let colorIndex = i % paletaSkins.arcoiris.length;
-                    ctx.fillStyle = paletaSkins.arcoiris[colorIndex];
-                    ctx.strokeStyle = paletaSkins.arcoiris[colorIndex];
-                    dibujarSegmentoVisual(i);
-                }
-            } else {
-                let skin = paletaSkins[skinSeleccionada];
-                ctx.fillStyle = skin.cuerpo;
-                ctx.strokeStyle = skin.cuerpo;
-                ctx.lineWidth = tileSize - 4;
-                ctx.lineCap = 'round';
-                ctx.lineJoin = 'round';
-
-                ctx.beginPath();
-                for (let i = 0; i < snakeVisual.length; i++) {
-                    let px = (snakeVisual[i].x * tileSize) + tileSize / 2;
-                    let py = (snakeVisual[i].y * tileSize) + tileSize / 2;
-                    if (i === 0) ctx.moveTo(px, py);
-                    else ctx.lineTo(px, py);
-                }
-                ctx.stroke();
-
-                let cabezaX = (snakeVisual[0].x * tileSize) + tileSize / 2;
-                let cabezaY = (snakeVisual[0].y * tileSize) + tileSize / 2;
-                ctx.fillStyle = skin.cabeza;
-                ctx.beginPath();
-                ctx.arc(cabezaX, cabezaY, tileSize * 0.42, 0, 2 * Math.PI);
-                ctx.fill();
-            }
+            tAnim += 0.016;
+            dibujarTableroVacio();
+            dibujarFruta();
+            dibujarSerpiente();
+            dibujarParticulas();
         }
 
-        function dibujarSegmentoVisual(i) {
-            ctx.lineWidth = tileSize - 4;
-            ctx.lineCap = 'round';
-            ctx.lineJoin = 'round';
-            ctx.beginPath();
-            let px = (snakeVisual[i].x * tileSize) + tileSize / 2;
-            let py = (snakeVisual[i].y * tileSize) + tileSize / 2;
-            ctx.arc(px, py, (tileSize - 4) / 2, 0, 2 * Math.PI);
-            ctx.fill();
+        function flashMuerte() {
+            dibujarEscenario();
+            ctx.fillStyle = 'rgba(200,30,30,0.35)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+            canvas.animate([{ transform: 'translateX(-8px)' }, { transform: 'translateX(8px)' }, { transform: 'translateX(-5px)' }, { transform: 'translateX(0)' }], { duration: 350 });
         }
 
         function generarComida() {
