@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>2048 - aldGAME</title>
     <style>
         * {
@@ -229,6 +229,24 @@ body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !imp
 .f-128{background:#f5d061;color:#2b2406}.f-256{background:#f0c53f;color:#2b2406}.f-512{background:#e9b923;color:#2b2406}
 .f-1024{background:#6dd3a0;color:#06210f}.f-2048{background:#3ec9ff;color:#04202b}.f-mas{background:#a37bff;color:#fff}
 </style>
+<style id="movil">
+html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
+.contenedor-juego,.tablero-2048{touch-action:none;-webkit-user-select:none;user-select:none}
+@media (max-width:800px), (pointer:coarse) and (max-width:1100px){
+  body{flex-direction:column;height:100vh}
+  .panel-lateral{width:100%;flex:none;flex-direction:row;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-right:0;border-bottom:1px solid #232836}
+  .panel-lateral h2,.seccion-historial{display:none}
+  .panel-lateral > div:first-child{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+  .info-estado{margin:0;padding:6px 8px;font-size:.68rem;flex:1;min-width:0}
+  .puntuacion-contenedor{display:flex;flex-direction:row;margin:0;gap:6px}
+  .caja-puntos{padding:4px 8px}.caja-puntos strong{font-size:1rem}
+  .botones{display:flex;gap:6px;flex:none}.botones .btn{padding:8px 10px;font-size:.72rem;white-space:nowrap;margin:0}
+  .contenedor-juego{padding:8px;gap:8px;min-height:0;flex:1}
+  .tablero-2048{width:min(94vw,calc(100vh - 120px));height:min(94vw,calc(100vh - 120px));padding:8px;gap:8px}
+  .celda-2048{font-size:clamp(1rem,6.5vw,1.8rem)}
+}
+@supports (height:100dvh){@media (max-width:800px), (pointer:coarse) and (max-width:1100px){body{height:100dvh}.tablero-2048{width:min(94vw,calc(100dvh - 120px));height:min(94vw,calc(100dvh - 120px))}}}
+</style>
 </head>
 <body>
 
@@ -236,7 +254,7 @@ body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !imp
     <div class="panel-lateral">
         <div>
             <h2>Juego 2048</h2>
-            <div class="info-estado" id="info-estado">Usa las flechas para mover</div>
+            <div class="info-estado" id="info-estado">Flechas o desliza el dedo para mover</div>
 
             <div class="puntuacion-contenedor">
                 <div class="caja-puntos">
@@ -347,20 +365,14 @@ body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !imp
             }
         }
 
-        // Control mediante teclado
-        document.addEventListener('keydown', (e) => {
+        // Control mediante teclado y táctil (deslizar el dedo)
+        function intentarMover(dir) {
             if (juegoTerminado) return;
             let movido = false;
-
-            if (e.key === "ArrowLeft") {
-                movido = moverIzquierda();
-            } else if (e.key === "ArrowRight") {
-                movido = moverDerecha();
-            } else if (e.key === "ArrowUp") {
-                movido = moverArriba();
-            } else if (e.key === "ArrowDown") {
-                movido = moverAbajo();
-            }
+            if (dir === 'L') movido = moverIzquierda();
+            else if (dir === 'R') movido = moverDerecha();
+            else if (dir === 'U') movido = moverArriba();
+            else if (dir === 'D') movido = moverAbajo();
 
             if (movido) {
                 agregarNumeroAleatorio();
@@ -372,7 +384,26 @@ body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !imp
                     registrarPartida(puntuacion);
                 }
             }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            const m = { ArrowLeft: 'L', ArrowRight: 'R', ArrowUp: 'U', ArrowDown: 'D' }[e.key];
+            if (m) { e.preventDefault(); intentarMover(m); }
         });
+
+        let swipe2048 = null;
+        document.addEventListener('touchstart', (e) => {
+            if (e.touches.length !== 1 || (e.target.closest && e.target.closest('a,button'))) { swipe2048 = null; return; }
+            swipe2048 = { x: e.touches[0].clientX, y: e.touches[0].clientY };
+        }, { passive: true });
+        document.addEventListener('touchmove', (e) => { if (swipe2048) e.preventDefault(); }, { passive: false });
+        document.addEventListener('touchend', (e) => {
+            if (!swipe2048) return;
+            const t = e.changedTouches[0], dx = t.clientX - swipe2048.x, dy = t.clientY - swipe2048.y;
+            swipe2048 = null;
+            if (Math.max(Math.abs(dx), Math.abs(dy)) < 24) return;
+            intentarMover(Math.abs(dx) > Math.abs(dy) ? (dx > 0 ? 'R' : 'L') : (dy > 0 ? 'D' : 'U'));
+        }, { passive: true });
 
         // Lógica de movimientos de 2048
         function filtrarCeros(fila) {

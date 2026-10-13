@@ -2,7 +2,7 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>Tetris - aldGAME</title>
     <style>
         * {
@@ -200,6 +200,27 @@ body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !imp
 .tablero-tetris{--h:min(calc(100vh - 56px),780px);height:var(--h);width:calc(var(--h) / 2);background:#0d1018;border:1px solid var(--nx-line);border-radius:12px;box-shadow:0 0 0 6px #151925,0 24px 60px rgba(0,0,0,.55);overflow:hidden}
 .celda-tetris{border:1px solid rgba(255,255,255,.035)}
 </style>
+<style id="movil">
+html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none}
+.tablero-tetris{touch-action:none;-webkit-user-select:none;user-select:none}
+.ctl-touch{display:none;gap:10px;width:min(440px,96vw);justify-content:center;flex:none}
+.ctl-touch button{flex:1;height:58px;border-radius:14px;border:1px solid #232836;background:#181c25;color:#fff;font-size:1.6rem;touch-action:none;-webkit-user-select:none;user-select:none}
+.ctl-touch button:active{background:#ff4757}
+@media (pointer:coarse), (max-width:800px){.ctl-touch{display:flex}}
+@media (max-width:800px), (pointer:coarse) and (max-width:1100px){
+  body{flex-direction:column;height:100vh}
+  .panel-lateral{width:100%;flex:none;flex-direction:row;align-items:center;justify-content:space-between;gap:8px;padding:8px 10px;border-right:0;border-bottom:1px solid #232836}
+  .panel-lateral h2,.seccion-historial,.puntuacion-contenedor .caja-puntos:nth-child(2){display:none}
+  .panel-lateral > div:first-child{display:flex;align-items:center;gap:8px;flex:1;min-width:0}
+  .info-estado{margin:0;padding:6px 8px;font-size:.68rem;flex:1;min-width:0}
+  .puntuacion-contenedor{display:flex;flex-direction:row;margin:0;gap:6px}
+  .caja-puntos{padding:4px 8px}.caja-puntos strong{font-size:1rem}
+  .botones{display:flex;gap:6px;flex:none}.botones .btn{padding:8px 10px;font-size:.72rem;white-space:nowrap;margin:0}
+  .contenedor-juego{padding:8px;gap:8px;min-height:0;flex:1}
+  .tablero-tetris{--h:min(calc(100vh - 190px),180vw)}
+}
+@supports (height:100dvh){@media (max-width:800px), (pointer:coarse) and (max-width:1100px){body{height:100dvh}.tablero-tetris{--h:min(calc(100dvh - 190px),180vw)}}}
+</style>
 </head>
 <body>
 
@@ -207,7 +228,7 @@ body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !imp
     <div class="panel-lateral">
         <div>
             <h2>Tetris aldGAME</h2>
-            <div class="info-estado" id="info-estado">¡Usa las flechas para jugar!</div>
+            <div class="info-estado" id="info-estado">¡Flechas o botones táctiles para jugar!</div>
 
             <div class="puntuacion-contenedor">
                 <div class="caja-puntos">
@@ -239,6 +260,12 @@ body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !imp
     <div class="contenedor-juego">
         <div class="tablero-tetris" id="tablero">
             <!-- Celdas generadas por JS (20x10) -->
+        </div>
+        <div class="ctl-touch" id="ctl-touch">
+            <button data-a="L" aria-label="Izquierda">◀</button>
+            <button data-a="ROT" aria-label="Rotar">⟳</button>
+            <button data-a="D" aria-label="Bajar">▼</button>
+            <button data-a="R" aria-label="Derecha">▶</button>
         </div>
     </div>
 
@@ -490,6 +517,38 @@ body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !imp
 
         iniciarJuego();
         actualizarHistorialUI();
+    
+        /* ===== Controles táctiles: botones + gestos sobre el tablero ===== */
+        (function () {
+            const acciones = { L: () => moverLateral(-1), R: () => moverLateral(1), D: () => bajarPieza(), ROT: () => rotarPieza() };
+            document.querySelectorAll('#ctl-touch button').forEach(b => {
+                const tipo = b.dataset.a, fn = acciones[tipo]; let t1 = null, t2 = null;
+                const parar = () => { clearTimeout(t1); clearInterval(t2); t1 = t2 = null; };
+                b.addEventListener('pointerdown', e => {
+                    e.preventDefault(); parar(); fn();
+                    if (tipo !== 'ROT') t1 = setTimeout(() => { t2 = setInterval(fn, tipo === 'D' ? 55 : 85); }, 230);
+                });
+                ['pointerup', 'pointercancel', 'pointerleave'].forEach(ev => b.addEventListener(ev, parar));
+                b.addEventListener('contextmenu', e => e.preventDefault());
+            });
+            // Gestos: arrastrar a los lados = mover, arrastrar abajo = bajar, toque corto = rotar
+            const tb = document.getElementById('tablero'); let g = null;
+            tb.addEventListener('touchstart', e => {
+                e.preventDefault(); if (e.touches.length > 1) return;
+                const t = e.touches[0]; g = { x: t.clientX, y: t.clientY, ax: t.clientX, ay: t.clientY, t: Date.now(), mov: false };
+            }, { passive: false });
+            tb.addEventListener('touchmove', e => {
+                e.preventDefault(); if (!g) return;
+                const t = e.touches[0], w = tb.clientWidth / 10, h = tb.clientHeight / 20;
+                if (Math.abs(t.clientX - g.x) > 10 || Math.abs(t.clientY - g.y) > 10) g.mov = true;
+                while (t.clientX - g.ax >= w) { moverLateral(1); g.ax += w; }
+                while (t.clientX - g.ax <= -w) { moverLateral(-1); g.ax -= w; }
+                while (t.clientY - g.ay >= h * 1.3) { bajarPieza(); g.ay += h * 1.3; }
+            }, { passive: false });
+            tb.addEventListener('touchend', e => { e.preventDefault(); if (g && !g.mov && Date.now() - g.t < 300) rotarPieza(); g = null; }, { passive: false });
+            tb.addEventListener('touchcancel', () => { g = null; });
+            tb.addEventListener('contextmenu', e => e.preventDefault());
+        })();
     </script>
 </body>
 </html>
