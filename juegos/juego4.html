@@ -124,7 +124,7 @@
             gap: 20px;
         }
 
-        /* Tablero 2048 Clásico Estable */
+        /* Tablero 2048 Clásico */
         .tablero-2048 {
             width: 400px;
             height: 400px;
@@ -135,6 +135,7 @@
             grid-template-columns: repeat(4, 1fr);
             grid-template-rows: repeat(4, 1fr);
             gap: 15px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.5);
         }
 
         .celda-2048 {
@@ -145,7 +146,6 @@
             justify-content: center;
             font-size: 1.8rem;
             font-weight: bold;
-            color: #776e65;
             user-select: none;
             transition: transform 0.08s ease-in-out;
         }
@@ -159,19 +159,19 @@
             animation: aparecer 0.12s ease-in-out;
         }
 
-        /* Colores estándar para las fichas */
-        .f-2 { background-color: #eee4da; color: #776e65; }
-        .f-4 { background-color: #ede0c8; color: #776e65; }
-        .f-8 { background-color: #f2b179; color: #f9f6f2; }
-        .f-16 { background-color: #f59563; color: #f9f6f2; }
-        .f-32 { background-color: #f67c5f; color: #f9f6f2; }
-        .f-64 { background-color: #f65e3b; color: #f9f6f2; }
-        .f-128 { background-color: #edcf72; color: #f9f6f2; font-size: 1.5rem; }
-        .f-256 { background-color: #edcc61; color: #f9f6f2; font-size: 1.5rem; }
-        .f-512 { background-color: #edc850; color: #f9f6f2; font-size: 1.5rem; }
-        .f-1024 { background-color: #edc53f; color: #f9f6f2; font-size: 1.2rem; }
-        .f-2048 { background-color: #edc22e; color: #f9f6f2; font-size: 1.2rem; }
-        .f-mas { background-color: #3c3a32; color: #f9f6f2; font-size: 1rem; }
+        /* Colores clásicos originales de las fichas del 2048 */
+        .f-2 { background-color: #eee4da !important; color: #776e65 !important; }
+        .f-4 { background-color: #ede0c8 !important; color: #776e65 !important; }
+        .f-8 { background-color: #f2b179 !important; color: #f9f6f2 !important; }
+        .f-16 { background-color: #f59563 !important; color: #f9f6f2 !important; }
+        .f-32 { background-color: #f67c5f !important; color: #f9f6f2 !important; }
+        .f-64 { background-color: #f65e3b !important; color: #f9f6f2 !important; }
+        .f-128 { background-color: #edcf72 !important; color: #f9f6f2 !important; font-size: 1.5rem; }
+        .f-256 { background-color: #edcc61 !important; color: #f9f6f2 !important; font-size: 1.5rem; }
+        .f-512 { background-color: #edc850 !important; color: #f9f6f2 !important; font-size: 1.5rem; }
+        .f-1024 { background-color: #edc53f !important; color: #f9f6f2 !important; font-size: 1.2rem; }
+        .f-2048 { background-color: #edc22e !important; color: #f9f6f2 !important; font-size: 1.2rem; }
+        .f-mas { background-color: #3c3a32 !important; color: #f9f6f2 !important; font-size: 1rem; }
 
         /* Botones */
         .botones {
@@ -218,8 +218,6 @@ body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !imp
 .btn-volver{background:transparent !important;border:1px solid var(--nx-line) !important;color:var(--nx-muted) !important}
 .btn-volver:hover{border-color:#3a4258 !important;color:var(--nx-text) !important;background:var(--nx-surface2) !important}
 .contenedor-juego{background:radial-gradient(800px 500px at 50% 0%,#141826 0%,transparent 70%)}
-.tablero-2048{width:min(440px,calc(100vh - 80px));height:min(440px,calc(100vh - 80px));background:#161a24;border:1px solid var(--nx-line);border-radius:16px;padding:12px;gap:12px;box-shadow:0 24px 60px rgba(0,0,0,.5)}
-.celda-2048{background:#1d2230;border-radius:10px;color:#d6dbe8;font-weight:800}
 </style>
 <style id="movil">
 html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
@@ -271,9 +269,7 @@ html,body{overscroll-behavior:none;-webkit-tap-highlight-color:transparent}
     </div>
 
     <div class="contenedor-juego">
-        <div class="tablero-2048" id="tablero">
-            <!-- Se generan dinámicamente las 16 celdas -->
-        </div>
+        <div class="tablero-2048" id="tablero"></div>
     </div>
 
     <script>
