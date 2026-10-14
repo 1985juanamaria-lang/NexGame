@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RNG Diario</title>
+<meta name="description" content="Tira un número aleatorio del 0 al 1.000.000 tantas veces como quieras, colecciona insignias y guarda tus 10 mejores tiradas.">
+<style>
+:root{--bg:#0e0f1f;--card:#171936;--card2:#1f2247;--line:#2c3066;--tx:#eceefc;--mut:#9aa0cf;--acc:#7c83ff;
+--trash:#6b7280;--common:#aeb4c8;--uncommon:#4ade80;--rare:#38bdf8;--epic:#a78bfa;--anomaly:#fb7185;--mythic:#fbbf24}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+body{min-height:100vh;background:radial-gradient(900px 500px at 50% -150px,#2a2d6b55,transparent)}
+.wrap{max-width:760px;margin:0 auto;padding:18px 16px 60px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+h1{margin:0;font-size:22px;letter-spacing:.5px}h1 span{color:var(--acc)}
+nav{display:flex;gap:4px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:4px;margin-bottom:18px;overflow-x:auto}
+nav button{flex:1;white-space:nowrap;background:none;border:0;color:var(--mut);padding:9px 12px;border-radius:9px;font:inherit;font-weight:600;cursor:pointer}
+nav button.on{background:var(--acc);color:#fff}
+nav button:focus-visible,.btn:focus-visible{outline:2px solid #fff;outline-offset:2px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:20px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:16px}
+.stat{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;text-align:center}
+.stat b{display:block;font-size:22px}.stat small{color:var(--mut)}
+.roll{text-align:center}
+.date{color:var(--mut);font-size:14px;margin-bottom:6px}
+.num{font:800 clamp(44px,13vw,84px)/1.1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:2px;margin:8px 0;min-height:1.15em;font-variant-numeric:tabular-nums}
+.btn{background:var(--acc);color:#fff;border:0;border-radius:12px;padding:14px 28px;font:700 18px inherit;font-family:inherit;cursor:pointer;transition:transform .1s,filter .15s}
+.btn:hover{filter:brightness(1.1)}.btn:active{transform:scale(.97)}.btn:disabled{opacity:.5;cursor:default}
+.btn.sec{background:var(--card2);border:1px solid var(--line);font-size:15px;padding:10px 18px;font-weight:600}
+.link{background:none;border:0;color:var(--mut);text-decoration:underline;cursor:pointer;font:inherit;font-size:14px;margin-top:12px}
+.tier{display:inline-block;border:2px solid var(--c);color:var(--c);border-radius:999px;padding:4px 16px;font-weight:800;letter-spacing:.6px;text-transform:uppercase;font-size:14px}
+.ep{color:var(--mut);margin:8px 0 14px}.ep b{color:var(--tx)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin:12px 0}
+.chip{display:flex;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--c);border-radius:10px;padding:6px 10px;font-size:14px;font-weight:600}
+.chip i{font-style:normal;font-size:18px}.chip em{font-style:normal;color:var(--c);font-size:12px}
+.chip.new{animation:pop .5s both}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:none;opacity:1}}
+.mythic-glow{animation:glow 1.6s ease-in-out infinite alternate}
+@keyframes glow{from{text-shadow:0 0 6px #fbbf2455}to{text-shadow:0 0 28px #fbbf24}}
+.next{color:var(--mut);font-size:14px;margin-top:14px}
+.newtag{font-size:10px;font-weight:800;background:var(--c);color:#111;border-radius:6px;padding:1px 5px;letter-spacing:.5px}
+.row{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:6px}
+.tog{display:flex;gap:8px;align-items:center;justify-content:center;color:var(--mut);font-size:14px;margin-top:14px;cursor:pointer}
+.note{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:8px 12px;font-size:14px;margin:8px auto;max-width:520px}
+.ico{letter-spacing:2px;font-size:16px}
+.mini{font-size:13px;color:var(--mut)}
+.numbtn{background:none;border:0;color:inherit;font:inherit;font-weight:700;cursor:pointer;padding:2px 0;text-align:left;border-bottom:1px dotted var(--mut)}
+.numbtn:focus-visible{outline:2px solid #fff;outline-offset:3px}
+.numbtn::before{content:"▸ ";color:var(--mut);font-size:12px}.numbtn.open::before{content:"▾ "}
+tr.detail td{background:var(--card2);border-bottom:1px solid var(--line);padding:10px 12px}
+.det{display:grid;grid-template-columns:1fr auto;gap:2px 10px;padding:7px 0;border-bottom:1px solid var(--line);border-left:3px solid var(--c);padding-left:10px;margin-bottom:6px;font-family:system-ui,sans-serif}
+.det:last-child{margin-bottom:0}.det b{font-size:14px}.det em{font-style:normal;color:var(--c);font-weight:700;font-size:13px}.det small{grid-column:1/-1;color:var(--mut);font-size:12px}
+.dtot{font-size:13px;color:var(--mut);margin-bottom:8px;font-family:system-ui,sans-serif}
+.grp{margin:22px 0 8px;font-weight:800;color:var(--c);text-transform:uppercase;font-size:13px;letter-spacing:1px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px}
+.b{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:12px;padding:10px 12px}
+.b.lock{opacity:.45}.b.lock i{filter:grayscale(1)}
+.b h4{margin:0 0 2px;font-size:15px}.b h4 i{font-style:normal;margin-right:6px}
+.b p{margin:0;color:var(--mut);font-size:13px}.b small{color:var(--c);font-size:12px}
+table{width:100%;border-collapse:collapse}td,th{padding:9px 6px;border-bottom:1px solid var(--line);text-align:left;font-size:15px}
+th{color:var(--mut);font-weight:600;font-size:13px}.r{text-align:right}
+td.n{font-family:ui-monospace,Menlo,monospace;font-weight:700}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;background:var(--c);margin-right:6px}
+h2{margin:0 0 10px;font-size:18px}h3{margin:22px 0 8px;font-size:16px}p{margin:0 0 10px}
+.muted{color:var(--mut)}
+input[type=number]{background:var(--card2);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:10px 12px;font:inherit;width:170px}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:#000c;color:#fff;padding:10px 18px;border-radius:999px;font-size:14px;opacity:0;pointer-events:none;transition:opacity .2s}
+.toast.on{opacity:1}
+[data-t=trash]{--c:var(--trash)}[data-t=common]{--c:var(--common)}[data-t=uncommon]{--c:var(--uncommon)}[data-t=rare]{--c:var(--rare)}[data-t=epic]{--c:var(--epic)}[data-t=anomaly]{--c:var(--anomaly)}[data-t=mythic]{--c:var(--mythic)}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+ <header><h1>RNG <span>Diario</span></h1><span class="muted">Tiradas ilimitadas</span></header>
+ <nav id="nav" role="tablist"></nav>
+ <main id="view"></main>
+</div>
+<div class="toast" id="toast" role="status"></div>
+<script>
+const N_MAX=1000000;
+/* --- tablas auxiliares (se calculan una sola vez, la primera vez que hacen falta) --- */
+let _spf=null,_sig=null;
+function SPF(){if(_spf)return _spf;const a=new Int32Array(N_MAX+1);for(let i=2;i<=N_MAX;i++)if(!a[i])for(let j=i;j<=N_MAX;j+=i)if(!a[j])a[j]=i;return _spf=a}
+function SIG(){if(_sig)return _sig;const a=new Int32Array(N_MAX+1);for(let i=1;i<=N_MAX;i++)for(let j=i;j<=N_MAX;j+=i)a[j]+=i;return _sig=a}
+const isPrime=n=>n>=2&&SPF()[n]===n;
+const isSq=n=>{const r=Math.round(Math.sqrt(n));return r*r===n};
+const isCube=n=>{const r=Math.round(Math.cbrt(n));return r*r*r===n};
+const isTri=n=>isSq(8*n+1);
+const SET=a=>new Set(a);
+const FIB=(()=>{const s=new Set([0,1]);let a=1,b=2;while(a<=N_MAX){s.add(a);[a,b]=[b,a+b]}return s})();
+const FACT=SET([1,2,6,24,120,720,5040,40320,362880]);
+const PERFECT=SET([6,28,496,8128]);
+const MERSENNE=SET([3,7,31,127,8191,131071,524287]);
+const CATALAN=SET([1,2,5,14,42,132,429,1430,4862,16796,58786,208012,742900]);
+const LUCAS=SET([1,3,4,7,11,18,29,47,76,123,199,322,521,843,1364,2207,3571,5778,9349,15127,24476,39603,64079,103682,167761,271443,439204,710647]);
+const BELL=SET([2,5,15,52,203,877,4140,21147,115975]);
+const PRIMORIAL=SET([2,6,30,210,2310,30030,510510]);
+const HIGHCOMP=SET([2,4,6,12,24,36,48,60,120,180,240,360,720,840,1260,1680,2520,5040,7560,10080,15120,20160,25200,27720,45360,50400,55440,83160,110880,166320,221760,277200,332640,498960,554400,665280,720720]);
+const SQTRI=SET([36,1225,41616]);
+const HEXWORDS=SET(['dead','beef','cafe','face','babe','f00d','c0de','feed','deed','fade','decaf','bead','bade','dad','bad','ace','add','fee','bee','bed','cab','dab','fab','ebb'].map(w=>parseInt(w,16)));
+const pal=s=>s.length>1&&s===[...s].reverse().join('');
+const dsum=s=>{let t=0;for(const c of s)t+=+c;return t};
+const hasUp=(s,len)=>{for(let i=0;i+len<=s.length;i++)if('0123456789'.includes(s.slice(i,i+len)))return true;return false};
+const hasDown=(s,len)=>{for(let i=0;i+len<=s.length;i++)if('9876543210'.includes(s.slice(i,i+len)))return true;return false};
+const zeros=s=>{let z=0;for(const c of s)if(c==='0')z++;return z};
+function isSemi(n){if(n<4)return false;const p=SPF()[n],m=n/p;return m>1&&SPF()[m]===m}
+function isPrimePower(n){if(n<4)return false;const p=SPF()[n];let m=n;while(m%p===0)m/=p;return m===1&&n!==p}
+function isHappy(n){if(n<2)return false;while(n!==1&&n!==4){let t=0;while(n){const d=n%10;t+=d*d;n=(n-d)/10}n=t}return n===1}
+function isKaprekar(n){if(n<2)return false;const s=String(n*n);for(let i=1;i<s.length;i++){const b=Number(s.slice(i));if(b>0&&Number(s.slice(0,i))+b===n)return true}return false}
+function isAutodiv(n,s){if(s.length<2||s.includes('0'))return false;for(const c of s)if(n%+c!==0)return false;return true}
+function isAbundant(n){return n>=12&&SIG()[n]>2*n}
+const hasEcho=s=>{for(let i=0;i+4<=s.length;i++)if(s[i]===s[i+2]&&s[i+1]===s[i+3]&&s[i]!==s[i+1])return true;return false};
+const hasSand=s=>{for(let i=0;i+3<=s.length;i++)if(s[i]===s[i+2]&&s[i]!==s[i+1])return true;return false};
+const nonDec=s=>{for(let i=1;i<s.length;i++)if(s[i]<s[i-1])return false;return true};
+const nonInc=s=>{for(let i=1;i<s.length;i++)if(s[i]>s[i-1])return false;return true};
+const strictInc=s=>{for(let i=1;i<s.length;i++)if(s[i]<=s[i-1])return false;return true};
+const arith=s=>{if(s.length<4)return false;const d=s.charCodeAt(1)-s.charCodeAt(0);if(d===0)return false;for(let i=2;i<s.length;i++)if(s.charCodeAt(i)-s.charCodeAt(i-1)!==d)return false;return true};
+const altParity=s=>{for(let i=1;i<s.length;i++)if((s[i]-s[i-1])%2===0)return false;return true};
+
+/* --- helpers y conjuntos de la ampliación --- */
+function isPrimeAny(m){if(m<2)return false;if(m<=N_MAX)return SPF()[m]===m;if(m%2===0)return false;for(let i=3;i*i<=m;i+=2)if(m%i===0)return false;return true}
+const rev=s=>[...s].reverse().join('');
+const isEmirp=(n,s)=>{if(!isPrime(n))return false;const r=Number(rev(s));return r!==n&&isPrimeAny(r)};
+const isSophie=n=>isPrime(n)&&isPrimeAny(2*n+1);
+function isCircular(n,s){if(n<2)return false;for(let i=0;i<s.length;i++)if(!isPrimeAny(Number(s.slice(i)+s.slice(0,i))))return false;return true}
+const isPronic=n=>{if(n<2)return false;const k=Math.floor(Math.sqrt(n));return k*(k+1)===n};
+const isPent=n=>{if(n<2)return false;const x=Math.round(Math.sqrt(24*n+1));return x*x===24*n+1&&(x+1)%6===0};
+const isHex=n=>{if(n<2)return false;const x=Math.round(Math.sqrt(8*n+1));return x*x===8*n+1&&(x+1)%4===0};
+const isFourth=n=>{if(n<2)return false;const r=Math.round(Math.pow(n,.25));return r*r*r*r===n};
+const maxFreq=s=>{const c={};let m=0;for(const ch of s){c[ch]=(c[ch]||0)+1;if(c[ch]>m)m=c[ch]}return m};
+const POW10=SET([10,100,1000,10000,100000]);
+const POW3=SET([3,9,27,81,243,729,2187,6561,19683,59049,177147,531441]);
+const POW5=SET([5,25,125,625,3125,15625,78125,390625]);
+const FERMAT=SET([3,5,17,257,65537]);
+const FIBPRIME=SET([2,3,5,13,89,233,1597,28657,514229]);
+const HISTORY=SET([1492,1789,1914,1918,1939,1945,1969,1989]);
+const TIMEN=SET([60,360,365,3600,8760,86400,525600]);
+const NETPORT=SET([21,22,25,53,80,443,3306,8080]);
+const HTTPC=SET([200,201,204,301,302,304,400,401,403,500,502,503]);
+const RESOL=SET([480,720,1080,1440,2160,4320]);
+const BITS=SET([255,256,65535,65536]);
+const MEMEMAX=SET([42069,69420]);
+const KEYPAD=['147','258','369','741','852','963','456','654','789','987','159','951','357','753'];
+const BADGES=[
+/* ===== básicas ===== */
+{id:'even',icon:'⚖️',name:'Par',desc:'Termina en cifra par.',test:n=>n%2===0},
+{id:'lucky7',icon:'🍀',name:'Siete de la suerte',desc:'Contiene al menos un 7.',test:(n,s)=>s.includes('7')},
+{id:'void',icon:'🌫️',name:'Void',desc:'No tiene ningún cero.',test:(n,s)=>!s.includes('0')},
+{id:'unique',icon:'🔣',name:'Cifras únicas',desc:'3 o más cifras y ninguna se repite.',test:(n,s)=>s.length>=3&&new Set(s).size===s.length},
+{id:'prime',icon:'🧮',name:'Primo',desc:'Solo divisible entre 1 y él mismo.',test:n=>isPrime(n)},
+{id:'harshad',icon:'➗',name:'Harshad',desc:'Divisible entre la suma de sus cifras.',test:(n,s)=>n>0&&n%dsum(s)===0},
+{id:'nice',icon:'😏',name:'Nice',desc:'Contiene un 69.',test:(n,s)=>s.includes('69')},
+{id:'trio',icon:'🎰',name:'Trío',desc:'Tres cifras iguales seguidas.',test:(n,s)=>/(\d)\1\1/.test(s)},
+{id:'alleven',icon:'🟦',name:'Todo pares',desc:'Todas sus cifras son pares.',test:(n,s)=>/^[02468]+$/.test(s)},
+{id:'allodd',icon:'🟧',name:'Todo impares',desc:'Todas sus cifras son impares.',test:(n,s)=>/^[13579]+$/.test(s)},
+{id:'twinprime',icon:'👯',name:'Primo gemelo',desc:'Primo con otro primo a distancia 2.',test:n=>isPrime(n)&&(isPrime(n-2)||isPrime(n+2))},
+{id:'round100',icon:'💯',name:'Redondo',desc:'Múltiplo de 100.',test:n=>n>0&&n%100===0},
+{id:'tri',icon:'🔺',name:'Triangular',desc:'Suma 1+2+3+… hasta algún número.',test:n=>n>0&&isTri(n)},
+{id:'up4',icon:'📈',name:'Escalera',desc:'Contiene 4 cifras seguidas en orden ascendente (1234).',test:(n,s)=>hasUp(s,4)},
+{id:'down4',icon:'📉',name:'Cuesta abajo',desc:'Contiene 4 cifras seguidas en orden descendente (4321).',test:(n,s)=>hasDown(s,4)},
+{id:'palin',icon:'🪞',name:'Capicúa',desc:'Se lee igual al derecho y al revés.',test:(n,s)=>n>=10&&pal(s)},
+{id:'square',icon:'🟪',name:'Cuadrado perfecto',desc:'Es el cuadrado de un entero.',test:n=>n>1&&isSq(n)},
+{id:'half',icon:'♊',name:'Mitades gemelas',desc:'Sus dos mitades son idénticas (123123).',test:(n,s)=>s.length>=4&&s.length%2===0&&s.slice(0,s.length/2)===s.slice(s.length/2)},
+{id:'thousand',icon:'🏛️',name:'Millar exacto',desc:'Múltiplo de 1.000.',test:n=>n>0&&n%1000===0},
+{id:'cube',icon:'🧊',name:'Cubo perfecto',desc:'Es el cubo de un entero.',test:n=>n>1&&isCube(n)},
+{id:'pow2',icon:'💾',name:'Potencia de 2',desc:'2, 4, 8, 16… 524288.',test:n=>n>0&&(n&(n-1))===0},
+{id:'fib',icon:'🐚',name:'Fibonacci',desc:'Aparece en la sucesión de Fibonacci.',test:n=>n>1&&FIB.has(n)},
+{id:'repdigit',icon:'🔁',name:'Repdigit',desc:'Todas sus cifras son iguales (2+ cifras).',test:(n,s)=>s.length>1&&/^(\d)\1+$/.test(s)},
+{id:'palprime',icon:'🔮',name:'Primo capicúa',desc:'Primo y capicúa a la vez.',test:(n,s)=>n>=10&&isPrime(n)&&pal(s)},
+{id:'narc',icon:'🪩',name:'Narcisista',desc:'Igual a la suma de sus cifras elevadas al nº de cifras (153).',test:(n,s)=>s.length>=3&&[...s].reduce((a,c)=>a+Math.pow(+c,s.length),0)===n},
+{id:'mersenne',icon:'🧬',name:'Primo de Mersenne',desc:'Primo de la forma 2ⁿ−1.',test:n=>MERSENNE.has(n)},
+{id:'factorial',icon:'❗',name:'Factorial',desc:'Es n! para algún n.',test:n=>FACT.has(n)},
+{id:'perfect',icon:'🏆',name:'Número perfecto',desc:'Igual a la suma de sus divisores propios.',test:n=>PERFECT.has(n)},
+{id:'hundredk',icon:'🌗',name:'Cien mil',desc:'Múltiplo exacto de 100.000.',test:n=>n>0&&n<N_MAX&&n%100000===0},
+{id:'middle',icon:'🎯',name:'Justo en medio',desc:'Exactamente 500.000.',test:n=>n===500000},
+{id:'zero',icon:'🕳️',name:'Cero absoluto',desc:'Sacaste el 0.',test:n=>n===0},
+{id:'million',icon:'👑',name:'El millón',desc:'Sacaste 1.000.000.',test:n=>n===N_MAX},
+/* ===== memes: contiene ===== */
+{id:'blaze',icon:'🌿',name:'Humo',desc:'Contiene un 420.',test:(n,s)=>s.includes('420')},
+{id:'evil',icon:'😈',name:'Maldito',desc:'Contiene un 666.',test:(n,s)=>s.includes('666')},
+{id:'jackpot',icon:'🎲',name:'Jackpot',desc:'Contiene un 777.',test:(n,s)=>s.includes('777')},
+{id:'e404',icon:'🔌',name:'Error 404',desc:'Contiene un 404.',test:(n,s)=>s.includes('404')},
+{id:'pi',icon:'🥧',name:'Pi (dentro)',desc:'Contiene 3141.',test:(n,s)=>s.includes('3141')},
+{id:'leet',icon:'👾',name:'Elite',desc:'Contiene 1337.',test:(n,s)=>s.includes('1337')},
+{id:'has67',icon:'🤷',name:'Six seven (dentro)',desc:'Contiene un 67.',test:(n,s)=>s.includes('67')},
+{id:'has42',icon:'🌌',name:'La respuesta (dentro)',desc:'Contiene un 42.',test:(n,s)=>s.includes('42')},
+{id:'has13',icon:'🐈‍⬛',name:'Mala suerte',desc:'Contiene un 13.',test:(n,s)=>s.includes('13')},
+/* ===== memes y curiosidades: número exacto ===== */
+{id:'x67',icon:'🙌',name:'Six seven',desc:'Exactamente 67.',test:n=>n===67},
+{id:'x42',icon:'🛸',name:'La respuesta',desc:'Exactamente 42.',test:n=>n===42},
+{id:'x69',icon:'😎',name:'Nice de verdad',desc:'Exactamente 69.',test:n=>n===69},
+{id:'x420',icon:'💨',name:'Cuatro-veinte',desc:'Exactamente 420.',test:n=>n===420},
+{id:'x666',icon:'👹',name:'La bestia',desc:'Exactamente 666.',test:n=>n===666},
+{id:'x777',icon:'🎡',name:'Tragaperras',desc:'Exactamente 777.',test:n=>n===777},
+{id:'x1337',icon:'💻',name:'Elite de verdad',desc:'Exactamente 1337.',test:n=>n===1337},
+{id:'x404',icon:'🚫',name:'No encontrado',desc:'Exactamente 404.',test:n=>n===404},
+{id:'x1234',icon:'🔓',name:'Contraseña floja',desc:'Exactamente 1234.',test:n=>n===1234},
+{id:'x123456',icon:'🗝️',name:'Contraseña top',desc:'Exactamente 123456.',test:n=>n===123456},
+{id:'x1729',icon:'🚕',name:'Taxi de Ramanujan',desc:'Exactamente 1729.',test:n=>n===1729},
+{id:'xpi',icon:'🍰',name:'Pi completo',desc:'Exactamente 314159.',test:n=>n===314159},
+{id:'xe',icon:'📐',name:'Número e',desc:'Exactamente 271828.',test:n=>n===271828},
+{id:'xphi',icon:'🌻',name:'Proporción áurea',desc:'Exactamente 161803.',test:n=>n===161803},
+{id:'xsqrt2',icon:'📏',name:'Raíz de dos',desc:'Exactamente 141421.',test:n=>n===141421},
+{id:'xalmost',icon:'😭',name:'Por un pelo',desc:'Exactamente 999.999.',test:n=>n===999999},
+/* ===== por número de cifras ===== */
+{id:'len1',icon:'1️⃣',name:'Un solo dígito',desc:'Un número del 0 al 9.',test:(n,s)=>s.length===1},
+{id:'len2',icon:'2️⃣',name:'Dos dígitos',desc:'Un número del 10 al 99.',test:(n,s)=>s.length===2},
+{id:'len3',icon:'3️⃣',name:'Tres dígitos',desc:'Un número del 100 al 999.',test:(n,s)=>s.length===3},
+{id:'len4',icon:'4️⃣',name:'Cuatro dígitos',desc:'Un número del 1.000 al 9.999.',test:(n,s)=>s.length===4},
+{id:'len5',icon:'5️⃣',name:'Cinco dígitos',desc:'Un número del 10.000 al 99.999.',test:(n,s)=>s.length===5},
+{id:'len6',icon:'6️⃣',name:'Seis dígitos',desc:'Un número del 100.000 al 999.999.',test:(n,s)=>s.length===6},
+/* ===== ceros ===== */
+{id:'doublezero',icon:'⭕',name:'Doble cero',desc:'Contiene dos ceros seguidos.',test:(n,s)=>s.includes('00')},
+{id:'manyzeros',icon:'🥚',name:'Huevera',desc:'Tiene 3 o más ceros.',test:(n,s)=>zeros(s)>=3},
+{id:'binlook',icon:'🤖',name:'Parece binario',desc:'Solo contiene ceros y unos (3+ cifras).',test:(n,s)=>s.length>=3&&/^[01]+$/.test(s)},
+{id:'solo',icon:'☝️',name:'Un solo protagonista',desc:'Una única cifra distinta de cero (300, 70000…).',test:(n,s)=>s.length>=2&&zeros(s)===s.length-1},
+/* ===== patrones de cifras ===== */
+{id:'twins',icon:'🫂',name:'Gemelas',desc:'Tiene dos cifras iguales juntas (55).',test:(n,s)=>/(\d)\1/.test(s)},
+{id:'sandwich',icon:'🥪',name:'Sándwich',desc:'Contiene un patrón ABA (como 727).',test:(n,s)=>hasSand(s)},
+{id:'echo',icon:'📣',name:'Eco',desc:'Contiene un patrón ABAB (como 4545).',test:(n,s)=>hasEcho(s)},
+{id:'bicolor',icon:'🎭',name:'Bicolor',desc:'Solo usa dos cifras distintas (3+ cifras).',test:(n,s)=>s.length>=3&&new Set(s).size===2},
+{id:'bookend',icon:'📚',name:'Sujetalibros',desc:'Empieza y termina por la misma cifra (3+ cifras).',test:(n,s)=>s.length>=3&&s[0]===s[s.length-1]},
+{id:'altparity',icon:'🦓',name:'Cebra',desc:'Alterna par e impar en todas sus cifras (4+ cifras).',test:(n,s)=>s.length>=4&&altParity(s)},
+{id:'high',icon:'🔝',name:'Cifras altas',desc:'Todas sus cifras son 5 o más (3+ cifras).',test:(n,s)=>s.length>=3&&/^[5-9]+$/.test(s)},
+{id:'low',icon:'⬇️',name:'Cifras bajas',desc:'Todas sus cifras son 4 o menos (3+ cifras).',test:(n,s)=>s.length>=3&&/^[0-4]+$/.test(s)},
+{id:'nondec',icon:'🪜',name:'Creciente',desc:'Las cifras nunca bajan de izquierda a derecha (4+ cifras).',test:(n,s)=>s.length>=4&&nonDec(s)},
+{id:'noninc',icon:'🛝',name:'Decreciente',desc:'Las cifras nunca suben de izquierda a derecha (4+ cifras).',test:(n,s)=>s.length>=4&&nonInc(s)},
+{id:'strict',icon:'🧗',name:'Orden perfecto',desc:'Cada cifra es mayor que la anterior (4+ cifras).',test:(n,s)=>s.length>=4&&strictInc(s)},
+{id:'arith',icon:'📊',name:'Progresión',desc:'Las cifras avanzan con paso constante (2468, 97531…).',test:(n,s)=>arith(s)},
+{id:'echo3',icon:'🔊',name:'Triple eco',desc:'Formato ABABAB.',test:(n,s)=>s.length===6&&/^(\d)(\d)\1\2\1\2$/.test(s)&&s[0]!==s[1]},
+{id:'twotrios',icon:'🎳',name:'Dos tríos',desc:'Formato AAABBB.',test:(n,s)=>s.length===6&&/^(\d)\1\1(\d)\2\2$/.test(s)&&s[0]!==s[3]},
+{id:'threepairs',icon:'🧦',name:'Tres parejas',desc:'Formato AABBCC.',test:(n,s)=>s.length===6&&/^(\d)\1(\d)\2(\d)\3$/.test(s)&&!/^(\d)\1+$/.test(s)},
+/* ===== suma de cifras ===== */
+{id:'blackjack',icon:'🃏',name:'Blackjack',desc:'Sus cifras suman 21.',test:(n,s)=>dsum(s)===21},
+{id:'sum7',icon:'🎱',name:'Siete exacto',desc:'Sus cifras suman 7.',test:(n,s)=>dsum(s)===7},
+{id:'heavy',icon:'🏋️',name:'Cifras pesadas',desc:'Sus cifras suman 45 o más.',test:(n,s)=>dsum(s)>=45},
+{id:'light',icon:'🪶',name:'Ligero',desc:'Sus cifras suman 3 o menos (sin ser 0).',test:(n,s)=>n>0&&dsum(s)<=3},
+/* ===== matemáticas ===== */
+{id:'semiprime',icon:'🧩',name:'Semiprimo',desc:'Producto de exactamente dos primos.',test:n=>isSemi(n)},
+{id:'abundant',icon:'🎁',name:'Abundante',desc:'La suma de sus divisores propios supera al número.',test:n=>isAbundant(n)},
+{id:'happy',icon:'😊',name:'Feliz',desc:'Sumar los cuadrados de sus cifras repetidamente acaba en 1.',test:n=>isHappy(n)},
+{id:'autodiv',icon:'🎓',name:'Autodivisible',desc:'Sin ceros y divisible entre cada una de sus cifras.',test:(n,s)=>isAutodiv(n,s)},
+{id:'binpal',icon:'🔀',name:'Capicúa binario',desc:'Su escritura en binario es capicúa.',test:n=>n>=3&&pal(n.toString(2))},
+{id:'primepow',icon:'🏰',name:'Potencia de primo',desc:'Es p², p³… con p primo.',test:n=>isPrimePower(n)},
+{id:'sqtri',icon:'🔷',name:'Cuadrado triangular',desc:'A la vez cuadrado perfecto y triangular.',test:n=>SQTRI.has(n)},
+{id:'lucas',icon:'🌀',name:'Número de Lucas',desc:'Aparece en la sucesión de Lucas.',test:n=>LUCAS.has(n)},
+{id:'allones',icon:'🔋',name:'Todo unos',desc:'En binario son todo unos (2ⁿ−1).',test:n=>n>=3&&((n+1)&n)===0},
+{id:'hexword',icon:'🔤',name:'Palabra hexadecimal',desc:'En hexadecimal forma una palabra (DEAD, CAFE, BEEF…).',test:n=>HEXWORDS.has(n)},
+{id:'kaprekar',icon:'✂️',name:'Kaprekar',desc:'Su cuadrado se parte en dos trozos que suman el número.',test:n=>isKaprekar(n)},
+{id:'catalan',icon:'🥐',name:'Número de Catalan',desc:'Aparece en la sucesión de Catalan.',test:n=>CATALAN.has(n)},
+{id:'bell',icon:'🔔',name:'Número de Bell',desc:'Aparece en la sucesión de Bell.',test:n=>BELL.has(n)},
+{id:'primorial',icon:'⛓️',name:'Primorial',desc:'Producto de los primeros primos (2·3·5·7…).',test:n=>PRIMORIAL.has(n)},
+{id:'highcomp',icon:'🌐',name:'Altamente compuesto',desc:'Tiene más divisores que cualquier número menor.',test:n=>HIGHCOMP.has(n)},
+/* ===== Fernando Alonso y el deporte ===== */
+{id:'x33',icon:'🏎️',name:'¿Cómo que 33?',desc:'Exactamente 33: la victoria que persigue Fernando Alonso.',test:n=>n===33},
+{id:'has33',icon:'🏁',name:'33… ¿pronto?',desc:'Contiene un 33, el meme de Alonso.',test:(n,s)=>s.includes('33')},
+{id:'has3333',icon:'🔧',name:'33 y 33',desc:'Contiene 3333: doble ración de meme.',test:(n,s)=>s.includes('3333')},
+{id:'x32',icon:'🥇',name:'La 32',desc:'Exactamente 32: la victoria de Alonso en el GP de España 2013.',test:n=>n===32},
+{id:'bicamp',icon:'🏅',name:'Bicampeón del mundo',desc:'2005 o 2006, los años de los títulos de Alonso.',test:n=>n===2005||n===2006},
+{id:'x100',icon:'🏆',name:'Podio número 100',desc:'Exactamente 100: el centenario de podios de Alonso.',test:n=>n===100},
+{id:'x7',icon:'⚽',name:'CR7',desc:'Exactamente 7, el dorsal de Cristiano Ronaldo.',test:n=>n===7},
+{id:'x10',icon:'🔟',name:'El diez',desc:'Exactamente 10, el dorsal más mítico del fútbol.',test:n=>n===10},
+{id:'x14',icon:'🎾',name:'Rey de la arcilla',desc:'Exactamente 14: los Roland Garros de Rafa Nadal.',test:n=>n===14},
+{id:'x22',icon:'🏟️',name:'Veintidós grandes',desc:'Exactamente 22: los Grand Slams de Nadal.',test:n=>n===22},
+/* ===== cultura, internet y tecnología ===== */
+{id:'x112',icon:'🚑',name:'Emergencias',desc:'Exactamente 112, el teléfono de emergencias europeo.',test:n=>n===112},
+{id:'x911',icon:'🚨',name:'Emergencia (EE. UU.)',desc:'Exactamente 911.',test:n=>n===911},
+{id:'x1001',icon:'🧞',name:'Mil y una noches',desc:'Exactamente 1001.',test:n=>n===1001},
+{id:'x300',icon:'🛡️',name:'Esto es Esparta',desc:'Exactamente 300, como la película.',test:n=>n===300},
+{id:'x101',icon:'🐶',name:'Dálmatas',desc:'Exactamente 101, como los dálmatas.',test:n=>n===101},
+{id:'x1984',icon:'👁️',name:'Gran Hermano',desc:'Exactamente 1984, la novela de Orwell.',test:n=>n===1984},
+{id:'x2001',icon:'🚀',name:'Odisea espacial',desc:'Exactamente 2001, una odisea del espacio.',test:n=>n===2001},
+{id:'x451',icon:'🔥',name:'Fahrenheit 451',desc:'Exactamente 451, la temperatura a la que arde el papel.',test:n=>n===451},
+{id:'x3000',icon:'💖',name:'Te quiero 3000',desc:'Exactamente 3000.',test:n=>n===3000},
+{id:'x9001',icon:'💥',name:'¡Más de 9000!',desc:'Exactamente 9001.',test:n=>n===9001},
+{id:'x20000',icon:'🐙',name:'Veinte mil leguas',desc:'Exactamente 20.000, de viaje submarino.',test:n=>n===20000},
+{id:'x418',icon:'🫖',name:'Soy una tetera',desc:'Exactamente 418, el código HTTP de la tetera.',test:n=>n===418},
+{id:'x2048',icon:'🎮',name:'Puzzle 2048',desc:'Exactamente 2048.',test:n=>n===2048},
+{id:'x64',icon:'⛏️',name:'Un stack',desc:'Exactamente 64, un stack completo de bloques.',test:n=>n===64},
+{id:'mememax',icon:'🤪',name:'Meme supremo',desc:'42069 o 69420.',test:n=>MEMEMAX.has(n)},
+{id:'history',icon:'📜',name:'Año histórico',desc:'1492, 1789, 1914, 1918, 1939, 1945, 1969 o 1989.',test:n=>HISTORY.has(n)},
+{id:'recent',icon:'📅',name:'Año reciente',desc:'Un número entre 1990 y 2026.',test:n=>n>=1990&&n<=2026},
+{id:'timen',icon:'⏳',name:'Medida del tiempo',desc:'60, 360, 365, 3600, 8760, 86400 o 525600.',test:n=>TIMEN.has(n)},
+{id:'netport',icon:'🌐',name:'Puerto de red',desc:'21, 22, 25, 53, 80, 443, 3306 u 8080.',test:n=>NETPORT.has(n)},
+{id:'httpc',icon:'📡',name:'Código HTTP',desc:'Un código de estado (200, 301, 403, 500…).',test:n=>HTTPC.has(n)},
+{id:'resol',icon:'📺',name:'Resolución de vídeo',desc:'480, 720, 1080, 1440, 2160 o 4320.',test:n=>RESOL.has(n)},
+{id:'bits',icon:'🧱',name:'Límite de bits',desc:'255, 256, 65535 o 65536.',test:n=>BITS.has(n)},
+{id:'pow10',icon:'🔟',name:'Potencia de 10',desc:'10, 100, 1.000, 10.000 o 100.000.',test:n=>POW10.has(n)},
+{id:'pow3',icon:'🔱',name:'Potencia de 3',desc:'3, 9, 27, 81… hasta 531441.',test:n=>POW3.has(n)},
+{id:'pow5',icon:'🖐️',name:'Potencia de 5',desc:'5, 25, 125… hasta 390625.',test:n=>POW5.has(n)},
+/* ===== más patrones y suerte ===== */
+{id:'has123',icon:'🔢',name:'Uno, dos, tres',desc:'Contiene un 123.',test:(n,s)=>s.includes('123')},
+{id:'has321',icon:'🚀',name:'Cuenta atrás',desc:'Contiene un 321.',test:(n,s)=>s.includes('321')},
+{id:'has888',icon:'🧧',name:'Fortuna china',desc:'Contiene un 888.',test:(n,s)=>s.includes('888')},
+{id:'has999',icon:'🪙',name:'Triple nueve',desc:'Contiene un 999.',test:(n,s)=>s.includes('999')},
+{id:'has1999',icon:'💾',name:'Fiesta del 99',desc:'Contiene 1999.',test:(n,s)=>s.includes('1999')},
+{id:'dice',icon:'🎲',name:'Dados',desc:'Todas sus cifras van del 1 al 6 (4+ cifras).',test:(n,s)=>s.length>=4&&/^[1-6]+$/.test(s)},
+{id:'keypad',icon:'☎️',name:'Teclado perezoso',desc:'Contiene una línea del teclado numérico (147, 258, 456, 789, 159…).',test:(n,s)=>s.length>=3&&KEYPAD.some(k=>s.includes(k))},
+{id:'ticket',icon:'🎫',name:'Billete de la suerte',desc:'6 cifras: las tres primeras suman lo mismo que las tres últimas.',test:(n,s)=>s.length===6&&dsum(s.slice(0,3))===dsum(s.slice(3))},
+{id:'almostrep',icon:'🎯',name:'Casi repdigit',desc:'Todas las cifras iguales menos una (4+ cifras).',test:(n,s)=>s.length>=4&&maxFreq(s)===s.length-1},
+{id:'clock',icon:'🕒',name:'Reloj digital',desc:'Cuatro cifras que forman una hora válida (12:34).',test:(n,s)=>s.length===4&&+s.slice(0,2)<=23&&+s.slice(2)<=59},
+{id:'mult7',icon:'7️⃣',name:'Siete veces',desc:'Múltiplo de 7.',test:n=>n>0&&n%7===0},
+{id:'mult9',icon:'9️⃣',name:'Nueve veces',desc:'Múltiplo de 9.',test:n=>n>0&&n%9===0},
+{id:'mult11',icon:'🏐',name:'Once veces',desc:'Múltiplo de 11.',test:n=>n>0&&n%11===0},
+{id:'mult13',icon:'🕸️',name:'Trece veces',desc:'Múltiplo de 13.',test:n=>n>0&&n%13===0},
+{id:'mult1111',icon:'🪪',name:'Cuatro unos',desc:'Múltiplo de 1111.',test:n=>n>0&&n%1111===0},
+/* ===== más matemáticas ===== */
+{id:'emirp',icon:'↔️',name:'Emirp',desc:'Primo cuyo reverso es otro primo distinto.',test:(n,s)=>isEmirp(n,s)},
+{id:'sophie',icon:'🎓',name:'Sophie Germain',desc:'Primo p con 2p+1 también primo.',test:n=>isSophie(n)},
+{id:'circular',icon:'⭕',name:'Primo circular',desc:'Todas las rotaciones de sus cifras son primas.',test:(n,s)=>isCircular(n,s)},
+{id:'fermat',icon:'✍️',name:'Primo de Fermat',desc:'3, 5, 17, 257 o 65537.',test:n=>FERMAT.has(n)},
+{id:'fibprime',icon:'🌻',name:'Primo de Fibonacci',desc:'Primo y de Fibonacci a la vez.',test:n=>FIBPRIME.has(n)},
+{id:'fourth',icon:'4️⃣',name:'Cuarta potencia',desc:'Es n⁴ para algún entero.',test:n=>isFourth(n)},
+{id:'pronic',icon:'▭',name:'Oblongo',desc:'Producto de dos enteros consecutivos (n·(n+1)).',test:n=>isPronic(n)},
+{id:'pent',icon:'⬠',name:'Pentagonal',desc:'Número pentagonal.',test:n=>isPent(n)},
+{id:'hexn',icon:'⬡',name:'Hexagonal',desc:'Número hexagonal.',test:n=>isHex(n)},
+{id:'doublepal',icon:'🪞',name:'Capicúa en dos mundos',desc:'Capicúa en decimal y en binario a la vez.',test:(n,s)=>n>=10&&pal(s)&&pal(n.toString(2))},
+{id:'sqpal',icon:'🔳',name:'Cuadrado capicúa',desc:'Cuadrado perfecto y capicúa (121, 484…).',test:(n,s)=>n>=10&&pal(s)&&isSq(n)}
+];
+const RARITY=['common','uncommon','rare','epic','anomaly','mythic'];
+const EP={common:1,uncommon:3,rare:10,epic:30,anomaly:100,mythic:500};
+function rarityOfCount(c){const p=c/(N_MAX+1);return p>0.10?'common':p>=0.01?'uncommon':p>=0.001?'rare':p>=0.0001?'epic':p>=0.00001?'anomaly':'mythic'}
+
+const STATS={"counts":{"even":500001,"lucky7":468559,"void":597870,"unique":168480,"prime":78498,"harshad":95428,"nice":49401,"trio":35920,"alleven":15625,"allodd":19530,"twinprime":16337,"round100":10000,"tri":1413,"up4":1880,"down4":1980,"palin":1989,"square":999,"half":990,"thousand":1000,"cube":99,"pow2":20,"fib":28,"repdigit":45,"palprime":109,"narc":11,"mersenne":7,"factorial":9,"perfect":4,"hundredk":9,"middle":1,"zero":1,"million":1,"blaze":3999,"evil":3700,"jackpot":3700,"e404":3979,"pi":300,"leet":300,"has67":49401,"has42":49401,"has13":49401,"x67":1,"x42":1,"x69":1,"x420":1,"x666":1,"x777":1,"x1337":1,"x404":1,"x1234":1,"x123456":1,"x1729":1,"xpi":1,"xe":1,"xphi":1,"xsqrt2":1,"xalmost":1,"len1":10,"len2":90,"len3":900,"len4":9000,"len5":90000,"len6":900000,"doublezero":35920,"manyzeros":8047,"binlook":61,"solo":46,"twins":402130,"sandwich":304479,"echo":24300,"bicolor":4537,"bookend":99990,"altparity":34875,"high":19500,"low":15601,"nondec":4785,"noninc":7720,"strict":336,"arith":44,"echo3":81,"twotrios":81,"threepairs":891,"blackjack":39662,"sum7":792,"heavy":5005,"light":84,"semiprime":210035,"abundant":247545,"happy":143070,"autodiv":9030,"binpal":1998,"primepow":236,"sqtri":3,"lucas":28,"allones":18,"hexword":24,"kaprekar":53,"catalan":13,"bell":9,"primorial":7,"highcomp":37,"x33":1,"has33":45739,"has3333":280,"x32":1,"bicamp":2,"x100":1,"x7":1,"x10":1,"x14":1,"x22":1,"x112":1,"x911":1,"x1001":1,"x300":1,"x101":1,"x1984":1,"x2001":1,"x451":1,"x3000":1,"x9001":1,"x20000":1,"x418":1,"x2048":1,"x64":1,"mememax":2,"history":8,"recent":37,"timen":7,"netport":8,"httpc":12,"resol":6,"bits":4,"pow10":5,"pow3":12,"pow5":8,"has123":3999,"has321":3999,"has888":3700,"has999":3700,"has1999":300,"dice":55728,"keypad":55204,"ticket":50412,"almostrep":1216,"clock":840,"mult7":142857,"mult9":111111,"mult11":90909,"mult13":76923,"mult1111":900,"emirp":11184,"sophie":7746,"circular":55,"fermat":5,"fibprime":9,"fourth":30,"pronic":999,"pent":815,"hexn":706,"doublepal":14,"sqpal":11},"dist":[[1,1613],[2,16222],[3,56836],[4,96100],[5,101966],[6,105850],[7,116515],[8,99672],[9,79145],[10,69502],[11,50134],[12,36282],[13,28697],[14,19890],[15,15054],[16,13054],[17,12153],[18,10823],[19,9136],[20,8819],[21,7414],[22,5904],[23,4750],[24,3852],[25,2925],[26,2303],[27,2204],[28,1746],[29,1345],[30,1263],[31,1237],[32,994],[33,823],[34,925],[35,739],[36,738],[37,830],[38,769],[39,687],[40,612],[41,603],[42,627],[43,636],[44,554],[45,489],[46,498],[47,483],[48,419],[49,403],[50,373],[51,302],[52,262],[53,234],[54,236],[55,186],[56,175],[57,155],[58,129],[59,135],[60,220],[61,199],[62,153],[63,219],[64,202],[65,158],[66,149],[67,135],[68,95],[69,82],[70,109],[71,77],[72,50],[73,87],[74,65],[75,60],[76,83],[77,55],[78,36],[79,34],[80,28],[81,18],[82,20],[83,25],[84,26],[85,23],[86,25],[87,17],[88,16],[89,18],[90,11],[91,13],[92,9],[93,17],[94,11],[95,13],[96,7],[97,11],[98,5],[99,7],[100,3],[101,9],[102,6],[103,11],[104,12],[105,10],[106,22],[107,21],[108,13],[109,13],[110,18],[111,4],[112,16],[113,11],[114,23],[115,15],[116,11],[117,14],[118,11],[119,9],[120,7],[121,6],[122,9],[123,9],[124,6],[125,9],[126,12],[127,7],[128,11],[129,6],[130,4],[131,9],[132,7],[133,12],[134,15],[135,11],[136,7],[137,23],[138,18],[139,11],[140,17],[141,13],[142,16],[143,11],[144,9],[145,13],[146,5],[147,9],[148,7],[149,7],[150,5],[151,6],[152,5],[153,5],[154,6],[155,9],[156,3],[157,2],[158,2],[159,2],[160,2],[161,6],[162,8],[163,9],[164,6],[165,7],[166,5],[167,6],[168,4],[169,9],[170,3],[171,3],[172,5],[173,4],[174,3],[175,3],[176,2],[177,1],[178,5],[179,1],[180,2],[181,2],[182,4],[183,1],[186,1],[188,2],[189,5],[190,3],[191,3],[192,4],[193,2],[194,1],[195,2],[196,1],[197,2],[198,3],[199,3],[200,2],[202,1],[203,2],[204,2],[205,2],[206,1],[207,2],[208,3],[209,1],[211,2],[212,2],[213,1],[214,1],[216,1],[217,2],[219,1],[220,1],[222,1],[223,1],[224,2],[226,3],[227,1],[228,1],[230,2],[231,4],[232,1],[233,2],[234,1],[235,2],[236,1],[237,3],[238,3],[239,3],[241,1],[242,1],[243,2],[244,1],[247,2],[248,1],[249,1],[251,1],[254,1],[255,1],[259,1],[261,3],[263,1],[266,2],[268,2],[270,1],[272,2],[278,2],[279,2],[280,1],[281,1],[282,1],[284,1],[285,2],[291,1],[294,2],[295,1],[298,2],[305,1],[319,1],[338,2],[339,1],[340,1],[346,1],[361,1],[365,2],[368,1],[371,1],[373,1],[376,1],[386,1],[392,1],[438,1],[439,2],[503,1],[505,1],[509,1],[510,2],[513,1],[514,1],[516,2],[517,1],[519,2],[520,1],[522,2],[523,1],[524,1],[527,1],[528,1],[530,1],[536,3],[537,1],[539,2],[543,2],[544,2],[545,1],[546,2],[547,3],[549,1],[550,2],[553,1],[556,1],[558,1],[560,1],[561,1],[562,1],[565,1],[566,1],[568,1],[570,1],[572,1],[573,1],[574,2],[586,1],[595,1],[605,1],[608,1],[609,2],[617,1],[618,1],[619,1],[620,1],[622,1],[625,2],[626,1],[635,1],[637,1],[646,1],[647,1],[648,1],[652,1],[661,1],[662,1],[665,1],[668,1],[675,2],[678,1],[682,1],[690,1],[692,1],[694,1],[696,2],[699,1],[704,1],[708,1],[710,1],[713,1],[714,1],[719,1],[724,1],[726,1],[733,1],[743,1],[750,1],[757,1],[765,1],[772,2],[779,2],[793,2],[796,1],[799,1],[801,1],[805,1],[807,1],[808,1],[817,1],[820,1],[824,1],[826,1],[835,1],[838,1],[842,1],[865,1],[869,1],[1004,1],[1026,1],[1029,1],[1036,1],[1138,1],[1192,1],[1193,1],[1260,1],[1316,1],[1393,1],[1397,1],[1417,1],[1856,1],[2179,1],[2643,1],[2863,1],[3151,1]]};
+/* ---------- datos derivados ---------- */
+BADGES.forEach(b=>{b.count=STATS.counts[b.id];b.r=rarityOfCount(b.count);b.ep=EP[b.r]});
+const TIERS={trash:'Basura',common:'Común',uncommon:'Poco común',rare:'Raro',epic:'Épico',anomaly:'Anomalía',mythic:'Mítico'};
+const TOTAL=N_MAX+1;
+const fmt=n=>String(n).replace(/\B(?=(\d{3})+(?!\d))/g,'.');
+const pct=x=>(x*100).toLocaleString('es',{maximumFractionDigits:x<0.001?4:x<0.1?2:1})+' %';
+function topShare(ep){let c=0;for(const[e,k]of STATS.dist)if(e>=ep)c+=k;return c/TOTAL}
+function bottomShare(ep){let c=0;for(const[e,k]of STATS.dist)if(e<=ep)c+=k;return c/TOTAL}
+function tierOf(ep,top){if(bottomShare(ep)<=.05)return'trash';if(top<=.01)return'mythic';if(top<=.05)return'anomaly';if(top<=.10)return'epic';if(top<=.25)return'rare';if(top<=.5)return'uncommon';return'common'}
+function analyze(n){const s=String(n),badges=BADGES.filter(b=>b.test(n,s)).sort((a,b)=>b.ep-a.ep),ep=badges.reduce((a,b)=>a+b.ep,0),top=topShare(ep);return{n,badges,ep,top,tier:tierOf(ep,top)}}
+/* ---------- estado ---------- */
+const KEY='rngdiario_v1',TOPN=10;
+let ST={v:2,total:0,ep:0,found:{},best:[],lastN:null,anim:true};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(ST))}catch(e){}};
+function addRoll(n){const a=analyze(n),fresh=a.badges.filter(b=>!ST.found[b.id]).map(b=>b.id);
+ ST.total++;ST.ep+=a.ep;a.badges.forEach(b=>ST.found[b.id]=(ST.found[b.id]||0)+1);ST.lastN=n;
+ if(!ST.best.some(x=>x.n===n)){ST.best.push({n,ep:a.ep,t:Date.now()+ST.total/1e6});ST.best.sort((x,y)=>y.ep-x.ep||y.t-x.t);ST.best=ST.best.slice(0,TOPN)}
+ return{a,fresh,rank:ST.best.findIndex(x=>x.n===n)}}
+try{const r=JSON.parse(localStorage.getItem(KEY));
+ if(r&&r.v===2){Object.assign(ST,r);ST.best=ST.best.map(x=>({...x,ep:analyze(x.n).ep})).sort((x,y)=>y.ep-x.ep||y.t-x.t).slice(0,TOPN)}
+ else if(r&&r.rolls){Object.keys(r.rolls).sort().forEach(k=>addRoll(r.rolls[k]));save()}}catch(e){}
+function rand(){if(!window.crypto||!crypto.getRandomValues)return Math.floor(Math.random()*TOTAL);const a=new Uint32Array(1),lim=Math.floor(4294967296/TOTAL)*TOTAL;do{crypto.getRandomValues(a)}while(a[0]>=lim);return a[0]%TOTAL}
+/* ---------- UI ---------- */
+const $=id=>document.getElementById(id);
+const TABS=[['hoy','Tirar'],['col','Colección'],['his','Top 10'],['info','Reglas']];
+let tab='hoy',rolling=false,onlyMissing=false,openHis=null,LAST=ST.lastN!==null?{a:analyze(ST.lastN),fresh:[],rank:-1,batch:null}:null;
+function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1800)}
+function renderNav(){$('nav').innerHTML=TABS.map(([k,l])=>`<button role="tab" aria-selected="${k===tab}" class="${k===tab?'on':''}" data-tab="${k}">${l}</button>`).join('');
+ $('nav').querySelectorAll('button').forEach(b=>b.onclick=()=>{if(rolling)return;tab=b.dataset.tab;render()})}
+function chips(a,anim,fresh){fresh=fresh||[];return a.badges.length?a.badges.map((b,i)=>`<div class="chip${anim?' new':''}" data-t="${b.r}" style="animation-delay:${i*70}ms" title="${b.desc}"><i>${b.icon}</i>${b.name}<em>+${b.ep}</em>${fresh.includes(b.id)?'<span class="newtag">NUEVA</span>':''}</div>`).join(''):'<p class="muted">Este número no ha ganado ninguna insignia.</p>'}
+function result(a,anim,fresh){return `<div data-t="${a.tier}"><span class="tier ${a.tier==='mythic'?'mythic-glow':''}">${TIERS[a.tier]}</span>
+ <p class="ep"><b>${a.ep} EP</b> · entre el ${pct(a.top)} de tiradas más altas</p></div><div class="chips">${chips(a,anim,fresh)}</div>`}
+function shareText(a){return `RNG Diario\n🎲 ${fmt(a.n)}\n${TIERS[a.tier]} · ${a.ep} EP\n${a.badges.map(b=>b.icon).join('')||'—'}\n${location.href.split('#')[0]}`}
+async function share(txt){try{if(navigator.share){await navigator.share({text:txt});return}}catch(e){if(e.name==='AbortError')return}
+ try{await navigator.clipboard.writeText(txt);toast('Copiado al portapapeles')}catch(e){prompt('Copia tu tirada:',txt)}}
+function spin(final,done){const el=$('num'),fin=String(final),len=fin.length;
+ const t0=performance.now(),iv=setInterval(()=>{const p=(performance.now()-t0)/900;
+  if(p>=1){clearInterval(iv);el.textContent=fmt(final);return done()}
+  const settle=Math.floor(p*len);let o='';for(let i=0;i<len;i++)o+=(i<settle)?fin[i]:Math.floor(Math.random()*10);el.textContent=fmt(o)},50)}
+function busy(v){document.querySelectorAll('.btn,.tog input').forEach(b=>b.disabled=v)}
+function doRoll(){if(rolling)return;rolling=true;busy(true);const n=rand();
+ const finish=()=>{const r=addRoll(n);save();LAST={a:r.a,fresh:r.fresh,rank:r.rank,batch:null};rolling=false;render(true)};
+ if(ST.anim&&!matchMedia('(prefers-reduced-motion:reduce)').matches){$('num').textContent=fmt(n).replace(/\d/g,'0');spin(n,finish)}else finish()}
+function rollMany(k){if(rolling)return;let best=null,fresh=new Set(),entered=0;
+ for(let i=0;i<k;i++){const r=addRoll(rand());r.fresh.forEach(id=>fresh.add(id));if(r.rank>=0)entered++;if(!best||r.a.ep>best.a.ep)best=r}
+ save();LAST={a:best.a,fresh:[...fresh].filter(id=>best.a.badges.some(b=>b.id===id)),rank:ST.best.findIndex(x=>x.n===best.a.n),batch:{k,entered,fresh:fresh.size}};render(true)}
+function viewHoy(anim){const found=Object.keys(ST.found).length,bestEp=ST.best.length?ST.best[0].ep:0;
+ let h=`<div class="stats" style="grid-template-columns:repeat(4,1fr)"><div class="stat"><b>${fmt(ST.total)}</b><small>tiradas</small></div><div class="stat"><b>${fmt(ST.ep)}</b><small>EP totales</small></div><div class="stat"><b>${found}/${BADGES.length}</b><small>insignias</small></div><div class="stat"><b>${bestEp}</b><small>mejor EP</small></div></div><div class="card roll">`;
+ if(!LAST){h+=`<div class="num" id="num">?</div><p class="muted">Tira tantas veces como quieras.</p>`}
+ else{const a=LAST.a;h+=`<div class="date">${LAST.batch?'Mejor de '+LAST.batch.k+' tiradas':'Última tirada'}</div><div class="num" id="num">${fmt(a.n)}</div>${result(a,anim,LAST.fresh)}`;
+  if(LAST.batch)h+=`<div class="note">${LAST.batch.entered} entraron en tu top 10 · ${LAST.batch.fresh} insignias nuevas</div>`;
+  else if(LAST.rank>=0)h+=`<div class="note">🏅 Entra en tu top 10 (puesto ${LAST.rank+1})</div>`;
+  else if(LAST.fresh.length)h+=`<div class="note">✨ ${LAST.fresh.length===1?'Insignia nueva':LAST.fresh.length+' insignias nuevas'} en tu colección</div>`}
+ h+=`<div class="row"><button class="btn" id="go">🎲 Tirar</button><button class="btn sec" id="many">⚡ ×10 rápido</button>${LAST?'<button class="btn sec" id="share">📤 Compartir</button>':''}</div>
+ <label class="tog"><input type="checkbox" id="anim" ${ST.anim?'checked':''}> Animación al tirar</label><p class="mini" style="margin:10px 0 0">Pulsa Espacio para tirar</p></div>`;
+ $('view').innerHTML=h;
+ $('go').onclick=doRoll;$('many').onclick=()=>rollMany(10);const sh=$('share');if(sh)sh.onclick=()=>share(shareText(LAST.a));
+ $('anim').onchange=e=>{ST.anim=e.target.checked;save()}}
+function viewCol(){const found=Object.keys(ST.found).length;
+ let h=`<p class="muted">Has descubierto <b>${found}</b> de <b>${BADGES.length}</b> insignias.</p><label class="tog" style="justify-content:flex-start;margin:0 0 4px"><input type="checkbox" id="miss" ${onlyMissing?'checked':''}> Mostrar solo las que me faltan</label>`;
+ for(const r of [...RARITY].reverse()){const all=BADGES.filter(b=>b.r===r).sort((a,b)=>a.count-b.count),list=onlyMissing?all.filter(b=>!ST.found[b.id]):all;if(!list.length)continue;
+  const got=all.filter(b=>ST.found[b.id]).length;
+  h+=`<div class="grp" data-t="${r}">${TIERS[r]} · +${EP[r]} EP · ${got}/${all.length}</div><div class="grid">`+list.map(b=>{const f=ST.found[b.id];
+   return `<div class="b ${f?'':'lock'}" data-t="${b.r}"><h4><i>${b.icon}</i>${b.name}</h4><p>${b.desc}</p><small>${f?'Conseguida ×'+fmt(f)+' · ':''}1 de cada ${fmt(Math.round(TOTAL/b.count))}</small></div>`}).join('')+'</div>'}
+ $('view').innerHTML=h;$('miss').onchange=e=>{onlyMissing=e.target.checked;render()}}
+function viewHis(){if(!ST.best.length){$('view').innerHTML='<div class="card"><p class="muted">Todavía no has tirado ningún número. Aquí se guardarán tus 10 mejores tiradas.</p></div>';return}
+ const med=['🥇','🥈','🥉'];
+ const rows=ST.best.map((x,i)=>{const a=analyze(x.n),open=openHis===x.n;
+  let r=`<tr data-t="${a.tier}"><td>${med[i]||i+1}</td><td class="n"><button class="numbtn${open?' open':''}" data-n="${a.n}" aria-expanded="${open}">${fmt(a.n)}</button>${open?'':`<div class="ico">${a.badges.map(b=>`<span>${b.icon}</span>`).join('')}</div>`}</td><td><span class="dot"></span>${TIERS[a.tier]}</td><td class="r">${a.ep}</td></tr>`;
+  if(open)r+=`<tr class="detail"><td colspan="4"><div class="dtot">${a.badges.length} insignias · ${a.ep} EP en total</div>${a.badges.map(b=>`<div class="det" data-t="${b.r}"><b>${b.icon} ${b.name}</b><em>+${b.ep} EP · ${TIERS[b.r]}</em><small>${b.desc}</small></div>`).join('')}</td></tr>`;
+  return r}).join('');
+ $('view').innerHTML=`<div class="card"><h2>Tus 10 mejores tiradas</h2><p class="muted">Solo se guardan las 10 con más EP. Toca un número para ver qué insignias te tocaron.</p><table><tr><th>#</th><th>Número</th><th>Rareza</th><th class="r">EP</th></tr>${rows}</table></div>`;
+ $('view').querySelectorAll('.numbtn').forEach(b=>b.onclick=()=>{const n=Number(b.dataset.n);openHis=openHis===n?null:n;viewHis()})}
+function viewInfo(){const rows=[['trash','Las peores tiradas (5 % inferior)'],['common','Resto de la mitad inferior'],['uncommon','Top 50–25 %'],['rare','Top 25–10 %'],['epic','Top 10–5 %'],['anomaly','Top 5–1 %'],['mythic','Top 1 %']];
+ const br=[['common','Más del 10 % de las tiradas'],['uncommon','1–10 %'],['rare','0,1–1 %'],['epic','0,01–0,1 %'],['anomaly','0,001–0,01 %'],['mythic','Menos de 0,001 %']];
+ $('view').innerHTML=`<div class="card"><h2>¿Cómo funciona?</h2><p>Tira un número aleatorio entre <b>0 y 1.000.000</b> tantas veces como quieras. Se analiza buscando patrones (capicúas, primos, memes, secuencias, cifras…) y cada patrón te da una <b>insignia</b> con puntos de entropía (<b>EP</b>). Hay <b>${BADGES.length}</b> insignias por descubrir.</p>
+ <p>En el <b>Top 10</b> solo se guardan tus 10 tiradas con más EP; tu colección de insignias se guarda siempre.</p>
+ <h3>Rareza de la tirada</h3><p class="muted">Se calcula comparando tus EP con los de los 1.000.001 números posibles.</p><table>${rows.map(([r,t])=>`<tr data-t="${r}"><td><span class="dot"></span><b style="color:var(--c)">${TIERS[r]}</b></td><td class="muted">${t}</td></tr>`).join('')}</table>
+ <h3>Rareza y EP de cada insignia</h3><table>${br.map(([r,t])=>`<tr data-t="${r}"><td><span class="dot"></span><b style="color:var(--c)">${TIERS[r]}</b></td><td class="muted">${t}</td><td class="r">+${EP[r]} EP</td></tr>`).join('')}</table>
+ <h3>Analizador</h3><p class="muted">Prueba cualquier número y mira qué insignias ganaría (no cuenta como tirada).</p>
+ <input type="number" id="an" min="0" max="1000000" placeholder="p. ej. 67"> <button class="btn sec" id="ang">Analizar</button><div id="anr" class="roll" style="margin-top:14px"></div>
+ <h3>Datos</h3><button class="link" id="reset" style="margin:0">Borrar mis datos guardados</button></div>`;
+ const run=()=>{const v=$('an').value.trim(),n=Number(v);if(v===''||!Number.isInteger(n)||n<0||n>N_MAX){$('anr').innerHTML='<p class="muted">Introduce un entero entre 0 y 1.000.000.</p>';return}
+  $('anr').innerHTML=`<div class="num" style="font-size:40px">${fmt(n)}</div>`+result(analyze(n),true)};
+ $('ang').onclick=run;$('an').onkeydown=e=>{if(e.key==='Enter')run()};
+ $('reset').onclick=()=>{if(confirm('¿Seguro? Se borrará tu top 10 y tu colección.')){ST={v:2,total:0,ep:0,found:{},best:[],lastN:null,anim:ST.anim};LAST=null;save();toast('Datos borrados');tab='hoy';render()}}}
+function render(anim){renderNav();({hoy:()=>viewHoy(anim),col:viewCol,his:viewHis,info:viewInfo})[tab]()}
+addEventListener('keydown',e=>{if(e.code==='Space'&&tab==='hoy'&&e.target===document.body){e.preventDefault();doRoll()}});
+render();
+</script>
+</body>
+</html>
