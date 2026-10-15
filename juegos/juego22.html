@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Círculo Perfecto - NexGame</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none}
+html,body{margin:0;height:100%;overflow:hidden;background:#141414;font-family:"Comic Sans MS","Chalkboard SE","Segoe Print",cursive,sans-serif;color:#fff;touch-action:none;overscroll-behavior:none}
+canvas{position:fixed;inset:0;width:100%;height:100%;display:block;cursor:crosshair}
+#brand{position:fixed;top:10px;left:14px;font-size:26px;letter-spacing:1px;font-weight:bold;color:#fff;text-decoration:none;z-index:3;text-shadow:0 2px 0 #000a}
+#brand span{color:#5dff3a}
+#brand small{display:block;font-size:12px;opacity:.55;font-weight:normal;letter-spacing:0}
+.ic{position:fixed;top:12px;width:34px;height:34px;border-radius:50%;background:#ffffff20;color:#ddd;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:3;font-size:18px;font-family:Arial}
+.ic:hover{background:#ffffff40}
+#msg{position:fixed;left:0;right:0;text-align:center;font-size:clamp(22px,4.2vw,40px);letter-spacing:1px;pointer-events:none;z-index:2;text-shadow:0 0 12px #000}
+#best{position:fixed;left:14px;bottom:12px;font-size:15px;opacity:.7;z-index:3}
+#acts{position:fixed;right:12px;bottom:12px;display:flex;gap:10px;z-index:3;opacity:0;pointer-events:none;transition:opacity .4s}
+#acts.on{opacity:1;pointer-events:auto}
+#acts button{font-family:inherit;font-size:17px;font-weight:bold;color:#fff;border:0;border-radius:14px;padding:12px 22px;cursor:pointer;text-decoration:none;box-shadow:0 4px 0 #0006}
+#cp{background:#b57bff}
+#acts button:active{transform:translateY(2px)}
+#info{position:fixed;inset:0;background:#000c;display:none;align-items:center;justify-content:center;z-index:10;padding:20px}
+#info div{background:#1c1c1c;border:2px solid #333;border-radius:16px;padding:22px;max-width:420px;line-height:1.5;font-size:17px;text-align:center}
+</style></head><body>
+<canvas id="c"></canvas>
+<a id="brand" href="../index.html">← <span>O</span>CÍRCULO<small>Dibuja un círculo perfecto</small></a>
+<div class="ic" id="inf" style="right:56px">i</div><div class="ic" id="snd" style="right:12px">🔊</div>
+<div id="msg"></div><div id="best"></div>
+<div id="acts"><button id="cp">Copiar</button></div>
+<div id="info"><div><b>Círculo Perfecto</b><br><br>Dibuja un círculo alrededor del punto blanco del centro, de un solo trazo y sin levantar el dedo o el ratón.<br>Cuanto más redondo y centrado, más cerca del 100 % estarás.<br><br><small style="opacity:.6">(toca para cerrar)</small></div></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),sc=document.createElement('canvas'),sx=sc.getContext('2d');
+const $=id=>document.getElementById(id);
+let W,H,DPR,CX,CY,U;
+function resize(){DPR=Math.min(devicePixelRatio||1,2);W=innerWidth;H=innerHeight;CX=W/2;CY=H/2;U=Math.max(4,Math.min(W,H)/80);for(const c of[cv,sc]){c.width=W*DPR;c.height=H*DPR}sx.setTransform(DPR,0,0,DPR,0,0);pts=[];state='idle';shown=null;$('acts').classList.remove('on');setMsg('Dibuja un círculo completo');$('msg').style.top=(CY+U*9)+'px'}
+let pts=[],state='idle',drawing=false,t0=0,shown=null,shownT=0,total=0,hueScore=null,failTimer=0;
+let best=+localStorage.getItem('circulo20')||0,muted=localStorage.getItem('circulo20m')==='1';
+function setMsg(t,col='#fff'){const m=$('msg');m.textContent=t;m.style.color=col}
+function updBest(){$('best').textContent=best?'Mejor: '+best.toFixed(1)+'%':''}
+function hueOf(d){const t=Math.min(1,d/.14);return 115-115*t}
+const col=(h,l=55)=>`hsl(${h},100%,${l}%)`;
+function scoreHue(s){const t=Math.max(0,Math.min(1,(97-s)/40));return 115-115*t}
+// --- pixel font 5x7
+const F={'0':'01110 10001 10011 10101 11001 10001 01110','1':'00100 01100 00100 00100 00100 00100 01110','2':'01110 10001 00001 00010 00100 01000 11111','3':'11110 00001 00001 01110 00001 00001 11110','4':'00010 00110 01010 10010 11111 00010 00010','5':'11111 10000 11110 00001 00001 10001 01110','6':'00110 01000 10000 11110 10001 10001 01110','7':'11111 00001 00010 00100 01000 01000 01000','8':'01110 10001 10001 01110 10001 10001 01110','9':'01110 10001 10001 01111 00001 00010 01100','X':'10001 10001 01010 00100 01010 10001 10001','%':'11001 11010 00010 00100 01000 01011 10011'};
+function glyph(ch,x,y,p){if(!F[ch])return;const rows=F[ch].split(' ');for(let r=0;r<7;r++)for(let c=0;c<5;c++)if(rows[r][c]==='1')ctx.fillRect(x+c*p,y+r*p,p,p)}
+function textW(s,p){return s.length*6*p-p}
+function drawScore(str,color){ // el punto blanco es el centro del círculo
+ const p=Math.round(U*1.5),[a,b]=str.split('.'),gap=p*2,y=CY-p*3.5;ctx.save();ctx.fillStyle=color;ctx.shadowColor=color;ctx.shadowBlur=p*3;
+ let x=CX-gap-textW(a,p);for(const ch of a){glyph(ch,x,y,p);x+=6*p}
+ x=CX+gap;for(const ch of b){glyph(ch,x,y,p);x+=6*p}ctx.restore();
+ ctx.fillStyle='#fff';ctx.shadowColor='#fff';ctx.shadowBlur=0;ctx.beginPath();ctx.arc(CX,CY+p*2.6,p*.8,0,6.3);ctx.fill()}
+// --- cálculo
+function stats(P){let R=0;for(const q of P)R+=Math.hypot(q.x-CX,q.y-CY);R/=P.length;let v=0;for(const q of P){const d=Math.hypot(q.x-CX,q.y-CY)-R;v+=d*d}return{R,err:Math.sqrt(v/P.length)/R}}
+function finalScore(P){const{R,err}=stats(P),gap=Math.hypot(P[0].x-P[P.length-1].x,P[0].y-P[P.length-1].y),pen=100*gap/(2*Math.PI*R)*1.5;return{R,s:Math.max(0,Math.min(100,100*(1-err*2.2)-pen))}}
+function liveScore(){if(pts.length<25)return null;const{err}=stats(pts);return Math.max(0,100*(1-err*2.2))}
+// --- trazo
+function seg(a,b,c,w=3.2){sx.strokeStyle=c;sx.shadowColor=c;sx.shadowBlur=14;sx.lineWidth=w;sx.lineCap='round';sx.beginPath();sx.moveTo(a.x,a.y);sx.lineTo(b.x,b.y);sx.stroke()}
+function redraw(R){sx.clearRect(0,0,W,H);for(let i=1;i<pts.length;i++){const r=Math.hypot(pts[i].x-CX,pts[i].y-CY);seg(pts[i-1],pts[i],col(hueOf(Math.abs(r-R)/R)))}}
+// --- sonido
+let AC;function tone(f,d,type='sine',v=.07,when=0){if(muted)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+when;o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d)}catch(e){}}
+// --- entrada
+function fail(text){state='fail';shown=null;setMsg(text,'#ff5252');tone(120,.35,'sawtooth',.08);const st=failTimer=performance.now();setTimeout(()=>{if(state==='fail'&&failTimer===st){sx.clearRect(0,0,W,H);pts=[];state='idle';setMsg('Dibuja un círculo completo')}},1100)}
+function down(e){if(e.target.closest('.ic,#acts,#info,#brand'))return;if(state==='info')return;cv.setPointerCapture&&e.target===cv&&cv.setPointerCapture(e.pointerId);
+ sx.clearRect(0,0,W,H);pts=[{x:e.clientX,y:e.clientY}];drawing=true;state='draw';t0=performance.now();total=0;shown=null;hueScore=null;$('acts').classList.remove('on');setMsg('');
+ if(Math.hypot(e.clientX-CX,e.clientY-CY)<U*6){drawing=false;fail('Empieza más lejos del centro')}}
+function move(e){if(!drawing)return;const ev=e.getCoalescedEvents?e.getCoalescedEvents():[e];for(const q of(ev.length?ev:[e])){const a=pts[pts.length-1],b={x:q.clientX,y:q.clientY};if(Math.hypot(b.x-a.x,b.y-a.y)<2)continue;
+  let d=Math.atan2(b.y-CY,b.x-CX)-Math.atan2(a.y-CY,a.x-CX);d=Math.atan2(Math.sin(d),Math.cos(d));total+=d;
+  const r0=Math.hypot(pts[0].x-CX,pts[0].y-CY),r=Math.hypot(b.x-CX,b.y-CY);seg(a,b,col(hueOf(Math.abs(r-r0)/r0)));pts.push(b)}
+ if(performance.now()-t0>12000){drawing=false;fail('Demasiado lento')}}
+function up(){if(!drawing)return;drawing=false;const deg=Math.abs(total)*180/Math.PI;
+ if(pts.length<20||deg<330)return fail('Dibuja un círculo completo');
+ const{R,s}=finalScore(pts);if(R<U*7)return fail('Demasiado cerca del centro');
+ redraw(R);state='done';shown=s;shownT=performance.now();hueScore=scoreHue(s);
+ const nb=s>best;if(nb){best=s;localStorage.setItem('circulo20',best)}updBest();
+ const word=s>=99?'¡PERFECTO! ¿Eres un compás?':s>=97?'¡Increíble!':s>=93?'¡Muy bien!':s>=85?'Bien hecho':s>=70?'No está mal':s>=40?'Casi un círculo...':'Eso es un garabato';
+ setMsg(nb?'¡Nuevo récord!':word,'#fff');$('acts').classList.add('on');
+ const txt=`He dibujado un círculo con un ${s.toFixed(1)}% de perfección. ¿Puedes superarlo?`;$('cp').onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(txt);$('cp').textContent='¡Copiado!';setTimeout(()=>$('cp').textContent='Copiar',1200)};
+ const b=300+s*4;tone(b,.12,'triangle');tone(b*1.25,.12,'triangle',.07,.1);tone(b*1.5,nb?.4:.2,'triangle',.07,.2);if(nb){tone(b*2,.5,'triangle',.07,.35)}}
+addEventListener('pointerdown',down);addEventListener('pointermove',move);addEventListener('pointerup',up);addEventListener('pointercancel',up);
+$('inf').onclick=e=>{e.stopPropagation();$('info').style.display='flex';state0=state;state='info'};$('info').onclick=()=>{$('info').style.display='none';state='idle'};
+function upSnd(){$('snd').textContent=muted?'🔇':'🔊'}$('snd').onclick=e=>{e.stopPropagation();muted=!muted;localStorage.setItem('circulo20m',muted?'1':'0');upSnd()};upSnd();
+addEventListener('resize',resize);
+// --- bucle
+function draw(now){requestAnimationFrame(draw);ctx.setTransform(DPR,0,0,DPR,0,0);
+ const g=ctx.createRadialGradient(CX,CY,0,CX,CY,Math.max(W,H)*.7);g.addColorStop(0,'#0a0a0a');g.addColorStop(1,'#1b1b1b');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);
+ ctx.drawImage(sc,0,0,W,H);
+ if(drawing&&pts.length){const q=pts[pts.length-1],r0=Math.hypot(pts[0].x-CX,pts[0].y-CY),r=Math.hypot(q.x-CX,q.y-CY),c=col(hueOf(Math.abs(r-r0)/r0),60);ctx.save();ctx.fillStyle=c;ctx.shadowColor=c;ctx.shadowBlur=20;ctx.beginPath();ctx.arc(q.x,q.y,6,0,6.3);ctx.fill();ctx.restore()}
+ let str='XX.X%',color='#d40000';
+ if(state==='done'&&shown!==null){const k=Math.max(0,Math.min(1,(now-shownT)/700)),e=1-Math.pow(1-k,3);str=(shown*e).toFixed(1)+'%';color=col(hueScore,52);if(k>=1)str=shown.toFixed(1)+'%'}
+ else if(state==='draw'){const l=liveScore();if(l!==null){str=l.toFixed(1)+'%';color=col(scoreHue(l),52)}}
+ const [a,b]=str.split('.');drawScore(a+'.'+b,color)}
+resize();updBest();requestAnimationFrame(draw);
+</script></body></html>
