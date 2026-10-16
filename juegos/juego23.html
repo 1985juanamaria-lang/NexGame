@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cookie Clicker - NexGame</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;font-family:Georgia,"Merriweather","Times New Roman",serif;color:#fff;background:#222 url(cookie/bg/bgBlue.jpg);overflow:hidden}
+button{font-family:inherit;cursor:pointer}
+#top{height:30px;display:flex;align-items:center;gap:16px;padding:0 12px;background:linear-gradient(#222,#000);font-size:13px;border-bottom:1px solid #555;position:relative;z-index:50}
+#top a{color:#ffd54a;text-decoration:none}#top b{color:#fff}#top .cr{margin-left:auto;opacity:.5;font-size:11px}
+#game{display:grid;grid-template-columns:clamp(340px,33vw,440px) 1fr clamp(280px,24vw,330px);height:calc(100vh - 30px)}
+section{position:relative;overflow:hidden;box-shadow:inset 0 0 40px #000c}
+#left{background:rgba(0,0,0,.35) url(cookie/bg/bgBlue.jpg);display:flex;flex-direction:column;align-items:center;text-align:center;text-shadow:0 2px 0 #000,0 0 8px #000}
+#left::before{content:"";position:absolute;inset:0;background:linear-gradient(rgba(0,0,0,.45),rgba(0,0,0,.1) 30%,rgba(0,0,0,.3));pointer-events:none}
+#bakery{position:relative;margin-top:10px;font-size:20px;background:#0008;padding:4px 14px;border-radius:10px;cursor:pointer;z-index:2;max-width:90%}
+#cnt{position:relative;z-index:2;font-size:26px;margin-top:8px;line-height:1.15;background:#0007;width:100%;padding:6px 4px}
+#cpsd{position:relative;z-index:2;font-size:14px;background:#0007;width:100%;padding:0 4px 6px}
+#buffs{position:relative;z-index:2;display:flex;gap:6px;min-height:38px;margin-top:6px;flex-wrap:wrap;justify-content:center}
+.buff{display:flex;align-items:center;gap:4px;background:#000a;border:1px solid #ffd54a;border-radius:8px;padding:1px 8px 1px 1px;font-size:12px}
+.bi{width:34px;height:34px;position:relative;flex-shrink:0}.bi i{position:absolute;left:0;top:0;width:48px;height:48px;transform:scale(.7);transform-origin:0 0}
+#cookieBox{position:relative;width:100%;flex:1;min-height:330px}
+#orbit{position:absolute;left:50%;top:50%;width:420px;height:420px;margin:-210px 0 0 -210px;pointer-events:none;z-index:3}
+.shine{position:absolute;left:50%;top:50%;width:420px;height:420px;margin:-210px 0 0 -210px;background:url(cookie/shine.png) center/contain no-repeat;opacity:.55;pointer-events:none;animation:spin 20s linear infinite}
+.shine.b{animation-duration:32s;animation-direction:reverse;opacity:.35}
+@keyframes spin{to{transform:rotate(360deg)}}
+#shadow{position:absolute;left:50%;top:50%;width:250px;height:250px;margin:-125px 0 0 -125px;background:url(cookie/shadow.png) center/contain no-repeat;opacity:.5;transform:translateY(50px) scaleY(.4);pointer-events:none}
+#big{position:absolute;left:50%;top:50%;width:240px;height:240px;margin:-120px 0 0 -120px;border:0;padding:0;background:url(cookie/big.png) center/contain no-repeat;z-index:2;transition:transform .06s;-webkit-user-select:none;user-select:none;touch-action:manipulation;filter:drop-shadow(0 6px 6px #0008)}
+#big:hover{transform:scale(1.04)}#big:active,#big.dn{transform:scale(.96)}
+#wrs{position:absolute;left:50%;top:50%;width:0;height:0;z-index:4}
+.wr{position:absolute;width:44px;margin:0 0 0 -22px;cursor:pointer;transform-origin:50% 0}
+.wr img{width:100%;display:block;animation:wig 1.4s ease-in-out infinite;filter:drop-shadow(0 2px 3px #000)}
+@keyframes wig{50%{transform:scale(1.07,.95)}}
+#milk{position:absolute;left:0;bottom:0;width:100%;height:120px;pointer-events:none;z-index:1}
+#mid{background:#222 url(cookie/bg/bgBlue.jpg);display:flex;flex-direction:column}
+#tabs{display:flex;background:linear-gradient(#444,#111);border-bottom:2px solid #000;flex-shrink:0}
+#tabs button{flex:1;background:none;border:0;border-right:1px solid #000;color:#ddd;padding:9px 4px;font-size:14px}
+#tabs button.on{background:#0007;color:#ffd54a;font-weight:bold}
+#panels{flex:1;overflow:auto;position:relative}
+#panels>div{padding:0}
+#pOpt,#pStats,#pAch{padding:14px;background:#000a;min-height:100%}
+.optbtn{display:inline-block;margin:4px;padding:8px 14px;background:linear-gradient(#5a5a5a,#2c2c2c);border:1px solid #888;border-radius:8px;color:#fff;font-size:14px}
+.optbtn:hover{filter:brightness(1.3)}
+.optrow{margin:10px 0;font-size:14px}select{background:#222;color:#fff;border:1px solid #888;padding:4px;border-radius:5px}
+#pStats div{display:flex;justify-content:space-between;padding:5px 0;border-bottom:1px solid #fff2;font-size:14px}
+#pAch .grid{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+.crate{width:48px;height:48px;border:2px solid #000;border-radius:5px;background-color:#0006;position:relative;cursor:pointer;flex-shrink:0;box-shadow:inset 0 0 6px #000}
+.crate i{position:absolute;inset:0;display:block}
+.crate.no{opacity:.35;filter:grayscale(1)}.crate.ok{box-shadow:0 0 8px 1px #ffd54a,inset 0 0 6px #000;border-color:#ffd54a}
+.row{position:relative;height:128px;border-bottom:3px solid #000;display:none;overflow:hidden}
+.row canvas{position:absolute;inset:0;width:100%;height:100%}
+.row .lbl{position:absolute;left:8px;top:6px;font-size:15px;text-shadow:0 1px 0 #000,0 0 6px #000;background:#0006;padding:2px 8px;border-radius:6px}
+#right{background:#1c1c1c url(cookie/bg/bgBlue.jpg);overflow-y:auto}
+.ttl{background:linear-gradient(#444,#111);text-align:center;padding:6px;font-size:16px;border-top:1px solid #777;border-bottom:1px solid #000;position:sticky;top:0;z-index:5}
+#upgrades{display:flex;flex-wrap:wrap;gap:4px;padding:6px;min-height:62px;background:#0007}
+#mode{display:flex;gap:4px;padding:5px;background:#000a}
+#mode button{flex:1;background:#333;border:1px solid #666;color:#ddd;border-radius:5px;padding:4px;font-size:12px}#mode button.on{background:#6a5200;border-color:#ffd54a;color:#fff}
+.prod{display:flex;align-items:center;gap:6px;padding:4px 8px 4px 4px;border-bottom:1px solid #000;background:rgba(0,0,0,.55);cursor:pointer;height:64px}
+.prod:hover{background:rgba(70,70,70,.6)}.prod.no{opacity:.55}
+.prod .pi{width:56px;height:56px;display:flex;align-items:center;justify-content:center;flex-shrink:0}.prod .pi img{max-width:56px;max-height:56px;image-rendering:pixelated}
+.prod.lock .pi img{filter:brightness(0)}
+.prod .pn{flex:1;line-height:1.2;font-size:16px;text-shadow:0 1px 0 #000}.prod .pc{font-size:13px;color:#9be564}.prod.no .pc{color:#ff7a7a}
+.prod .po{font-size:30px;color:#666;font-weight:bold;min-width:40px;text-align:right}
+#tip{position:fixed;display:none;z-index:200;max-width:300px;background:#000d;border:1px solid #777;border-radius:8px;padding:8px 10px;font-size:13px;pointer-events:none;line-height:1.35;box-shadow:0 4px 14px #000}
+#tip h4{margin:0 0 3px;font-size:16px;color:#ffd54a}#tip .pr{color:#9be564}#tip .pr.no{color:#ff7a7a}#tip em{color:#aaa;font-size:12px}
+#golds{position:fixed;inset:0;pointer-events:none;z-index:60}
+.gold{position:absolute;width:96px;height:96px;pointer-events:auto;cursor:pointer;animation:gIn .5s}
+.gold::before{content:"";position:absolute;inset:-16px;background:url(cookie/shineGold.png) center/contain;animation:spin 6s linear infinite}
+.gold i{position:absolute;inset:0;background:url(cookie/gold.png) center/contain;animation:gb 2s ease-in-out infinite}
+@keyframes gIn{from{opacity:0;transform:scale(.2)}}@keyframes gb{50%{transform:scale(1.08) rotate(5deg)}}
+#parts{position:fixed;inset:0;pointer-events:none;z-index:80;overflow:hidden}
+.fl{position:absolute;font-size:22px;font-weight:bold;text-shadow:0 2px 0 #000,0 0 6px #000;animation:up 1.1s ease-out forwards;white-space:nowrap}
+@keyframes up{to{transform:translateY(-70px);opacity:0}}
+.bit{position:absolute;width:20px;animation:fallb 1s ease-in forwards}
+@keyframes fallb{to{transform:translate(var(--dx),340px) rotate(var(--r));opacity:0}}
+#notes{position:absolute;top:44px;right:10px;z-index:90;display:flex;flex-direction:column;gap:6px;pointer-events:none;width:260px}
+.note{background:linear-gradient(#222,#000);border:2px solid #ffd54a;border-radius:8px;padding:6px 10px;font-size:13px;animation:nIn .4s,nOut .5s 4.5s forwards;box-shadow:0 4px 14px #000}
+.note b{color:#ffd54a;display:block}
+@keyframes nIn{from{transform:translateX(120%)}}@keyframes nOut{to{opacity:0;transform:translateX(30%)}}
+@media(max-width:900px){html,body{overflow:auto}#game{display:block;height:auto}section{overflow:visible;box-shadow:none}#left{height:520px}#panels{max-height:none}#right{max-height:none;overflow:visible}#milk{height:90px}}
+</style></head><body>
+<div id="top"><a href="../index.html">← NexGame</a><b>Cookie Clicker</b><span class="cr">Gráficos de Cookie Clicker © Orteil · sprites de SuperFlomm / The Spriters Resource</span></div>
+<div id="game">
+ <section id="left">
+  <div id="bakery"></div><div id="cnt"></div><div id="cpsd"></div><div id="buffs"></div>
+  <div id="cookieBox"><div class="shine"></div><div class="shine b"></div><div id="shadow"></div><canvas id="orbit" width="420" height="420"></canvas><button id="big" aria-label="Galleta gigante"></button><div id="wrs"></div></div>
+  <canvas id="milk"></canvas>
+ </section>
+ <section id="mid">
+  <div id="tabs"><button data-t="rows" class="on">Edificios</button><button data-t="opt">Opciones</button><button data-t="stats">Estadísticas</button><button data-t="ach">Logros</button></div>
+  <div id="notes"></div>
+  <div id="panels"><div id="pRows"></div><div id="pOpt" hidden></div><div id="pStats" hidden></div><div id="pAch" hidden></div></div>
+ </section>
+ <section id="right"><div class="ttl">Mejoras</div><div id="upgrades"></div><div class="ttl">Tienda</div><div id="mode"><button data-m="1" class="on">Comprar x1</button><button data-m="10">x10</button><button data-m="100">x100</button><button data-m="s">Vender</button></div><div id="products"></div></section>
+</div>
+<div id="tip"></div><div id="golds"></div><div id="parts"></div>
+<script>
+'use strict';
+const $=s=>document.querySelector(s),SAVE='cookie21';
+const B=[
+ {id:'cursor',n:'Cursor',base:15,cps:.1,col:0,d:'Hace clic automáticamente.'},
+ {id:'grandma',n:'Abuela',base:100,cps:1,col:1,d:'Una amable abuelita que hornea galletas para ti.'},
+ {id:'farm',n:'Granja',base:1100,cps:8,col:2,d:'Cultiva semillas de galleta.'},
+ {id:'mine',n:'Mina',base:12000,cps:47,col:3,d:'Extrae masa de galleta y pepitas de chocolate.'},
+ {id:'factory',n:'Fábrica',base:130000,cps:260,col:4,d:'Produce galletas en cantidades industriales.'},
+ {id:'bank',n:'Banco',base:1.4e6,cps:1400,col:15,d:'Genera galletas de la nada, con intereses.'},
+ {id:'temple',n:'Templo',base:2e7,cps:7800,col:16,d:'Llenos de tesoros de galleta olvidados.'},
+ {id:'wizard',n:'Torre de mago',base:3.3e8,cps:44000,col:17,d:'Conjura galletas con hechizos.'},
+ {id:'shipment',n:'Nave espacial',base:5.1e9,cps:260000,col:5,d:'Trae galletas frescas del planeta galleta.'},
+ {id:'alchemy',n:'Lab. de alquimia',base:7.5e10,cps:1.6e6,col:9,d:'Convierte oro en galletas.'},
+ {id:'portal',n:'Portal',base:1e12,cps:1e7,col:7,d:'Abre una puerta al Mundo Galleta.'},
+ {id:'timemachine',n:'Máquina del tiempo',base:1.4e13,cps:6.5e7,col:8,d:'Trae galletas del pasado, antes de que las comieras.'},
+ {id:'antimatter',n:'Condensador de antimateria',base:1.7e14,cps:4.3e8,col:13,d:'Condensa la antimateria de galletas del universo.'},
+ {id:'prism',n:'Prisma',base:2.1e15,cps:2.9e9,col:14,d:'Convierte la luz en galletas.'},
+ {id:'chancemaker',n:'Hacedor de suerte',base:2.6e16,cps:2.1e10,col:19,d:'Genera galletas por pura suerte.'},
+ {id:'fractal',n:'Motor fractal',base:3.1e17,cps:1.5e11,col:20,d:'Convierte galletas en más galletas.'},
+ {id:'console',n:'Consola JavaScript',base:7.1e18,cps:1.1e12,col:32,d:'Programa galletas con código.'},
+ {id:'idleverse',n:'Idleverso',base:1.2e20,cps:8.3e12,col:33,d:'Hay otros universos con sus propias galletas.'}];
+const TIERN=['Común','Berrilio','Arándanilio','Calcedomiel','Mantequioro','Azucarro','Menta azabache','Cerezaplata','Avellanalda','Caramelo lunar','Astrofudge'];
+const TIERP=[10,50,500,5e4,5e6,5e8,5e11,5e14,5e17,5e20,5e23],TIERC=[1,5,25,50,100,150,200,250,300,350,400],TIERR=[0,1,2,13,14,15,16,17,18,19,20];
+const COOKN=['Galletas con pepitas','Galletas de mantequilla','Galletas de azúcar','Galletas de avena','Galletas de chocolate','Galletas de macadamia','Galletas de almendra','Galletas de miel','Galletas de coco','Galletas de limón','Galletas de jengibre','Galletas de canela','Galletas de menta','Galletas de vainilla'];
+const MOUSE=[['Ratón de plástico',5e4,[11,0]],['Ratón de hierro',5e6,[11,1]],['Ratón de titanio',5e8,[11,2]],['Ratón de adamantio',5e10,[12,0]]];
+const KIT=[['Gatitos ayudantes',9e6,[18,0],.1,5],['Gatitos trabajadores',9e9,[18,1],.125,15],['Gatitos ingenieros',9e12,[18,2],.15,30]];
+// ---- mejoras
+const U=[];
+B.forEach((b,i)=>TIERC.forEach((c,t)=>U.push({id:`t${i}_${t}`,n:`${b.n}: ${TIERN[t]}`,d:i?`${b.n} produce el <b>doble</b> de galletas.`:'Los cursores y los clics rinden el <b>doble</b>.',price:b.base*TIERP[t],icon:[b.col,TIERR[t]],un:()=>G.owned[i]>=c})));
+COOKN.forEach((n,k)=>{const p=1e5*Math.pow(5,k);U.push({id:'c'+k,n,d:'Galletas más sabrosas: <b>+2%</b> de producción total.',price:p,icon:[k,k<14?3:4],un:()=>G.baked>=p*.2})});
+MOUSE.forEach((m,k)=>U.push({id:'m'+k,n:m[0],d:'Cada clic produce además <b>+1%</b> de tus galletas por segundo.',price:m[1],icon:m[2],un:()=>G.baked>=m[1]*.1}));
+KIT.forEach((m,k)=>U.push({id:'k'+k,n:m[0],d:`Tu producción aumenta según la leche (${m[3]*100}% de la leche).`,price:m[1],icon:m[2],un:()=>achCount()>=m[4]}));
+// ---- logros
+const AC=[];const NUM=n=>fmt(n);
+[1,1e3,1e5,1e6,1e7,1e8,1e9,1e10,1e11,1e12,1e13,1e15].forEach((v,k)=>AC.push({id:'b'+k,n:'Horneado '+NUM(v),d:`Hornea ${NUM(v)} galletas en total.`,icon:[k,3],t:()=>G.baked>=v}));
+[1,10,100,1e3,1e4,1e5,1e6,1e7,1e8,1e9].forEach((v,k)=>AC.push({id:'p'+k,n:'Panadero '+NUM(v),d:`Produce ${NUM(v)} galletas por segundo.`,icon:[k,4],t:()=>cps()>=v}));
+[1,100,1e3,1e4,5e4].forEach((v,k)=>AC.push({id:'cl'+k,n:'Clics '+NUM(v),d:`Haz ${NUM(v)} clics a la galleta.`,icon:[k,5],t:()=>G.clicks>=v}));
+B.forEach((b,i)=>[[1,0],[10,1],[50,2]].forEach(([c,r])=>AC.push({id:`o${i}_${c}`,n:`${b.n} x${c}`,d:`Ten ${c} ${b.n.toLowerCase()}${c>1?'s':''}.`,icon:[b.col,r],t:()=>G.owned[i]>=c})));
+[1,7,27,77].forEach((v,k)=>AC.push({id:'g'+k,n:'Dorado x'+v,d:`Haz clic en ${v} galleta${v>1?'s':''} dorada${v>1?'s':''}.`,icon:[k+6,3],t:()=>G.golden>=v}));
+[1,10,50].forEach((v,k)=>AC.push({id:'w'+k,n:'Reventón x'+v,d:`Revienta ${v} wrinkler${v>1?'s':''}.`,icon:[k+3,5],t:()=>G.popped>=v}));
+// ---- estado
+const def=()=>({cookies:0,baked:0,clicks:0,handmade:0,owned:Array(B.length).fill(0),upg:{},ach:{},golden:0,popped:0,name:'Mi panadería',bg:'bgBlue',milk:'Plain',snd:true,fx:true,t0:Date.now(),last:Date.now(),wr:[]});
+let G=def(),buffs=[],buyMode=1,tab='rows';
+function load(s){try{const o=JSON.parse(s);G=Object.assign(def(),o);if(!Array.isArray(G.owned)||G.owned.length<B.length){const x=Array(B.length).fill(0);(G.owned||[]).forEach((v,i)=>x[i]=v);G.owned=x}return true}catch(e){return false}}
+function save(){G.last=Date.now();try{localStorage.setItem(SAVE,JSON.stringify(G))}catch(e){}}
+// ---- cálculos
+function fmt(n,dec=0){if(!isFinite(n))return '∞';if(n<1e6)return n.toLocaleString('es-ES',{maximumFractionDigits:dec});const S=['M','B','T','Qa','Qi','Sx','Sp','Oc','No','Dc'];const e=Math.floor(Math.log10(n)/3)-2;if(e>=S.length)return n.toExponential(2);return (n/Math.pow(10,3*(e+2))).toFixed(3)+' '+S[e]}
+const achCount=()=>Object.keys(G.ach).length,milkV=()=>achCount()*.04;
+function tierMult(i){let m=1;TIERC.forEach((c,t)=>{if(G.upg[`t${i}_${t}`])m*=2});return m}
+function cookieMult(){let c=1;COOKN.forEach((n,k)=>{if(G.upg['c'+k])c+=.02});KIT.forEach((m,k)=>{if(G.upg['k'+k])c*=1+milkV()*m[3]});return c}
+function buffMult(t){let m=1;for(const b of buffs)if(b.type===t)m*=b.mult;return m}
+function rawCps(){let s=0;B.forEach((b,i)=>s+=G.owned[i]*b.cps*tierMult(i));return s*cookieMult()*buffMult('frenzy')}
+const cps=()=>rawCps()*(1-.05*G.wr.length);
+function clickPower(){let f=0;MOUSE.forEach((m,k)=>{if(G.upg['m'+k])f+=.01});return(1*tierMult(0)+rawCps()*f)*buffMult('click')}
+const cost=(i,k=1)=>Math.ceil(B[i].base*Math.pow(1.15,G.owned[i])*(Math.pow(1.15,k)-1)/.15);
+const sell=(i,k)=>{let s=0;for(let j=1;j<=k;j++)s+=B[i].base*Math.pow(1.15,G.owned[i]-j)*.25;return Math.floor(s)};
+// ---- sonido
+let AC_;function blip(f,d=.06,t='square',v=.05){if(!G.snd)return;try{AC_=AC_||new(window.AudioContext||window.webkitAudioContext)();const o=AC_.createOscillator(),g=AC_.createGain();o.type=t;o.frequency.setValueAtTime(f,AC_.currentTime);o.frequency.exponentialRampToValueAtTime(f*.6,AC_.currentTime+d);g.gain.setValueAtTime(v,AC_.currentTime);g.gain.exponentialRampToValueAtTime(.001,AC_.currentTime+d);o.connect(g);g.connect(AC_.destination);o.start();o.stop(AC_.currentTime+d)}catch(e){}}
+// ---- imágenes
+const I={};function im(s){if(!I[s]){I[s]=new Image();I[s].src='cookie/'+s}return I[s]}
+B.forEach(b=>{if(b.id!=='cursor'){im(`b/${b.id}_row.png`);im(`b/${b.id}_worker.png`);im(`bg/${b.id}.png`)}});im('b/cursor_small.png');for(let i=0;i<4;i++)im(`b/grandma_w${i}.png`);
+// ---- UI: iconos y tooltips
+const ic=(c,r)=>`<i style="background:url(cookie/icons.png) -${c*48}px -${r*48}px"></i>`;
+const tip=$('#tip');
+function showTip(h,e){tip.innerHTML=h;tip.style.display='block';moveTip(e)}function moveTip(e){const x=Math.min(innerWidth-tip.offsetWidth-8,e.clientX+16),y=Math.min(innerHeight-tip.offsetHeight-8,e.clientY+14);tip.style.left=Math.max(4,x)+'px';tip.style.top=Math.max(4,y)+'px'}
+document.addEventListener('mouseover',e=>{const t=e.target.closest('[data-tip]');if(!t){tip.style.display='none';return}showTip(tipHtml(t.dataset.tip),e)});
+document.addEventListener('mousemove',e=>{if(tip.style.display==='block')moveTip(e)});
+function tipHtml(k){const[a,id]=k.split(':');
+ if(a==='p'){const i=+id,b=B[i],c=buyMode==='s'?sell(i,Math.min(1,G.owned[i])):cost(i,buyMode),one=b.base*b.cps/b.base*tierMult(i)*cookieMult();
+  return `<h4>${b.n}</h4>${b.d}<br><br>Cada uno produce <b>${fmt(b.cps*tierMult(i)*cookieMult(),1)}</b> galletas/s<br>Tienes <b>${G.owned[i]}</b> (produciendo ${fmt(G.owned[i]*b.cps*tierMult(i)*cookieMult(),1)}/s)<br><span class="pr ${G.cookies<cost(i,1)?'no':''}">Precio: ${fmt(cost(i,1))}</span>`}
+ if(a==='u'){const u=U.find(x=>x.id===id);return `<h4>${u.n}</h4>${u.d}<br><span class="pr ${G.cookies<u.price?'no':''}">Precio: ${fmt(u.price)}</span>`}
+ if(a==='a'){const x=AC.find(y=>y.id===id),got=G.ach[id];return got?`<h4>${x.n}</h4>${x.d}<br><em>Conseguido · +4% de leche</em>`:`<h4>???</h4>${x.d}`}
+ if(a==='o')return '<h4>Wrinkler</h4>Chupa un 5% de tu producción. ¡Haz clic para reventarlo y recuperar lo chupado (+10%)!';
+ return ''}
+// ---- tienda
+let sigU='',sigP='';
+function renderStore(){
+ const vis=U.filter(u=>!G.upg[u.id]&&u.un()).sort((a,b)=>a.price-b.price);
+ const hu=vis.map(u=>`<div class="crate ${G.cookies>=u.price?'ok':''}" data-u="${u.id}" data-tip="u:${u.id}">${ic(u.icon[0],u.icon[1])}</div>`).join('')||'<span style="opacity:.5;font-size:12px;padding:6px">Sin mejoras por ahora</span>';
+ if(hu!==sigU){sigU=hu;$('#upgrades').innerHTML=hu}
+ let mx=1;G.owned.forEach((v,i)=>{if(v>0)mx=Math.max(mx,i)});
+ let hp='';B.forEach((b,i)=>{if(i>mx+1)return;const lock=i>mx&&G.owned[i]===0&&G.cookies<b.base*.5;const sel=buyMode==='s',k=sel?1:buyMode,pc=sel?sell(i,Math.min(k,G.owned[i])):cost(i,k),aff=sel?G.owned[i]>0:G.cookies>=pc;
+  hp+=`<div class="prod ${aff?'':'no'} ${lock?'lock':''}" data-p="${i}" data-tip="p:${i}"><div class="pi"><img src="cookie/b/${b.id}_icon.png"></div><div class="pn">${lock?'???':b.n}<div class="pc">${sel?'Vender: +':''}${fmt(pc)}</div></div><div class="po">${G.owned[i]||''}</div></div>`});
+ if(hp!==sigP){sigP=hp;$('#products').innerHTML=hp}}
+$('#upgrades').addEventListener('click',e=>{const t=e.target.closest('[data-u]');if(!t)return;const u=U.find(x=>x.id===t.dataset.u);if(G.cookies>=u.price){G.cookies-=u.price;G.upg[u.id]=1;blip(520,.12,'triangle');sigU='';tip.style.display='none';renderStore()}});
+$('#products').addEventListener('click',e=>{const t=e.target.closest('[data-p]');if(!t)return;const i=+t.dataset.p;
+ if(buyMode==='s'){const k=Math.min(1,G.owned[i]);if(k){G.cookies+=sell(i,k);G.owned[i]-=k;blip(300,.08)}}
+ else{const k=buyMode,c=cost(i,k);if(G.cookies>=c){G.cookies-=c;G.owned[i]+=k;blip(660,.08,'triangle')}}
+ sigP='';renderStore();rowsVis()});
+$('#mode').addEventListener('click',e=>{const t=e.target.closest('[data-m]');if(!t)return;buyMode=t.dataset.m==='s'?'s':+t.dataset.m;document.querySelectorAll('#mode button').forEach(b=>b.classList.toggle('on',b===t));sigP='';renderStore()});
+// ---- filas de edificios
+const rowsEl=$('#pRows');B.forEach((b,i)=>{if(!i)return;const d=document.createElement('div');d.className='row';d.id='row'+i;d.innerHTML=`<canvas></canvas><div class="lbl"></div>`;rowsEl.appendChild(d)});
+function rowsVis(){B.forEach((b,i)=>{if(!i)return;const r=$('#row'+i);r.style.display=G.owned[i]>0?'block':'none';r.querySelector('.lbl').textContent=`${b.n}: ${G.owned[i]}  ·  ${fmt(G.owned[i]*b.cps*tierMult(i)*cookieMult(),1)}/s`})}
+function drawRows(now){B.forEach((b,i)=>{if(!i||G.owned[i]<1)return;const r=$('#row'+i),cv=r.querySelector('canvas'),w=r.clientWidth;if(!w)return;if(cv.width!==w||cv.height!==128){cv.width=w;cv.height=128}const x=cv.getContext('2d');x.imageSmoothingEnabled=false;
+ const bg=im(`bg/${b.id}.png`);if(bg.complete&&bg.naturalWidth){for(let xx=0;xx<w;xx+=128)x.drawImage(bg,xx,0,128,128)}else{x.fillStyle='#333';x.fillRect(0,0,w,128)}
+ const n=G.owned[i],bs=im(`b/${b.id}_row.png`),wk=im(`b/${b.id}_worker.png`),nb=Math.min(n,Math.floor(w/34));
+ if(bs.complete&&bs.naturalWidth)for(let k=0;k<nb;k++){const px=8+((k*53)%Math.max(60,w-bs.naturalWidth-10)),py=128-bs.naturalHeight-14-(k%3)*5;x.drawImage(bs,px,py)}
+ const nw=Math.min(n,16);if(wk.complete&&wk.naturalWidth)for(let k=0;k<nw;k++){const sp=14+((k*17)%22),px=((now/1000*sp+k*83)%(w+80))-40,py=128-wk.naturalHeight-4+Math.sin(now/180+k)*2;x.drawImage(wk,px,py)}})}
+// ---- cursores, leche
+const oc=$('#orbit'),ox=oc.getContext('2d'),mc=$('#milk'),mx_=mc.getContext('2d');
+function drawOrbit(now){ox.clearRect(0,0,420,420);const n=Math.min(G.owned[0],150),im_=im('b/cursor_small.png');if(!n||!im_.complete)return;let rem=n,ring=0,idx=0;while(rem>0){const cap=18+ring*6,cnt=Math.min(cap,rem),r=150+ring*22;for(let k=0;k<cnt;k++){const a=k/cnt*6.283+now/1000*(ring%2?.15:-.15)+ring;ox.save();ox.translate(210+Math.cos(a)*r,210+Math.sin(a)*r);ox.rotate(a-Math.PI/2);ox.drawImage(im_,-16,-16);ox.restore()}rem-=cnt;ring++}}
+function drawMilk(now){const w=mc.clientWidth,h=mc.clientHeight;if(mc.width!==w||mc.height!==h){mc.width=w;mc.height=h}mx_.clearRect(0,0,w,h);const m=im('fx/milk'+G.milk+'.png');if(!m.complete||!m.naturalWidth)return;const lv=Math.min(h-6,10+milkV()*28);
+ for(const[ph,al,off] of[[0,.55,6],[2,.9,0]]){mx_.save();mx_.globalAlpha=al;mx_.beginPath();mx_.moveTo(0,h);for(let x=0;x<=w;x+=8)mx_.lineTo(x,h-lv+Math.sin(x/38+now/900+ph)*5+off);mx_.lineTo(w,h);mx_.closePath();mx_.clip();for(let x=-((now/40)%240)*(ph?1:-1);x<w;x+=240)mx_.drawImage(m,x,h-lv-6+off,240,240);mx_.restore()}}
+// ---- clic
+const big=$('#big');
+function bigClick(e){const p=clickPower();G.cookies+=p;G.baked+=p;G.handmade+=p;G.clicks++;blip(220+Math.random()*60,.05);
+ const r=big.getBoundingClientRect(),x=e.clientX||r.left+r.width/2,y=e.clientY||r.top+r.height/2;float(x,y,'+'+fmt(p,1));
+ if(G.fx){for(let k=0;k<2;k++){const b=document.createElement('img');b.src=`cookie/fx/bit${1+Math.floor(Math.random()*10)}.png`;b.className='bit';b.style.left=x-10+'px';b.style.top=y-10+'px';b.style.setProperty('--dx',(Math.random()*120-60)+'px');b.style.setProperty('--r',(Math.random()*360)+'deg');$('#parts').appendChild(b);setTimeout(()=>b.remove(),1000)}}}
+function float(x,y,t,col){const d=document.createElement('div');d.className='fl';d.textContent=t;d.style.left=x-20+(Math.random()*30-15)+'px';d.style.top=y-30+'px';if(col)d.style.color=col;const p=$('#parts');if(p.children.length>60)p.firstChild.remove();p.appendChild(d);setTimeout(()=>d.remove(),1100)}
+big.addEventListener('pointerdown',e=>{e.preventDefault();big.classList.add('dn');bigClick(e)});['pointerup','pointerleave','pointercancel'].forEach(t=>big.addEventListener(t,()=>big.classList.remove('dn')));
+// ---- notificaciones, buffs
+function note(t,d,icon){const n=document.createElement('div');n.className='note';n.innerHTML=`<b>${t}</b>${d}`;$('#notes').appendChild(n);setTimeout(()=>n.remove(),5000)}
+function renderBuffs(){$('#buffs').innerHTML=buffs.map(b=>`<div class="buff"><div class="bi">${ic(b.icon[0],b.icon[1])}</div>${b.n} ${Math.ceil(b.t)}s</div>`).join('')}
+// ---- galletas doradas
+let nextGold=40+Math.random()*50;
+function spawnGold(){const g=document.createElement('div');g.className='gold';g.style.left=(40+Math.random()*(innerWidth-180))+'px';g.style.top=(70+Math.random()*(innerHeight-200))+'px';g.innerHTML='<i></i>';const life=setTimeout(()=>g.remove(),13000);
+ g.addEventListener('pointerdown',e=>{e.preventDefault();clearTimeout(life);g.remove();G.golden++;goldEffect(e.clientX,e.clientY)});$('#golds').appendChild(g)}
+function goldEffect(x,y){const r=Math.random();blip(880,.3,'triangle',.08);
+ if(r<.55){buffs.push({type:'frenzy',mult:7,t:77,n:'Frenesí x7',icon:[10,0]});note('¡Frenesí!','Producción x7 durante 77 segundos.')}
+ else if(r<.85){const g=Math.min(G.cookies*.15,rawCps()*900)+13;G.cookies+=g;G.baked+=g;float(x,y,'+'+fmt(g),'#ffd54a');note('¡Suerte!','Ganas '+fmt(g)+' galletas.')}
+ else{buffs.push({type:'click',mult:777,t:13,n:'Frenesí de clics x777',icon:[11,0]});note('¡Frenesí de clics!','Tus clics valen x777 durante 13 segundos.')}
+ renderBuffs()}
+// ---- wrinklers
+let nextWr=90+Math.random()*90;
+function renderWr(){const c=$('#wrs');c.innerHTML='';G.wr.forEach((w,i)=>{const d=document.createElement('div');d.className='wr';d.dataset.tip='o:'+i;const R=104;d.style.left=Math.cos(w.a)*R+'px';d.style.top=Math.sin(w.a)*R+'px';d.style.transform=`rotate(${w.a*180/Math.PI-90}deg) scale(${1+Math.min(.5,Math.log10(1+w.s)/20)})`;d.innerHTML=`<img src="cookie/${w.sh?'wrinklerShiny':'wrinkler'}.png">`;d.addEventListener('pointerdown',e=>{e.preventDefault();e.stopPropagation();const g=w.s*1.1*(w.sh?3:1);G.cookies+=g;G.baked+=g;G.popped++;G.wr.splice(i,1);float(e.clientX,e.clientY,'+'+fmt(g),'#ff9a3c');blip(140,.2,'sawtooth',.08);tip.style.display='none';renderWr()});c.appendChild(d)})}
+// ---- paneles
+document.querySelectorAll('#tabs button').forEach(b=>b.onclick=()=>{tab=b.dataset.t;document.querySelectorAll('#tabs button').forEach(x=>x.classList.toggle('on',x===b));['rows','opt','stats','ach'].forEach(t=>$('#p'+{rows:'Rows',opt:'Opt',stats:'Stats',ach:'Ach'}[t]).hidden=t!==tab);if(tab==='opt')renderOpt();if(tab==='ach')renderAch();if(tab==='stats')renderStats()});
+function renderOpt(){const bgs=['Blue','Red','Purple','Choco','Black','Stars','Sky','Gold','Mint','Pink'],ml=['Plain','Chocolate','Caramel','Strawberry','Blueberry','Mint','Orange','Raspberry'],ES={Plain:'Normal',Chocolate:'Chocolate',Caramel:'Caramelo',Strawberry:'Fresa',Blueberry:'Arándano',Mint:'Menta',Orange:'Naranja',Raspberry:'Frambuesa'};
+ $('#pOpt').innerHTML=`<div class="optrow"><button class="optbtn" id="oSave">💾 Guardar ahora</button><button class="optbtn" id="oExp">📤 Exportar</button><button class="optbtn" id="oImp">📥 Importar</button><button class="optbtn" id="oRes">🗑 Reiniciar todo</button></div>
+ <div class="optrow">Fondo: <select id="oBg">${bgs.map(b=>`<option value="bg${b}" ${G.bg==='bg'+b?'selected':''}>${b}</option>`).join('')}</select> &nbsp; Leche: <select id="oMilk">${ml.map(m=>`<option value="${m}" ${G.milk===m?'selected':''}>${ES[m]}</option>`).join('')}</select></div>
+ <div class="optrow"><label><input type="checkbox" id="oSnd" ${G.snd?'checked':''}> Sonidos</label> &nbsp; <label><input type="checkbox" id="oFx" ${G.fx?'checked':''}> Migas de galleta al hacer clic</label></div>
+ <div class="optrow" style="opacity:.7;font-size:12px">El juego se guarda solo cada 30 segundos en este navegador.<br>Arte: Cookie Clicker © Orteil. Sprites extraídos por SuperFlomm (The Spriters Resource). Proyecto de fans sin ánimo de lucro.</div>`;
+ $('#oSave').onclick=()=>{save();note('Guardado','Partida guardada.')};$('#oExp').onclick=()=>{save();const s=btoa(unescape(encodeURIComponent(JSON.stringify(G))));navigator.clipboard&&navigator.clipboard.writeText(s);prompt('Copia este código para guardar tu partida:',s)};
+ $('#oImp').onclick=()=>{const s=prompt('Pega tu código de partida:');if(!s)return;try{if(load(decodeURIComponent(escape(atob(s))))){save();applyLook();sigU=sigP='';rowsVis();note('Importado','Partida cargada.')}}catch(e){alert('Código no válido')}};
+ $('#oRes').onclick=()=>{if(confirm('¿Borrar toda tu partida?')){G=def();buffs=[];save();applyLook();sigU=sigP='';rowsVis();renderWr();renderOpt()}};
+ $('#oBg').onchange=e=>{G.bg=e.target.value;applyLook()};$('#oMilk').onchange=e=>{G.milk=e.target.value};$('#oSnd').onchange=e=>G.snd=e.target.checked;$('#oFx').onchange=e=>G.fx=e.target.checked}
+function renderStats(){const t=Math.floor((Date.now()-G.t0)/1000),h=Math.floor(t/3600),m=Math.floor(t%3600/60);const rows=[['Galletas en el banco',fmt(G.cookies)],['Galletas horneadas (total)',fmt(G.baked)],['Galletas por segundo',fmt(cps(),1)],['Galletas por clic',fmt(clickPower(),1)],['Clics',fmt(G.clicks)],['Galletas hechas a mano',fmt(G.handmade)],['Edificios',fmt(G.owned.reduce((a,b)=>a+b,0))],['Galletas doradas pulsadas',G.golden],['Wrinklers reventados',G.popped],['Logros',achCount()+' / '+AC.length],['Leche',Math.round(milkV()*100)+'%'],['Tiempo jugado',`${h} h ${m} min`]];$('#pStats').innerHTML='<h3 style="margin:0 0 8px">Estadísticas</h3>'+rows.map(r=>`<div><span>${r[0]}</span><b>${r[1]}</b></div>`).join('')}
+function renderAch(){$('#pAch').innerHTML=`<h3 style="margin:0">Logros: ${achCount()} / ${AC.length}</h3><div style="font-size:12px;opacity:.7">Cada logro da +4% de leche.</div><div class="grid">${AC.map(a=>`<div class="crate ${G.ach[a.id]?'':'no'}" data-tip="a:${a.id}">${G.ach[a.id]?ic(a.icon[0],a.icon[1]):'<i style="display:flex;align-items:center;justify-content:center;font-size:22px">?</i>'}</div>`).join('')}</div>`}
+function applyLook(){document.body.style.backgroundImage=`url(cookie/bg/${G.bg}.jpg)`;document.querySelectorAll('#left,#mid,#right').forEach(e=>e.style.backgroundImage=`url(cookie/bg/${G.bg}.jpg)`);$('#bakery').textContent=G.name+' · panadería'}
+$('#bakery').onclick=()=>{const n=prompt('Nombre de tu panadería:',G.name);if(n){G.name=n.slice(0,24);applyLook()}};
+// ---- bucle principal
+let last=performance.now(),acc=0,saveT=0,achT=0;
+function frame(now){const dt=Math.min(.25,(now-last)/1000);last=now;
+ const raw=rawCps(),gain=raw*(1-.05*G.wr.length)*dt;G.cookies+=gain;G.baked+=gain;G.wr.forEach(w=>w.s+=raw*.05*dt);
+ for(let i=buffs.length-1;i>=0;i--){buffs[i].t-=dt;if(buffs[i].t<=0){buffs.splice(i,1);renderBuffs()}}
+ nextGold-=dt;if(nextGold<=0){spawnGold();nextGold=60+Math.random()*90}
+ nextWr-=dt;if(nextWr<=0){nextWr=100+Math.random()*100;if(G.baked>1e6&&G.wr.length<10){G.wr.push({a:Math.random()*6.283,s:0,sh:Math.random()<.02?1:0});renderWr();note('¡Un wrinkler!','Se ha pegado a tu galleta y chupa tu producción.')}}
+ achT+=dt;if(achT>.5){achT=0;AC.forEach(a=>{if(!G.ach[a.id]&&a.t()){G.ach[a.id]=1;note('Logro: '+a.n,a.d);blip(990,.25,'triangle',.07);if(tab==='ach')renderAch()}})}
+ acc+=dt;if(acc>.25){acc=0;renderStore();rowsVis();if(buffs.length)renderBuffs();if(tab==='stats')renderStats()}
+ saveT+=dt;if(saveT>30){saveT=0;save()}
+ $('#cnt').innerHTML=`${fmt(Math.floor(G.cookies))}<br><small style="font-size:60%">${Math.floor(G.cookies)===1?'galleta':'galletas'}</small>`;$('#cpsd').textContent='por segundo: '+fmt(cps(),1)+(G.wr.length?'  (wrinklers: -'+G.wr.length*5+'%)':'');document.title=fmt(Math.floor(G.cookies))+' galletas';
+ drawOrbit(now);drawMilk(now);if(tab==='rows')drawRows(now);requestAnimationFrame(frame)}
+// ---- inicio
+(function init(){const s=localStorage.getItem(SAVE);if(s&&load(s)){const secs=Math.min((Date.now()-G.last)/1000,6*3600);if(secs>60){const g=rawCps()*(1-.05*G.wr.length)*secs*.5;if(g>0){G.cookies+=g;G.baked+=g;setTimeout(()=>note('¡Bienvenido de nuevo!','Tus edificios han hornado '+fmt(g)+' galletas mientras no estabas.'),600)}}}
+ applyLook();rowsVis();renderStore();renderWr();requestAnimationFrame(frame);addEventListener('beforeunload',save)})();
+</script></body></html>
