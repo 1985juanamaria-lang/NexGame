@@ -366,6 +366,24 @@
             border-color: var(--color-principal);
         }
 
+        .cant-btn {
+            background: var(--bg-body);
+            color: var(--color-secundario);
+            border: 1px solid var(--border-panel);
+            padding: 5px 8px;
+            border-radius: 6px;
+            font-size: 0.78rem;
+            font-weight: bold;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .cant-btn.activo {
+            background: var(--color-principal);
+            color: #000;
+            border-color: var(--color-principal);
+        }
+
         .tab-contenido {
             display: none;
             flex-direction: column;
@@ -575,6 +593,13 @@
                     <button class="subtab-btn" onclick="cambiarSubtab('clickup')">⚡ Aumento de Clics (20)</button>
                 </div>
 
+                <div class="subtabs-header" id="selector-cantidad">
+                    <button class="cant-btn activo" data-cant="1" onclick="cambiarCantidad(1)">Comprar x1</button>
+                    <button class="cant-btn" data-cant="10" onclick="cambiarCantidad(10)">x10</button>
+                    <button class="cant-btn" data-cant="50" onclick="cambiarCantidad(50)">x50</button>
+                    <button class="cant-btn" data-cant="100" onclick="cambiarCantidad(100)">x100</button>
+                </div>
+
                 <div id="lista-mejoras-auto"></div>
                 <div id="lista-mejoras-click" style="display: none;"></div>
             </div>
@@ -751,6 +776,32 @@
             logrosDesbloqueados: {}
         };
 
+
+        // ===== FORMATO DE NÚMEROS GRANDES (K, M, B, T, ... y luego notación E) =====
+        const SUFIJOS_NUM = ['K', 'M', 'B', 'T', 'Qa', 'Qi', 'Sx', 'Sp', 'Oc', 'No', 'Dc'];
+        function formatear(n, dec) {
+            n = Number(n);
+            if (isNaN(n)) return '0';
+            if (!isFinite(n)) return '∞';
+            if (n < 0) return '-' + formatear(-n, dec);
+            if (n < 1000) {
+                return n.toLocaleString('es-ES', { maximumFractionDigits: dec || 0, minimumFractionDigits: dec || 0 });
+            }
+            let idx = Math.floor(Math.log10(n) / 3) - 1;
+            if (idx >= SUFIJOS_NUM.length) {
+                let exp = Math.floor(Math.log10(n));
+                let mant = n / Math.pow(10, exp);
+                if (mant.toFixed(2) === '10.00') { mant = 1; exp++; }
+                return mant.toFixed(2).replace('.', ',') + 'E' + exp;
+            }
+            let valor = n / Math.pow(1000, idx + 1);
+            let dec2 = valor < 10 ? 2 : (valor < 100 ? 1 : 0);
+            if (parseFloat(valor.toFixed(dec2)) >= 1000 && idx + 1 < SUFIJOS_NUM.length) { idx++; valor /= 1000; dec2 = 2; }
+            return valor.toFixed(dec2).replace('.', ',') + ' ' + SUFIJOS_NUM[idx];
+        }
+        function descMejora(m, unidad) {
+            return '+' + formatear(m.valor) + ' ' + unidad;
+        }
         let listaLogrosProcedurales = [];
 
         function generar637Logros() {
@@ -763,7 +814,7 @@
                     id: `logro_polvo_clasico_${m}`,
                     icono: '✨',
                     nombre: `Magnate Estelar #${idx+1}`,
-                    desc: `Acumula ${m.toLocaleString()} Polvo Estelar histórico`,
+                    desc: `Acumula ${formatear(m)} Polvo Estelar histórico`,
                     check: () => partida.fichasTotalesHistoricas >= m
                 });
             });
@@ -787,7 +838,7 @@
                     id: `logro_clic_manual_${m}`,
                     icono: '👆',
                     nombre: `Toque Cósmico #${idx+1}`,
-                    desc: `Realiza ${m.toLocaleString()} clics manuales`,
+                    desc: `Realiza ${formatear(m)} clics manuales`,
                     check: () => partida.clicsManualesTotales >= m
                 });
             });
@@ -816,7 +867,7 @@
                     id: `logro_extra_${rellenoIdx}`,
                     icono: '⭐',
                     nombre: `Estrella Distante #${rellenoIdx}`,
-                    desc: `Alcanza ${metaExtra.toLocaleString()} Polvo Estelar acumulado`,
+                    desc: `Alcanza ${formatear(metaExtra)} Polvo Estelar acumulado`,
                     check: () => partida.fichasTotalesHistoricas >= metaExtra
                 });
                 rellenoIdx++;
@@ -932,7 +983,7 @@
             partida.fichas += valorGanado;
             partida.fichasTotalesHistoricas += valorGanado;
 
-            crearParticulaFlotante(e.clientX, e.clientY, `+${valorGanado}`);
+            crearParticulaFlotante(e.clientX, e.clientY, `+${formatear(valorGanado)}`);
             verificarLogrosGlobales();
             actualizarUI();
         }
@@ -949,11 +1000,12 @@
 
         function comprarMejoraAuto(id) {
             let mejora = partida.mejorasAuto[id];
-            if (partida.fichas >= mejora.costo) {
+            let lote = costoLote(mejora, cantidadCompra);
+            if (partida.fichas >= lote.total) {
                 sonarEfecto('compra');
-                partida.fichas -= mejora.costo;
-                mejora.cantidad++;
-                mejora.costo = Math.round(mejora.costo * mejora.mult);
+                partida.fichas -= lote.total;
+                mejora.cantidad += cantidadCompra;
+                mejora.costo = lote.siguiente;
                 recalcularCPS();
                 verificarLogrosGlobales();
                 actualizarUI();
@@ -963,11 +1015,12 @@
 
         function comprarMejoraClick(id) {
             let mejora = partida.mejorasClick[id];
-            if (partida.fichas >= mejora.costo) {
+            let lote = costoLote(mejora, cantidadCompra);
+            if (partida.fichas >= lote.total) {
                 sonarEfecto('compra');
-                partida.fichas -= mejora.costo;
-                mejora.cantidad++;
-                mejora.costo = Math.round(mejora.costo * mejora.mult);
+                partida.fichas -= lote.total;
+                mejora.cantidad += cantidadCompra;
+                mejora.costo = lote.siguiente;
                 recalcularPoderClick();
                 verificarLogrosGlobales();
                 actualizarUI();
@@ -1000,7 +1053,7 @@
         function ejecutarAscension() {
             let ganados = calcularMateriaPendiente();
             if (ganados > 0) {
-                if (confirm(`¿Ejecutar salto cuántico? Reiniciarás tu imperio pero ganarás +${ganados} Materia Oscura 🌌.`)) {
+                if (confirm(`¿Ejecutar salto cuántico? Reiniciarás tu imperio pero ganarás +${formatear(ganados)} Materia Oscura 🌌.`)) {
                     partida.materiaOscura += ganados;
                     partida.fichas = 0;
                     partida.poderClick = 1;
@@ -1069,7 +1122,26 @@
             }
         }
 
+        // ===== CANTIDAD DE COMPRA (x1, x10, x50, x100) =====
+        let cantidadCompra = 1;
+        try { let g = parseInt(localStorage.getItem('cantidadCompra11')); if ([1, 10, 50, 100].includes(g)) cantidadCompra = g; } catch (e) {}
+        function costoLote(m, k) {
+            let c = m.costo, total = 0;
+            for (let i = 0; i < k; i++) { total += c; c = Math.round(c * m.mult); }
+            return { total: total, siguiente: c };
+        }
+        function marcarCantidadActiva() {
+            document.querySelectorAll('.cant-btn').forEach(b => b.classList.toggle('activo', parseInt(b.dataset.cant) === cantidadCompra));
+        }
+        function cambiarCantidad(n) {
+            cantidadCompra = n;
+            try { localStorage.setItem('cantidadCompra11', n); } catch (e) {}
+            marcarCantidadActiva();
+            actualizarUI();
+        }
+
         function inicializarTiendaHTML() {
+            marcarCantidadActiva();
             let contenedorAuto = document.getElementById('lista-mejoras-auto');
             let contenedorClick = document.getElementById('lista-mejoras-click');
             
@@ -1084,8 +1156,8 @@
                 div.innerHTML = `
                     <div class="info-mejora">
                         <h4 id="nombre-auto-${key}">${m.nombre} (x${m.cantidad})</h4>
-                        <p>${m.desc}</p>
-                        <p id="costo-auto-${key}" style="color: var(--color-principal); font-weight: bold; margin-top: 2px;">Coste: ${Math.round(m.costo).toLocaleString()} ✨</p>
+                        <p>${descMejora(m, 'f/s')}</p>
+                        <p id="costo-auto-${key}" style="color: var(--color-principal); font-weight: bold; margin-top: 2px;">Coste${cantidadCompra > 1 ? ' (x' + cantidadCompra + ')' : ''}: ${formatear(costoLote(m, cantidadCompra).total)} ✨</p>
                     </div>
                     <button class="btn-comprar" id="btn-compra-auto-${key}" onclick="comprarMejoraAuto('${key}')">Comprar</button>
                 `;
@@ -1100,8 +1172,8 @@
                 div.innerHTML = `
                     <div class="info-mejora">
                         <h4 id="nombre-click-${key}">${m.nombre} (x${m.cantidad})</h4>
-                        <p>${m.desc}</p>
-                        <p id="costo-click-${key}" style="color: var(--color-principal); font-weight: bold; margin-top: 2px;">Coste: ${Math.round(m.costo).toLocaleString()} ✨</p>
+                        <p>${descMejora(m, 'clic')}</p>
+                        <p id="costo-click-${key}" style="color: var(--color-principal); font-weight: bold; margin-top: 2px;">Coste${cantidadCompra > 1 ? ' (x' + cantidadCompra + ')' : ''}: ${formatear(costoLote(m, cantidadCompra).total)} ✨</p>
                     </div>
                     <button class="btn-comprar" id="btn-compra-click-${key}" onclick="comprarMejoraClick('${key}')">Comprar</button>
                 `;
@@ -1146,23 +1218,23 @@
             let tiempoTexto = segundos > 60 ? `${(segundos/60).toFixed(1)} m` : `${Math.floor(segundos)} s`;
             let div = document.createElement('div');
             div.className = 'modal-offline';
-            div.innerHTML = `🌟 ¡Orbitas sincronizadas!<br>Extrajiste <b>+${Math.floor(ganancia).toLocaleString()} ✨</b> en ${tiempoTexto} offline`;
+            div.innerHTML = `🌟 ¡Orbitas sincronizadas!<br>Extrajiste <b>+${formatear(Math.floor(ganancia))} ✨</b> en ${tiempoTexto} offline`;
             document.body.appendChild(div);
             setTimeout(() => div.remove(), 5000);
         }
 
         function actualizarUI() {
-            document.getElementById('txt-fichas').textContent = `${Math.floor(partida.fichas).toLocaleString()} ✨`;
-            document.getElementById('txt-ps').textContent = `Polvo Estelar por seg: ${partida.fichasPorSegundo.toFixed(1)}`;
+            document.getElementById('txt-fichas').textContent = `${formatear(Math.floor(partida.fichas))} ✨`;
+            document.getElementById('txt-ps').textContent = `Polvo Estelar por seg: ${formatear(partida.fichasPorSegundo, 1)}`;
             
             let countL = contarLogrosDesbloqueados();
             let bonoLogroPct = (countL * 0.5).toFixed(1);
-            let bonoMateriaPct = (partida.materiaOscura * 10);
+            let bonoMateriaPct = formatear(partida.materiaOscura * 10);
 
             document.getElementById('txt-stats').innerHTML = `
-                Poder por clic: ${partida.poderClick.toLocaleString()} ✨<br>
-                Clics manuales: ${partida.clicsManualesTotales.toLocaleString()} 👆<br>
-                Materia Oscura: ${partida.materiaOscura} 🌌 (+${bonoMateriaPct}% Prod)<br>
+                Poder por clic: ${formatear(partida.poderClick)} ✨<br>
+                Clics manuales: ${formatear(partida.clicsManualesTotales)} 👆<br>
+                Materia Oscura: ${formatear(partida.materiaOscura)} 🌌 (+${bonoMateriaPct}% Prod)<br>
                 Logros Desbloqueados: ${countL} / 637 (+${bonoLogroPct}% Prod)
             `;
 
@@ -1178,8 +1250,9 @@
 
                 if (itemEl && nombreEl && costoEl && btnEl) {
                     nombreEl.textContent = `${m.nombre} (x${m.cantidad})`;
-                    costoEl.textContent = `Coste: ${Math.round(m.costo).toLocaleString()} ✨`;
-                    if (partida.fichas >= m.costo) {
+                    costoEl.textContent = `Coste${cantidadCompra > 1 ? ' (x' + cantidadCompra + ')' : ''}: ${formatear(costoLote(m, cantidadCompra).total)} ✨`;
+                    btnEl.textContent = cantidadCompra > 1 ? `Comprar x${cantidadCompra}` : 'Comprar';
+                    if (partida.fichas >= costoLote(m, cantidadCompra).total) {
                         itemEl.classList.remove('bloqueado');
                         btnEl.disabled = false;
                     } else {
@@ -1198,8 +1271,9 @@
 
                 if (itemEl && nombreEl && costoEl && btnEl) {
                     nombreEl.textContent = `${m.nombre} (x${m.cantidad})`;
-                    costoEl.textContent = `Coste: ${Math.round(m.costo).toLocaleString()} ✨`;
-                    if (partida.fichas >= m.costo) {
+                    costoEl.textContent = `Coste${cantidadCompra > 1 ? ' (x' + cantidadCompra + ')' : ''}: ${formatear(costoLote(m, cantidadCompra).total)} ✨`;
+                    btnEl.textContent = cantidadCompra > 1 ? `Comprar x${cantidadCompra}` : 'Comprar';
+                    if (partida.fichas >= costoLote(m, cantidadCompra).total) {
                         itemEl.classList.remove('bloqueado');
                         btnEl.disabled = false;
                     } else {
@@ -1212,8 +1286,8 @@
             let dGanados = calcularMateriaPendiente();
             let btnAscender = document.getElementById('btn-ascender');
             document.getElementById('txt-prestigio-gain').innerHTML = `
-                Materia Oscura a ganar: ${dGanados} 🌌<br>
-                <small style="color: var(--color-secundario);">Basado en ${Math.floor(partida.fichasTotalesHistoricas).toLocaleString()} Polvo Estelar histórico (1 🌌 por cada 1,000 ✨)</small>
+                Materia Oscura a ganar: ${formatear(dGanados)} 🌌<br>
+                <small style="color: var(--color-secundario);">Basado en ${formatear(Math.floor(partida.fichasTotalesHistoricas))} Polvo Estelar histórico (1 🌌 por cada 1,000 ✨)</small>
             `;
             btnAscender.disabled = (dGanados <= 0);
         }
