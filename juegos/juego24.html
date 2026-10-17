@@ -226,21 +226,41 @@ const $$=(s,r=document)=>[...r.querySelectorAll(s)];
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
+/* ---------- proxy propio (vercel.json) ----------
+   En redes que bloquean las APIs y los dominios de imágenes, todo pasa por tu propio dominio.
+   Si el proxy falla (o abres el archivo en local), se intenta la dirección original. */
+const PX_ON=/^https?:$/.test(location.protocol)&&!/^(localhost|127\.0\.0\.1|\[::1\])$/.test(location.hostname)&&localStorage.getItem('abre_noproxy')!=='1';
+const PX_MAP=[
+  ['https://api.pokemontcg.io/v2','/px/pk'],
+  ['https://images.pokemontcg.io','/px/pkimg'],
+  ['https://db.ygoprodeck.com/api/v7','/px/ygo'],
+  ['https://images.ygoprodeck.com','/px/ygoimg'],
+  ['https://optcgapi.com/api','/px/op'],
+  ['https://optcgapi.com/','/px/opsite/'],
+  ['https://en.onepiece-cardgame.com','/px/opimg']
+];
+function px(u){if(!PX_ON||!u||typeof u!=='string')return u;for(const [a,b] of PX_MAP)if(u.startsWith(a))return b+u.slice(a.length);return u}
+function unpx(u){if(!u||typeof u!=='string')return u;for(const [a,b] of PX_MAP)if(u.startsWith(b))return a+u.slice(b.length);return u}
+
 /* =====================================================================
    DATOS DE CADA JUEGO (cada uno con su API)
    ===================================================================== */
 async function getJSON(url,tries=2,ms=25000,headers){
+  const pu=px(url),cands=pu!==url?[pu,url]:[url];
   let last;
   for(let a=0;a<tries;a++){
-    const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),ms);
-    try{
-      const r=await fetch(url,{signal:ctl.signal,headers});
-      clearTimeout(to);
-      let j=null;try{j=await r.json()}catch(e){}
-      if(!r.ok)throw new Error((j&&j.error)||('HTTP '+r.status));
-      if(j==null)throw new Error('Respuesta vacía');
-      return j;
-    }catch(e){clearTimeout(to);last=e;if(a<tries-1)await sleep(700*(a+1))}
+    for(const u of cands){
+      const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),ms);
+      try{
+        const r=await fetch(u,{signal:ctl.signal,headers});
+        clearTimeout(to);
+        let j=null;try{j=await r.json()}catch(e){}
+        if(!r.ok)throw new Error((j&&j.error)||('HTTP '+r.status));
+        if(j==null)throw new Error('Respuesta vacía');
+        return j;
+      }catch(e){clearTimeout(to);last=e}
+    }
+    if(a<tries-1)await sleep(700*(a+1));
   }
   throw last;
 }
@@ -470,8 +490,8 @@ function migrateTiers(){
 }
 function totalOf(s){const c=setCards[s.id]||cached('set2_'+s.id,null);return c?c.length:(s.total||0)}
 /* imágenes */
-function imgOf(c){return GAME.id==='yugioh'&&cfg.ygoImg&&c.pid?cfg.ygoImg.replace('{id}',c.pid):c.img}
-function bigOf(c){return GAME.id==='yugioh'&&cfg.ygoImg&&c.pid?imgOf(c):(GAME.big(c)||imgOf(c))}
+function imgOf(c){return GAME.id==='yugioh'&&cfg.ygoImg&&c.pid?cfg.ygoImg.replace('{id}',c.pid):px(c.img)}
+function bigOf(c){return GAME.id==='yugioh'&&cfg.ygoImg&&c.pid?imgOf(c):(px(GAME.big(c))||imgOf(c))}
 addEventListener('error',e=>{
   const im=e.target;if(!im||im.tagName!=='IMG')return;
   const fb=im.dataset.fb;
@@ -576,7 +596,7 @@ async function viewShelf(){
     const shown=list.slice(0,S.shelfN);
     $('#shelf').innerHTML=shown.map(s=>{
       const o=ownedInSet(s.id),tot=totalOf(s);
-      const art=s.logo?`<img loading="lazy" src="${esc(s.logo)}" alt="" data-txt="${esc(s.name)}">`:`<div class="code">${esc(s.code||s.name.slice(0,6))}</div>`;
+      const art=s.logo?`<img loading="lazy" src="${esc(px(s.logo))}" alt="" data-txt="${esc(s.name)}">`:`<div class="code">${esc(s.code||s.name.slice(0,6))}</div>`;
       return `<button class="setbtn" data-set="${esc(s.id)}"><div class="lg">${art}</div><b>${esc(s.name)}</b><small>${esc(s.series)}${s.releaseDate?' · '+esc(s.releaseDate.slice(0,4)):''}</small><div class="bar"><i style="width:${pctOf(o,tot)}%"></i></div><small>${o}${tot?' / '+tot:''} cartas</small></button>`;
     }).join('')||'<p class="muted">No hay sets con ese nombre.</p>';
     $$('.setbtn').forEach(b=>b.onclick=()=>{S.setId=b.dataset.set;viewPack()});
@@ -592,7 +612,7 @@ async function viewPack(){
   const sets=await getSets().catch(()=>null);if(!sets)return failure('',viewShelf);
   const set=sets.find(s=>s.id===S.setId);if(!set){S.setId=null;return viewShelf()}
   const o=ownedInSet(set.id),h=hue(set.id),tot=totalOf(set);
-  const art=set.logo?`<img src="${esc(set.logo)}" alt="" data-hide>`:`<div class="code">${esc(set.code||set.name.slice(0,6))}</div>`;
+  const art=set.logo?`<img src="${esc(px(set.logo))}" alt="" data-hide>`:`<div class="code">${esc(set.code||set.name.slice(0,6))}</div>`;
   app.innerHTML=`<button class="btn small" id="back">← Todos los sets</button>
   <div class="stage">
     <div class="packwrap" id="packwrap"><div class="pack" id="pack" style="--h1:${h};--h2:${(h+50)%360}" role="button" tabindex="0" aria-label="Abrir sobre de ${esc(set.name)}">
@@ -655,7 +675,7 @@ async function openPack(set){
 function cardHTML(c,opts={}){
   const t=TIERS[c.t],holo=isHolo(c),kind=c.t===4?'gold':c.t>=3?'':(holo?'soft':'');
   const src=opts.big?bigOf(c):imgOf(c);
-  let fb=c.fb||'';if(opts.big&&src!==imgOf(c))fb=imgOf(c);
+  let fb=px(c.fb||'');if(opts.big&&src!==imgOf(c))fb=imgOf(c);if(!fb&&PX_ON&&src!==unpx(src))fb=unpx(src);
   return `<div class="tilt"><div class="card"><div class="face back"></div><div class="face front">
     <img src="${esc(src)}" ${fb?`data-fb="${esc(fb)}"`:''} data-n="${esc(c.name)}" data-t="${esc(t.n)}" alt="${esc(c.name)}" ${opts.lazy?'loading="lazy"':''} decoding="async">
     ${holo?`<div class="holo ${kind}"></div>`:''}<div class="glare"></div></div></div></div>`;
