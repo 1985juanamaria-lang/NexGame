@@ -239,7 +239,7 @@ const PX_MAP=[
   ['https://optcgapi.com/','/px/opsite/'],
   ['https://en.onepiece-cardgame.com','/px/opimg']
 ];
-function px(u){if(!PX_ON||!u||typeof u!=='string')return u;for(const [a,b] of PX_MAP)if(u.startsWith(a))return b+u.slice(a.length);return u}
+function px(u){if(!PX_ON||!u||typeof u!=='string')return u;for(const [a,b] of PX_MAP)if(u.startsWith(a)){let r=b+u.slice(a.length);if(b==='/px/op')r=r.replace(/\/(\?|$)/,'$1');return r}return u}
 function unpx(u){if(!u||typeof u!=='string')return u;for(const [a,b] of PX_MAP)if(u.startsWith(b))return a+u.slice(b.length);return u}
 
 /* =====================================================================
