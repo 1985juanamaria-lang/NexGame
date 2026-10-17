@@ -1,0 +1,17 @@
+{
+  "rewrites": [
+    { "source": "/px/pk/:path*",     "destination": "https://api.pokemontcg.io/v2/:path*" },
+    { "source": "/px/pkimg/:path*",  "destination": "https://images.pokemontcg.io/:path*" },
+    { "source": "/px/ygo/:path*",    "destination": "https://db.ygoprodeck.com/api/v7/:path*" },
+    { "source": "/px/ygoimg/:path*", "destination": "https://images.ygoprodeck.com/:path*" },
+    { "source": "/px/op/:path*",     "destination": "https://optcgapi.com/api/:path*" },
+    { "source": "/px/opsite/:path*", "destination": "https://optcgapi.com/:path*" },
+    { "source": "/px/opimg/:path*",  "destination": "https://en.onepiece-cardgame.com/:path*" }
+  ],
+  "headers": [
+    {
+      "source": "/px/(pkimg|ygoimg|opimg|opsite)/:path*",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800, s-maxage=2592000" }]
+    }
+  ]
+}
