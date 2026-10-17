@@ -1,0 +1,867 @@
+<!DOCTYPE html>
+<html lang="es" data-game="pokemon">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#000000">
+<title>Abre sobres</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bowlby+One&family=Nunito:wght@400;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#000;--panel:#0c0c11;--panel2:#15151d;--panel3:#1d1d27;--line:#26262f;
+  --text:#f4f4f8;--mute:#8f8fa0;--gold:#ffcb05;--red:#ee4b5a;--green:#3ccf8e;
+  --accent:#ffcb05;--accent-ink:#1a1400;--glow:rgba(255,203,5,.18);--ar:245/342;
+  --safe-t:env(safe-area-inset-top,0px);--safe-b:env(safe-area-inset-b,0px);--safe-b:env(safe-area-inset-bottom,0px);
+}
+html[data-game=onepiece]{--accent:#ff4d4d;--accent-ink:#fff;--glow:rgba(255,77,77,.2);--ar:63/88}
+html[data-game=yugioh]{--accent:#b98cff;--accent-ink:#12002b;--glow:rgba(185,140,255,.2);--ar:59/86}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{color-scheme:dark;scrollbar-color:#2a2a35 #000}
+html,body{margin:0;min-height:100%;background:#000;color:var(--text);font-family:'Nunito','Trebuchet MS',system-ui,sans-serif;font-size:16px;line-height:1.4}
+body{background:radial-gradient(1100px 520px at 50% -140px,var(--glow),transparent 70%),radial-gradient(700px 500px at 100% 100%,rgba(255,255,255,.03),transparent 60%),#000;background-attachment:fixed;min-height:100vh;padding-bottom:var(--safe-b)}
+::-webkit-scrollbar{width:10px;height:10px}::-webkit-scrollbar-track{background:#000}::-webkit-scrollbar-thumb{background:#262630;border-radius:8px;border:2px solid #000}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+h1,h2,h3{font-family:'Bowlby One','Arial Black',Impact,sans-serif;font-weight:400;margin:0;letter-spacing:.01em}
+body.picking .top,body.picking main,body.picking footer.foot{display:none}
+.top{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:calc(10px + var(--safe-t)) 14px 10px;background:rgba(0,0,0,.84);backdrop-filter:blur(10px);border-bottom:1px solid var(--line)}
+.logo{font-family:'Bowlby One','Arial Black',sans-serif;font-size:21px;color:var(--accent);text-shadow:0 0 22px var(--glow);margin-right:2px;white-space:nowrap}
+.gchip{display:flex;align-items:center;gap:6px;padding:6px 12px;border-radius:999px;background:var(--panel2);border:1px solid var(--line);font-weight:800;font-size:14px;white-space:nowrap}
+.gchip:hover{border-color:var(--accent)}
+.tabs{display:flex;gap:4px;flex:1;min-width:230px;padding:4px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.tab{flex:1;padding:7px 10px;border:0;background:transparent;border-radius:10px;font-weight:800;color:var(--mute);white-space:nowrap;transition:.15s}
+.tab:hover{color:var(--text)}
+.tab[aria-selected=true]{background:var(--accent);color:var(--accent-ink);box-shadow:0 0 18px var(--glow)}
+.pill{display:flex;align-items:center;gap:6px;padding:7px 12px;border-radius:999px;background:var(--panel);border:1px solid var(--line);font-weight:800;white-space:nowrap}
+.pill b{color:var(--gold)}
+.btn{border-radius:12px;padding:10px 18px;font-weight:800;background:var(--panel2);border:1px solid var(--line);transition:transform .08s,filter .15s,border-color .15s}
+.btn:hover{border-color:#3a3a48;filter:brightness(1.2)}.btn:active{transform:translateY(1px)}
+.btn.main{background:var(--accent);border-color:transparent;color:var(--accent-ink);box-shadow:0 0 0 1px rgba(255,255,255,.06),0 6px 22px var(--glow)}
+.btn.main:hover{filter:brightness(1.1)}
+.btn.red{background:#2a0e14;border-color:#6b1e2b;color:#ff8c99}
+.btn.small{padding:6px 12px;font-size:14px;border-radius:10px}
+.btn[disabled]{opacity:.45;pointer-events:none}
+main{max-width:1180px;margin:0 auto;padding:18px 14px 40px}
+footer.foot{max-width:1180px;margin:0 auto;padding:0 14px 40px;color:#5d5d6b;font-size:12px}
+.muted{color:var(--mute)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+input[type=search],input[type=text],select,textarea{background:var(--panel);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px 12px;font:inherit;min-width:0}
+input[type=search]:focus,input[type=text]:focus,select:focus,textarea:focus{border-color:var(--accent);outline:0;box-shadow:0 0 0 3px var(--glow)}
+textarea{width:100%;min-height:120px;font-family:ui-monospace,Menlo,monospace;font-size:12px}
+.title{font-size:26px;margin:4px 0 4px}
+.sub{margin:0 0 16px;color:var(--mute);max-width:70ch}
+/* ---- elegir juego ---- */
+#chooser{display:none;min-height:100vh;padding:calc(30px + var(--safe-t)) 18px 40px;place-items:center}
+body.picking #chooser{display:grid}
+.ch-in{width:min(1040px,100%);text-align:center}
+.ch-logo{font-family:'Bowlby One',sans-serif;font-size:15px;letter-spacing:.3em;text-transform:uppercase;color:var(--mute)}
+.ch-in h1{font-size:clamp(30px,6vw,54px);margin:10px 0 8px;line-height:1.05}
+.ch-in .sub{margin:0 auto 30px}
+.ch-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:16px}
+.gt{position:relative;display:flex;flex-direction:column;align-items:center;gap:6px;padding:26px 18px 20px;border-radius:24px;background:linear-gradient(180deg,color-mix(in srgb,var(--ga) 16%,#0b0b10),#07070a 70%);border:1px solid color-mix(in srgb,var(--ga) 35%,#1c1c24);transition:transform .2s,box-shadow .2s,border-color .2s;overflow:hidden}
+.gt::before{content:"";position:absolute;inset:-40% -20% auto;height:70%;background:radial-gradient(closest-side,color-mix(in srgb,var(--ga) 35%,transparent),transparent);opacity:.55;pointer-events:none;transition:opacity .2s}
+.gt:hover,.gt:focus-visible{transform:translateY(-6px);border-color:var(--ga);box-shadow:0 18px 50px color-mix(in srgb,var(--ga) 28%,transparent)}
+.gt:hover::before{opacity:1}
+.gt-art{position:relative;font-size:64px;line-height:1;filter:drop-shadow(0 6px 14px color-mix(in srgb,var(--ga) 55%,transparent));margin-bottom:4px}
+.gt b{position:relative;font-family:'Bowlby One',sans-serif;font-weight:400;font-size:26px;color:var(--ga)}
+.gt small{position:relative;color:var(--mute);font-size:14px;max-width:24ch}
+.gt-st{position:relative;margin-top:10px;padding:6px 12px;border-radius:99px;background:#000a;border:1px solid var(--line);font-size:13px;font-weight:800;color:#c9c9d6}
+.gt-last{position:absolute;top:12px;right:12px;padding:3px 10px;border-radius:99px;background:var(--ga);color:#000;font-weight:800;font-size:12px}
+.ch-foot{margin-top:28px;color:#5d5d6b;font-size:12px;max-width:80ch;margin-inline:auto}
+/* ---- estantería ---- */
+.shelf{display:grid;grid-template-columns:repeat(auto-fill,minmax(172px,1fr));gap:12px;margin-top:14px}
+.setbtn{display:flex;flex-direction:column;gap:6px;text-align:left;padding:12px;border-radius:16px;background:linear-gradient(165deg,var(--panel2),var(--panel) 70%);border:1px solid var(--line);transition:transform .15s,border-color .15s,box-shadow .15s}
+.setbtn:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:0 10px 30px var(--glow)}
+.setbtn .lg{height:62px;display:flex;align-items:center;justify-content:center}
+.setbtn img{max-width:100%;max-height:62px;object-fit:contain;filter:drop-shadow(0 3px 4px rgba(0,0,0,.6))}
+.setbtn .code{font-family:'Bowlby One',sans-serif;font-size:26px;color:var(--accent);letter-spacing:.02em;text-shadow:0 0 20px var(--glow)}
+.setbtn b{font-size:15px;line-height:1.2}
+.setbtn small{color:var(--mute)}
+.bar{height:6px;border-radius:99px;background:#000;border:1px solid #1c1c24;overflow:hidden}
+.bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--green),var(--accent));border-radius:99px}
+/* ---- sobre ---- */
+.stage{display:grid;grid-template-columns:minmax(240px,320px) 1fr;gap:28px;align-items:center;margin-top:10px}
+@media(max-width:760px){.stage{grid-template-columns:1fr;justify-items:center;text-align:center}.stage .side{width:100%}}
+.packwrap{position:relative;display:flex;justify-content:center;padding:26px 0;perspective:900px}
+.pack{--h1:230;--h2:290;position:relative;width:220px;height:340px;cursor:pointer;transform:rotate(-3deg);transition:transform .25s;filter:drop-shadow(0 24px 24px rgba(0,0,0,.8)) drop-shadow(0 0 28px var(--glow))}
+.pack:hover{transform:rotate(0) translateY(-6px) scale(1.03)}
+.pack .body,.pack .flap{position:absolute;left:0;right:0;overflow:hidden;background:linear-gradient(155deg,hsl(var(--h1) 78% 50%),hsl(var(--h2) 72% 22%))}
+.pack .flap{top:0;height:60px;border-radius:10px 10px 0 0;z-index:3;transform-origin:0 100%;clip-path:polygon(0 0,100% 0,100% 82%,95% 100%,90% 82%,85% 100%,80% 82%,75% 100%,70% 82%,65% 100%,60% 82%,55% 100%,50% 82%,45% 100%,40% 82%,35% 100%,30% 82%,25% 100%,20% 82%,15% 100%,10% 82%,5% 100%,0 82%)}
+.pack .body{top:48px;bottom:0;border-radius:0 0 10px 10px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:26px 14px 18px}
+.pack .flap::before,.pack .body::before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.22) 0 2px,transparent 2px 7px);mask:linear-gradient(#000 0 16px,transparent 16px calc(100% - 16px),#000 calc(100% - 16px));-webkit-mask:linear-gradient(#000 0 16px,transparent 16px calc(100% - 16px),#000 calc(100% - 16px))}
+.pack .flap::before{mask:none;-webkit-mask:none;opacity:.7}
+.pack .shine{position:absolute;inset:0;background:linear-gradient(105deg,transparent 35%,rgba(255,255,255,.5) 50%,transparent 65%);background-size:260% 100%;background-position:130% 0;animation:sweep 5s 1s ease-in-out infinite;mix-blend-mode:overlay;z-index:4;pointer-events:none}
+@keyframes sweep{0%,60%{background-position:130% 0}100%{background-position:-30% 0}}
+.pack .body img{max-width:88%;max-height:96px;object-fit:contain;filter:drop-shadow(0 4px 6px rgba(0,0,0,.6));z-index:2}
+.pack .body .code{font-family:'Bowlby One',sans-serif;font-size:40px;color:#fff;text-shadow:0 3px 0 rgba(0,0,0,.35),0 0 24px rgba(255,255,255,.3);z-index:2}
+.pack .body span{font-weight:800;font-size:14px;color:#fff;text-shadow:0 2px 3px rgba(0,0,0,.6);z-index:2;text-align:center}
+.pack .seal{position:absolute;bottom:24px;left:50%;width:38px;height:38px;margin-left:-19px;border-radius:50%;background:radial-gradient(circle at 50% 50%,#fff 0 6px,var(--red) 7px 14px,#fff 15px 17px,#d0d0e8 18px);opacity:.85;z-index:2}
+.pack.tear{animation:shake .5s linear}
+.pack.tear .flap{animation:flap .55s .45s ease-in forwards}
+.pack.tear .body{animation:drop .5s .75s ease-in forwards}
+@keyframes shake{0%,100%{transform:rotate(-3deg)}15%{transform:rotate(-7deg) translateX(-6px)}30%{transform:rotate(5deg) translateX(7px)}45%{transform:rotate(-6deg) translateX(-5px)}60%{transform:rotate(4deg) translateX(5px)}80%{transform:rotate(-2deg)}}
+@keyframes flap{to{transform:translate(70px,-110px) rotate(48deg);opacity:0}}
+@keyframes drop{to{transform:translateY(60px);opacity:0}}
+.skiphint{position:absolute;left:50%;bottom:0;transform:translateX(-50%);padding:6px 14px;border-radius:99px;background:#000c;border:1px solid var(--line);font-weight:800;font-size:13px;color:#d6d6e2;animation:pop .25s both;pointer-events:none}
+@keyframes pop{from{opacity:0;transform:translate(-50%,8px)}}
+.flash{position:fixed;inset:0;background:#fff;opacity:0;pointer-events:none;z-index:50}
+.flash.go{animation:flash .5s ease-out}
+@keyframes flash{0%{opacity:.85}100%{opacity:0}}
+.side h2{font-size:28px;line-height:1.1;margin-bottom:6px}
+.odds{margin:14px 0;padding:12px 14px;border-radius:14px;background:var(--panel);border:1px solid var(--line);font-size:14px;text-align:left}
+.odds div{display:flex;justify-content:space-between;gap:10px;padding:2px 0}
+.dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px}
+.qopt{display:flex;align-items:center;gap:8px;margin-top:12px;font-weight:700;font-size:14px;color:#c7c7d4;cursor:pointer}
+.qopt input{width:18px;height:18px;accent-color:var(--accent)}
+/* ---- cartas ---- */
+.grid{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;max-width:1000px;margin:16px auto}
+@media(max-width:820px){.grid{grid-template-columns:repeat(3,1fr);gap:10px}}
+@media(max-width:480px){.grid{grid-template-columns:repeat(2,1fr)}}
+.album-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(128px,1fr));gap:12px;margin-top:14px}
+.cw{position:relative;aspect-ratio:var(--ar);perspective:900px}
+.tilt{width:100%;height:100%;transition:transform .12s ease-out;transform-style:preserve-3d}
+.tilt.free{transition:none}
+.card{position:relative;width:100%;height:100%;transform-style:preserve-3d;transition:transform .6s cubic-bezier(.3,1.2,.4,1);cursor:pointer}
+.cw.flipped .card{transform:rotateY(180deg)}
+.face{position:absolute;inset:0;border-radius:4.6%/3.3%;overflow:hidden;backface-visibility:hidden;-webkit-backface-visibility:hidden}
+.back{background:radial-gradient(circle at 50% 50%,#e63946 0 11%,#fff 11.5% 14%,#1a2a8a 14.5% 15.5%,transparent 16%),repeating-linear-gradient(45deg,#2a3cbf 0 8px,#2333a8 8px 16px);border:5px solid #f5c518;box-shadow:inset 0 0 0 3px #000}
+.back::after{content:"";position:absolute;left:50%;top:50%;width:26%;aspect-ratio:1;margin:-13% 0 0 -13%;border-radius:50%;background:linear-gradient(#e63946 0 46%,#000 46% 54%,#fff 54%);border:3px solid #000;box-shadow:0 0 0 3px #fff}
+html[data-game=onepiece] .back{background:radial-gradient(circle at 50% 50%,#ffd166 0 9%,#7a1c1c 9.5% 13%,#ffd166 13.5% 15%,transparent 15.5%),repeating-linear-gradient(60deg,#0b1a3b 0 9px,#071229 9px 18px);border:5px solid #c1121f}
+html[data-game=onepiece] .back::after{width:34%;margin:-17% 0 0 -17%;border-radius:0;background:linear-gradient(45deg,transparent 42%,#ffd166 42% 58%,transparent 58%),linear-gradient(-45deg,transparent 42%,#ffd166 42% 58%,transparent 58%);border:0;box-shadow:none;opacity:.9}
+html[data-game=yugioh] .back{background:radial-gradient(circle at 50% 50%,#150a03 0 10%,#e0a43a 10.5% 12.5%,#150a03 13% 18%,#e0a43a 18.5% 19.5%,transparent 20%),conic-gradient(from 20deg,#6b3410,#b8651f,#6b3410,#b8651f,#6b3410,#b8651f,#6b3410);border:5px solid #1c0f05}
+html[data-game=yugioh] .back::after{width:16%;margin:-8% 0 0 -8%;background:radial-gradient(circle,#ff3b3b 0 30%,#150a03 32%);border:3px solid #e0a43a;box-shadow:none}
+.front{transform:rotateY(180deg);background:#0b0b10}
+.front img{width:100%;height:100%;display:block;object-fit:cover}
+.front .alt{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:10px;text-align:center;font-weight:800;background:linear-gradient(160deg,#22222c,#0b0b10);font-size:14px}
+.holo,.glare{position:absolute;inset:0;pointer-events:none;opacity:0;transition:opacity .25s}
+.holo{mix-blend-mode:color-dodge;background:repeating-linear-gradient(115deg,rgba(255,0,150,.55) 0,rgba(255,230,0,.55) 12%,rgba(0,255,170,.55) 24%,rgba(0,160,255,.55) 36%,rgba(160,60,255,.55) 48%,rgba(255,0,150,.55) 60%);background-size:260% 260%;background-position:calc(var(--mx,50)*1%) calc(var(--my,50)*1%)}
+.holo.gold{background:repeating-linear-gradient(120deg,rgba(255,215,0,.6) 0,rgba(255,250,200,.65) 9%,rgba(255,170,0,.55) 18%,rgba(255,215,0,.6) 28%);background-size:240% 240%;background-position:calc(var(--mx,50)*1%) calc(var(--my,50)*1%)}
+.holo.soft{opacity:0;background:linear-gradient(115deg,transparent 20%,rgba(255,255,255,.35) 45%,rgba(120,200,255,.35) 55%,transparent 80%);background-size:240% 240%;background-position:calc(var(--mx,50)*1%) calc(var(--my,50)*1%)}
+.glare{mix-blend-mode:overlay;background:radial-gradient(circle at calc(var(--mx,50)*1%) calc(var(--my,50)*1%),rgba(255,255,255,.75),transparent 48%)}
+.cw.flipped .tilt:hover .holo,.cw.flipped .tilt.on .holo{opacity:.6}
+.cw.flipped .tilt:hover .glare,.cw.flipped .tilt.on .glare{opacity:.55}
+.cw.flipped.t2 .face.front{box-shadow:0 0 0 2px rgba(74,168,255,.7)}
+.cw.glow{filter:drop-shadow(0 0 14px var(--gc))}
+.cw.dealt{animation:deal .45s both cubic-bezier(.2,.9,.3,1.2);animation-delay:calc(var(--i)*70ms)}
+@keyframes deal{from{opacity:0;transform:translateY(-60px) rotate(-12deg) scale(.7)}to{opacity:1;transform:none}}
+.grid.nodeal .cw.dealt{animation:none}
+.grid.fast .card{transition-duration:.01s}
+.badge{position:absolute;top:-8px;left:-8px;z-index:5;background:var(--red);color:#fff;font-weight:800;font-size:12px;padding:3px 8px;border-radius:99px;border:2px solid #000;transform:rotate(-8deg);opacity:0;transition:opacity .3s .4s}
+.cw.flipped .badge{opacity:1}
+.count{position:absolute;right:-6px;bottom:-6px;z-index:5;background:var(--accent);color:var(--accent-ink);font-weight:800;font-size:13px;min-width:26px;text-align:center;padding:2px 7px;border-radius:99px;border:2px solid #000}
+.cw.locked .front img{filter:grayscale(1) brightness(.22) contrast(1.1)}
+.cw.locked .card{cursor:default}
+.num{position:absolute;left:0;right:0;bottom:6px;z-index:4;text-align:center;font-size:12px;font-weight:800;color:#7b7b90;pointer-events:none}
+.ring{position:absolute;inset:-4px;border-radius:8px;border:3px solid var(--gc);opacity:0;pointer-events:none}
+.cw.burst .ring{animation:ring .9s ease-out}
+@keyframes ring{0%{opacity:.9;transform:scale(1)}100%{opacity:0;transform:scale(1.45)}}
+/* ---- varios ---- */
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{padding:5px 12px;border-radius:99px;border:1px solid var(--line);background:var(--panel);font-weight:800;font-size:13px;color:var(--mute)}
+.chip:hover{color:var(--text)}
+.chip[aria-pressed=true]{background:var(--accent);border-color:transparent;color:var(--accent-ink)}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px}
+.cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-top:14px}
+.ach{display:flex;gap:12px;align-items:center;padding:10px 0;border-bottom:1px solid var(--line)}
+.ach:last-child{border:0}
+.ach .ic{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;font-size:22px;background:var(--panel3);flex:none;filter:grayscale(.8) brightness(.8)}
+.ach.done .ic{background:var(--accent);filter:none}
+.ach .t{flex:1}.ach .t small{color:var(--mute);display:block}
+.hist{display:grid;grid-template-columns:100px 1fr 110px;gap:8px;align-items:center;font-size:14px;margin:6px 0}
+.hist .bar{height:12px}
+.loader{display:grid;place-items:center;gap:14px;padding:60px 0;text-align:center}
+.spin{width:46px;height:46px;border-radius:50%;border:5px solid var(--line);border-top-color:var(--accent);animation:sp .8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.err{padding:18px;border-radius:14px;background:#1b0a10;border:1px solid #6b1e2b;margin:20px 0}
+.modal{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;padding:18px;overflow:auto}
+.modal.open{display:flex}
+.sheet{width:min(94vw,460px);background:var(--panel);border:1px solid var(--line);border-radius:18px;padding:18px;max-height:94vh;overflow:auto}
+.sheet h3{font-size:20px;margin-bottom:10px}
+.sheet hr{border:0;border-top:1px solid var(--line);margin:12px 0}
+.zoom{display:grid;gap:14px;justify-items:center;width:min(92vw,400px)}
+.zoom .cw{width:min(76vw,330px);touch-action:none}
+.zoom .meta{text-align:center}
+#toast{position:fixed;left:50%;bottom:calc(22px + var(--safe-b));transform:translate(-50%,20px);background:#fff;color:#111;font-weight:800;padding:10px 18px;border-radius:12px;z-index:80;opacity:0;pointer-events:none;transition:.25s;max-width:92vw;text-align:center}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+.sw{display:flex;align-items:center;gap:10px;padding:8px 0}
+.sw input{width:20px;height:20px;accent-color:var(--accent)}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;animation-delay:0s!important;transition-duration:.01ms!important}.pack .shine{display:none}}
+</style>
+</head>
+<body class="picking">
+
+<div id="chooser" role="dialog" aria-label="Elegir juego"></div>
+
+<header class="top">
+  <div class="logo">Abre sobres</div>
+  <button class="gchip" id="swgame" title="Cambiar de juego" aria-label="Cambiar de juego"></button>
+  <nav class="tabs" role="tablist" aria-label="Secciones">
+    <button class="tab" role="tab" data-tab="sobres" aria-selected="true">Sobres</button>
+    <button class="tab" role="tab" data-tab="album" aria-selected="false">Álbum</button>
+    <button class="tab" role="tab" data-tab="stats" aria-selected="false">Logros y datos</button>
+  </nav>
+  <div class="pill" title="Monedas">🪙 <b id="coins">0</b></div>
+  <button class="btn small" id="daily" hidden>🎁 Regalo diario</button>
+  <button class="btn small" id="cfg" aria-label="Ajustes">⚙</button>
+</header>
+<main id="app"></main>
+<footer class="foot">Proyecto de fans, sin relación con The Pokémon Company, Bandai/Shueisha ni Konami. Todas las marcas y artes pertenecen a sus dueños.</footer>
+<div class="flash" id="flash"></div>
+<div class="modal" id="modal" role="dialog" aria-modal="true"></div>
+<div id="toast" role="status" aria-live="polite"></div>
+
+<script>
+'use strict';
+/* =====================================================================
+   CONFIGURACIÓN GENERAL
+   ===================================================================== */
+const PACK_COST=100,DAILY=150;
+const SLOT_W={2:70,3:22,4:8};   // probabilidades del hueco especial (se reparten entre las rarezas que existan)
+const BASE_TIERS=[{c:'#9aa3b5',v:5},{c:'#3ccf8e',v:12},{c:'#4aa8ff',v:40},{c:'#c26bff',v:120},{c:'#ffcb05',v:300}];
+const $=(s,r=document)=>r.querySelector(s);
+const $$=(s,r=document)=>[...r.querySelectorAll(s)];
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+
+/* =====================================================================
+   DATOS DE CADA JUEGO (cada uno con su API)
+   ===================================================================== */
+async function getJSON(url,tries=2,ms=25000,headers){
+  let last;
+  for(let a=0;a<tries;a++){
+    const ctl=new AbortController(),to=setTimeout(()=>ctl.abort(),ms);
+    try{
+      const r=await fetch(url,{signal:ctl.signal,headers});
+      clearTimeout(to);
+      let j=null;try{j=await r.json()}catch(e){}
+      if(!r.ok)throw new Error((j&&j.error)||('HTTP '+r.status));
+      if(j==null)throw new Error('Respuesta vacía');
+      return j;
+    }catch(e){clearTimeout(to);last=e;if(a<tries-1)await sleep(700*(a+1))}
+  }
+  throw last;
+}
+const unwrap=j=>Array.isArray(j)?j:((j&&(j.results||j.data||j.sets||j.cards))||[]);
+
+/* ---------- Pokémon: pokemontcg.io ---------- */
+async function pkApi(path){
+  const h={};if(cfg.key)h['X-Api-Key']=cfg.key;
+  return getJSON('https://api.pokemontcg.io/v2'+path,3,25000,h);
+}
+function pkBaseTier(r){
+  const s=(r||'').toLowerCase();
+  if(!s||s==='common')return 0;
+  if(s==='uncommon')return 1;
+  if(/secret|rainbow|hyper|special illustration|shiny|gold|black white/.test(s))return 4;
+  if(/ultra|illustration|\b(ex|gx|v|vmax|vstar|v-union)\b|lv\.x|prime|legend|break|amazing|radiant|prism|star|double|ace spec/.test(s))return 3;
+  return 2;
+}
+function pkTier(r,num,printed){
+  let t=pkBaseTier(r);const n=String(num==null?'':num).trim();
+  if(n){
+    if(/^[A-Za-z]$/.test(n)||/rgb/i.test(n))t=Math.max(t,4);
+    else if(/^(TG|GG|SV|RC)\d+$/i.test(n))t=Math.max(t,3);
+    else if(/^\d+$/.test(n)&&printed>0&&parseInt(n,10)>printed)t=Math.max(t,3);
+  }
+  return t;
+}
+
+/* ---------- One Piece: optcgapi.com ---------- */
+// Si el navegador bloquea la petición directa (CORS), se prueba por un proxy público.
+const OP_ROUTES=[u=>u,u=>'https://corsproxy.io/?url='+encodeURIComponent(u),u=>'https://api.allorigins.win/raw?url='+encodeURIComponent(u)];
+let opRoute=0,OPALL=null;
+async function opGet(path){
+  const url='https://optcgapi.com/api'+path;let last;
+  for(let k=0;k<OP_ROUTES.length;k++){
+    const r=(opRoute+k)%OP_ROUTES.length;
+    try{const j=await getJSON(OP_ROUTES[r](url),1,25000);opRoute=r;return j}catch(e){last=e}
+  }
+  throw last;
+}
+const opAll=()=>OPALL||(OPALL=opGet('/allSetCards/').then(unwrap).catch(e=>{OPALL=null;throw e}));
+function opSeries(id){const p=String(id).toUpperCase();return p.startsWith('OP')?'Boosters':p.startsWith('EB')?'Extra Booster':p.startsWith('PRB')?'Premium Booster':p.startsWith('ST')?'Starter Deck':'One Piece'}
+function opSetObj(o){
+  if(typeof o==='string')o={set_id:o,set_name:o};
+  const id=o.set_id||o.id||o.set_code||o.code||o.st_id;if(!id)return null;
+  return {id:String(id),name:String(o.set_name||o.name||o.title||id),code:String(id),series:opSeries(id),total:+(o.total||o.card_count||o.num_of_cards||0)||0,releaseDate:o.release_date||o.date||'',logo:''};
+}
+function opIsVariant(id,name){return /_[a-z]+\d*$/i.test(id||'')||/parallel|alternate art|alt art|manga|\(sp\)|signed|wanted/i.test(name||'')}
+function opTier(rar,variant){
+  const r=String(rar||'').toUpperCase().trim();
+  let t={C:0,UC:1,R:2,L:2,P:2,SR:3,SEC:4,SP:4,'SP CARD':4,TR:4,SCR:4}[r];
+  if(t==null)t=r.includes('SEC')||r.includes('SP')?4:1;
+  if(variant)t=Math.min(4,Math.max(t,2)+1);
+  return t;
+}
+function opCard(c){
+  const id=c.card_image_id||((c.card_set_id||'')+'|'+(c.card_name||''));
+  const off=c.card_image_id?`https://en.onepiece-cardgame.com/images/cardlist/card/${c.card_image_id}.png`:'';
+  const img=c.card_image||off;if(!img)return null;
+  const variant=opIsVariant(c.card_image_id,c.card_name);
+  const name=String(c.card_name||'?').replace(/\s*\(\d{2,3}\)/g,'').trim();
+  return {id,name,num:c.card_set_id||id,r:(c.rarity||'')+(variant?' ★':''),img,fb:img===off?'':off,t:opTier(c.rarity,variant)};
+}
+
+/* ---------- Yu-Gi-Oh!: YGOPRODeck ---------- */
+const YGO='https://db.ygoprodeck.com/api/v7';
+function ygoTier(r){
+  const s=String(r||'').toLowerCase();
+  if(/secret|ghost|starlight|prismatic|quarter|10000|ten thousand|extra secret/.test(s))return 4;
+  if(/ultra|ultimate|gold|platinum|collector|millennium|pharaoh|kaiba|premium/.test(s))return 3;
+  if(/super|mosaic|shatterfoil|starfoil|parallel/.test(s))return 2;
+  if(/\brare\b/.test(s))return 1;
+  return 0;
+}
+
+const GAMES={
+  pokemon:{
+    id:'pokemon',name:'Pokémon',emoji:'⚡',accent:'#ffcb05',theme:'#000000',
+    tag:'Sobres de todas las expansiones del Pokémon TCG',api:'Pokémon TCG (pokemontcg.io)',
+    tiers:['Común','Poco común','Rara','Ultra rara','Secreta'],pl:['comunes','poco comunes','raras','ultra raras','secretas'],
+    fixed:[[0,6],[1,3]],
+    async sets(){
+      const j=await pkApi('/sets?orderBy=-releaseDate&select=id,name,series,total,printedTotal,releaseDate,images');
+      return j.data.map(s=>({id:s.id,name:s.name,series:s.series,total:s.total,printed:s.printedTotal,releaseDate:s.releaseDate,logo:(s.images&&s.images.logo)||''}));
+    },
+    async cards(set){
+      let all=[],page=1;
+      while(true){
+        const j=await pkApi(`/cards?q=${encodeURIComponent('set.id:"'+set.id+'"')}&pageSize=250&page=${page}&select=id,name,number,rarity,images`);
+        all=all.concat(j.data.map(x=>({id:x.id,name:x.name,num:x.number,r:x.rarity||'',img:(x.images&&x.images.small)||'',fb:''})));
+        if(all.length>=j.totalCount||!j.data.length)break;page++;
+      }
+      all.forEach(x=>x.t=pkTier(x.r,x.num,set.printed));
+      return all;
+    },
+    retier(m,set){return pkTier(m.r,m.num,set&&set.printed)},
+    big:c=>c.img?c.img.replace(/\.png$/,'_hires.png'):''
+  },
+  onepiece:{
+    id:'onepiece',name:'One Piece',emoji:'🏴‍☠️',accent:'#ff4d4d',theme:'#000000',
+    tag:'Sobres del juego de cartas One Piece, de OP-01 en adelante',api:'One Piece TCG (optcgapi.com)',
+    tiers:['Común','Poco común','Rara','Súper rara','Secreta'],pl:['comunes','poco comunes','raras','súper raras','secretas'],
+    fixed:[[0,6],[1,3]],
+    async sets(){
+      let list=[];
+      try{list=unwrap(await opGet('/allSets/')).map(opSetObj).filter(Boolean)}catch(e){}
+      if(!list.length){ // plan B: deducir los sets a partir de todas las cartas
+        const all=await opAll(),m=new Map();
+        all.forEach(c=>{if(c.set_id&&!m.has(c.set_id))m.set(c.set_id,opSetObj({set_id:c.set_id,set_name:c.set_name}))});
+        list=[...m.values()];
+      }
+      let main=list.filter(s=>/^(OP|EB|PRB)/i.test(s.id));if(main.length)list=main;
+      const rank=s=>/^OP/i.test(s.id)?0:/^EB/i.test(s.id)?1:2;
+      return list.sort((a,b)=>rank(a)-rank(b)||b.id.localeCompare(a.id,undefined,{numeric:true}));
+    },
+    async cards(set){
+      let arr=[];
+      try{arr=unwrap(await opGet('/sets/'+encodeURIComponent(set.id)+'/'))}catch(e){}
+      if(!arr.length){const all=await opAll();arr=all.filter(c=>c.set_id===set.id||c.set_name===set.name)}
+      const seen=new Set(),out=[];
+      arr.forEach(c=>{const x=opCard(c);if(x&&!seen.has(x.id)){seen.add(x.id);out.push(x)}});
+      out.sort((a,b)=>String(a.num).localeCompare(String(b.num),undefined,{numeric:true}));
+      return out;
+    },
+    big:c=>c.img
+  },
+  yugioh:{
+    id:'yugioh',name:'Yu-Gi-Oh!',emoji:'🐉',accent:'#b98cff',theme:'#000000',
+    tag:'Sobres de packs y expansiones del Yu-Gi-Oh! TCG',api:'Yu-Gi-Oh! (YGOPRODeck)',
+    tiers:['Común','Rara','Súper rara','Ultra rara','Secreta'],pl:['comunes','raras','súper raras','ultra raras','secretas'],
+    fixed:[[0,7],[1,1]],
+    async sets(){
+      const j=await getJSON(YGO+'/cardsets.php',2);
+      return unwrap(j).filter(s=>s.set_name&&(s.num_of_cards||0)>=15).map(s=>({id:s.set_name,name:s.set_name,code:s.set_code||'',series:s.set_code||'Yu-Gi-Oh!',total:s.num_of_cards||0,releaseDate:s.tcg_date||'',logo:''}))
+        .sort((a,b)=>(b.releaseDate||'').localeCompare(a.releaseDate||''));
+    },
+    async cards(set){
+      const j=await getJSON(YGO+'/cardinfo.php?cardset='+encodeURIComponent(set.name),2);
+      const nm=set.name.toLowerCase(),seen=new Set(),out=[];
+      for(const c of (j.data||[])){
+        const im=c.card_images&&c.card_images[0];if(!im)continue;
+        for(const p of (c.card_sets||[])){
+          if((p.set_name||'').toLowerCase()!==nm)continue;
+          const id=p.set_code+'|'+(p.set_rarity_code||p.set_rarity||'');
+          if(seen.has(id))continue;seen.add(id);
+          out.push({id,name:c.name,num:p.set_code,r:p.set_rarity||'',img:im.image_url_small||im.image_url,pid:im.id,fb:'',t:ygoTier(p.set_rarity)});
+        }
+      }
+      out.sort((a,b)=>String(a.num).localeCompare(String(b.num),undefined,{numeric:true}));
+      return out;
+    },
+    big:c=>c.img?c.img.replace('/cards_small/','/cards/'):''
+  }
+};
+let GAME=GAMES.pokemon,TIERS=[];
+const packSize=()=>GAME.fixed.reduce((a,[,n])=>a+n,0)+1;
+const ck=k=>GAME.id==='pokemon'?k:GAME.id+'_'+k;
+
+/* =====================================================================
+   GUARDADO (una partida por juego + ajustes comunes)
+   ===================================================================== */
+const SAVEKEY={pokemon:'abre_sobres_pokemon_v1',onepiece:'abre_sobres_onepiece_v1',yugioh:'abre_sobres_yugioh_v1'};
+const LSCFG='abre_cfg_v2',LSLAST='abre_lastgame';
+const defaults=g=>({game:g,coins:500,packs:0,cards:{},ach:{},daily:'',pulls:[0,0,0,0,0],total:0,spent:0});
+function loadSaveFor(g){try{const d=JSON.parse(localStorage.getItem(SAVEKEY[g]));if(d)return Object.assign(defaults(g),d,{game:g})}catch(e){}return defaults(g)}
+function loadCfg(){
+  const base={mute:false,free:false,key:'',skip:false,ygoImg:''};
+  try{const d=JSON.parse(localStorage.getItem(LSCFG));if(d)return Object.assign(base,d)}catch(e){}
+  const old=loadSaveFor('pokemon');   // trae los ajustes de la versión anterior
+  return Object.assign(base,{mute:!!old.mute,free:!!old.free,key:old.key||''});
+}
+let cfg=loadCfg(),save=defaults('pokemon');
+function persist(){try{localStorage.setItem(SAVEKEY[GAME.id],JSON.stringify(save))}catch(e){toast('No se pudo guardar: el almacenamiento está lleno')}}
+function persistCfg(){try{localStorage.setItem(LSCFG,JSON.stringify(cfg))}catch(e){}}
+function cache(k,v){try{localStorage.setItem('abre_c_'+ck(k),JSON.stringify({t:Date.now(),v}))}catch(e){}}
+function cached(k,ttl){try{const d=JSON.parse(localStorage.getItem('abre_c_'+ck(k)));if(d&&(ttl==null||Date.now()-d.t<ttl))return d.v}catch(e){}return null}
+
+/* =====================================================================
+   SONIDO
+   ===================================================================== */
+let AC;
+function tone(f,d=.12,type='sine',v=.07,when=0){if(cfg.mute)return;try{AC=AC||new(window.AudioContext||window.webkitAudioContext)();const t=AC.currentTime+when,o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.setValueAtTime(f,t);g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.connect(g);g.connect(AC.destination);o.start(t);o.stop(t+d)}catch(e){}}
+const sfx={
+  tear(){for(let i=0;i<7;i++)tone(300+Math.random()*900,.06,'sawtooth',.04,i*.045)},
+  flip(){tone(520,.06,'triangle',.06)},
+  rare(t){const b=[523,659,784,1047,1319];for(let i=0;i<Math.min(5,t+1);i++)tone(b[i],.28,'triangle',.07,i*.09)},
+  coin(){tone(880,.08,'square',.04);tone(1320,.14,'square',.04,.07)},
+  ach(){[784,988,1175,1568].forEach((f,i)=>tone(f,.25,'triangle',.07,i*.1))}
+};
+let tt;function toast(m){const e=$('#toast');e.textContent=m;e.classList.add('show');clearTimeout(tt);tt=setTimeout(()=>e.classList.remove('show'),2600)}
+
+/* =====================================================================
+   SALTAR ANIMACIONES: un toque o una tecla cualquiera acaba la espera
+   ===================================================================== */
+let skipNow=null;
+function armSkip(onSkip,ms){            // devuelve una promesa: true si se saltó, false si terminó sola
+  return new Promise(res=>{
+    let done=false;
+    const fin=sk=>{if(done)return;done=true;clearTimeout(t);if(skipNow===wrap)skipNow=null;if(sk&&onSkip)onSkip();res(sk)};
+    const wrap=()=>fin(true),t=setTimeout(()=>fin(false),ms);
+    skipNow=wrap;
+  });
+}
+['pointerdown','keydown'].forEach(ev=>addEventListener(ev,e=>{if(skipNow&&!(ev==='keydown'&&e.repeat))skipNow()},true));
+
+/* =====================================================================
+   CARGA DE SETS Y CARTAS
+   ===================================================================== */
+let SETS=null;const setCards={};
+async function getSets(){
+  if(SETS)return SETS;
+  const c=cached('sets2',864e5);if(c){SETS=c;migrateTiers();return SETS}
+  try{SETS=await GAME.sets();cache('sets2',SETS);migrateTiers();return SETS}
+  catch(e){const old=cached('sets2',null);if(old){SETS=old;migrateTiers();return SETS}throw e}
+}
+async function getSetCards(id){
+  if(setCards[id])return setCards[id];
+  const c=cached('set2_'+id,null);if(c){setCards[id]=c;return c}
+  const set=(SETS||[]).find(s=>s.id===id)||{id,name:id};
+  const all=await GAME.cards(set);
+  setCards[id]=all;cache('set2_'+id,all);migrateTiers();return all;
+}
+function migrateTiers(){
+  if(!SETS||!GAME.retier)return;let ch=false;
+  for(const id in save.cards){const e=save.cards[id],s=SETS.find(x=>x.id===e.m.s),nt=GAME.retier(e.m,s);if(nt!==e.m.t){save.pulls[e.m.t]=Math.max(0,save.pulls[e.m.t]-e.n);save.pulls[nt]+=e.n;e.m.t=nt;ch=true}}
+  if(ch)persist();
+}
+function totalOf(s){const c=setCards[s.id]||cached('set2_'+s.id,null);return c?c.length:(s.total||0)}
+/* imágenes */
+function imgOf(c){return GAME.id==='yugioh'&&cfg.ygoImg&&c.pid?cfg.ygoImg.replace('{id}',c.pid):c.img}
+function bigOf(c){return GAME.id==='yugioh'&&cfg.ygoImg&&c.pid?imgOf(c):(GAME.big(c)||imgOf(c))}
+addEventListener('error',e=>{
+  const im=e.target;if(!im||im.tagName!=='IMG')return;
+  const fb=im.dataset.fb;
+  if(fb&&!im.dataset.tried){im.dataset.tried=1;im.src=fb;return}
+  if(im.dataset.n!=null){const d=document.createElement('div');d.className='alt';d.innerHTML=esc(im.dataset.n)+'<small>'+esc(im.dataset.t||'')+'</small>';im.replaceWith(d)}
+  else if(im.dataset.txt!=null){const b=document.createElement('b');b.textContent=im.dataset.txt;im.replaceWith(b)}
+  else if(im.dataset.hide!=null)im.style.display='none';
+},true);
+
+/* =====================================================================
+   RAREZAS Y SOBRES
+   ===================================================================== */
+const isHolo=c=>c.t>=3||/holo/i.test(c.r);
+function pools(cards){const p=[[],[],[],[],[]];cards.forEach(c=>p[c.t].push(c));return p}
+function slotOdds(p){const w={};let sum=0;for(const t of [2,3,4])if(p[t].length){w[t]=SLOT_W[t];sum+=w[t]}
+  if(!sum)return null;for(const t in w)w[t]=w[t]/sum*100;return w}
+function pick(arr,used){const free=arr.filter(c=>!used.has(c.id));const a=free.length?free:arr;return a[Math.floor(Math.random()*a.length)]}
+function buildPack(cards){
+  const p=pools(cards),used=new Set(),out=[];
+  const fallback=t=>{for(let k=t;k>=0;k--)if(p[k].length)return p[k];for(let k=t+1;k<5;k++)if(p[k].length)return p[k];return cards};
+  const take=(t,n)=>{for(let i=0;i<n;i++){const c=pick(fallback(t),used);used.add(c.id);out.push(c)}};
+  GAME.fixed.forEach(([t,n])=>take(t,n));
+  const odds=slotOdds(p);let slotT=2;
+  if(odds){let r=Math.random()*100;for(const t of Object.keys(odds).map(Number).sort()){r-=odds[t];if(r<=0){slotT=t;break}slotT=t}}
+  take(slotT,1);
+  return out;
+}
+function expectPct(){   // % esperado por rareza en un set que tenga todas
+  const n=packSize(),e=[0,0,0,0,0];
+  GAME.fixed.forEach(([t,k])=>e[t]+=k/n*100);
+  const sum=SLOT_W[2]+SLOT_W[3]+SLOT_W[4];[2,3,4].forEach(t=>e[t]+=SLOT_W[t]/sum/n*100);
+  return e.map(x=>+x.toFixed(1));
+}
+
+/* =====================================================================
+   ESTADO DE LA VISTA
+   ===================================================================== */
+const S={tab:'sobres',setId:null,albumSet:'all',albumTier:-1,albumQ:'',albumOwned:false,shelfQ:'',shelfN:72};
+const app=$('#app');
+function today(){return new Date().toISOString().slice(0,10)}
+function uniqueCount(){return Object.keys(save.cards).length}
+function ownedInSet(id){let n=0;for(const k in save.cards)if(save.cards[k].m.s===id)n++;return n}
+function money(){$('#coins').textContent=save.coins.toLocaleString('es');$('#daily').hidden=save.daily===today()}
+function pay(n){save.coins+=n;persist();money()}
+function hue(id){let h=0;for(const ch of id)h=(h*31+ch.charCodeAt(0))%360;return h}
+const pctOf=(o,t)=>t?Math.min(100,o/t*100):0;
+
+/* =====================================================================
+   ELEGIR JUEGO
+   ===================================================================== */
+function renderChooser(){
+  const last=localStorage.getItem(LSLAST);
+  $('#chooser').innerHTML=`<div class="ch-in"><div class="ch-logo">Abre sobres</div><h1>¿A qué quieres jugar?</h1>
+  <p class="sub">Elige un juego de cartas. Cada uno guarda su propia colección, monedas y logros.</p>
+  <div class="ch-grid">${Object.values(GAMES).map((g,i)=>{const s=loadSaveFor(g.id);return `<button class="gt" data-g="${g.id}" style="--ga:${g.accent}" aria-label="${esc(g.name)}"><span class="gt-art">${g.emoji}</span><b>${esc(g.name)}</b><small>${esc(g.tag)}</small><span class="gt-st">🪙 ${s.coins.toLocaleString('es')} · 🃏 ${Object.keys(s.cards).length} · 📦 ${s.packs}</span>${last===g.id?'<span class="gt-last">Continuar</span>':''}</button>`}).join('')}</div>
+  <p class="ch-foot">Proyecto de fans, sin relación con The Pokémon Company, Bandai/Shueisha ni Konami. Datos de cartas: pokemontcg.io, optcgapi.com y YGOPRODeck.</p></div>`;
+  $$('.gt').forEach(b=>b.onclick=()=>enterGame(b.dataset.g));
+  const f=last&&$(`.gt[data-g="${last}"]`);(f||$('.gt')).focus({preventScroll:true});
+}
+function showChooser(){persist();closeModalNow();document.body.classList.add('picking');document.documentElement.dataset.game='pokemon';document.title='Abre sobres';window.scrollTo(0,0);renderChooser()}
+function enterGame(id){
+  if(!GAMES[id])return;
+  GAME=GAMES[id];localStorage.setItem(LSLAST,id);
+  save=loadSaveFor(id);SETS=null;for(const k in setCards)delete setCards[k];OPALL=null;
+  Object.assign(S,{tab:'sobres',setId:null,albumSet:'all',albumTier:-1,albumQ:'',albumOwned:false,shelfQ:'',shelfN:72});
+  TIERS=BASE_TIERS.map((t,i)=>Object.assign({n:GAME.tiers[i]},t));
+  buildACH();
+  document.documentElement.dataset.game=id;document.title='Abre sobres · '+GAME.name;
+  $('#swgame').innerHTML=`<span>${GAME.emoji}</span>${esc(GAME.name)} <small class="muted">▾</small>`;
+  document.body.classList.remove('picking');
+  $$('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab==='sobres'));
+  money();render();
+}
+$('#swgame').onclick=showChooser;
+function paramGame(){
+  const q=new URLSearchParams(location.search),raw=(q.get('game')||q.get('juego')||location.hash.slice(1)||'').toLowerCase().replace(/[^a-z]/g,'');
+  const map={pokemon:'pokemon',poke:'pokemon',onepiece:'onepiece',op:'onepiece',yugioh:'yugioh',ygo:'yugioh',yugi:'yugioh'};
+  return map[raw]||null;
+}
+
+/* =====================================================================
+   NAVEGACIÓN
+   ===================================================================== */
+$$('.tab').forEach(b=>b.onclick=()=>go(b.dataset.tab));
+function go(tab){S.tab=tab;$$('.tab').forEach(b=>b.setAttribute('aria-selected',b.dataset.tab===tab));render()}
+let revealCtl=null;
+function render(){revealCtl=null;window.scrollTo(0,0);({sobres:viewShelf,album:viewAlbum,stats:viewStats})[S.tab]()}
+function loading(msg){app.innerHTML=`<div class="loader"><div class="spin"></div><div>${esc(msg)}</div></div>`}
+function failure(msg,retry){app.innerHTML=`<div class="err"><b>No se pudo conectar con la API de ${esc(GAME.api)}.</b><p>${esc(msg||'')} Estas APIs gratuitas a veces tardan en responder o se limitan. Revisa la conexión a internet y vuelve a intentarlo.</p><button class="btn main" id="retry">Reintentar</button></div>`;$('#retry').onclick=retry}
+
+/* ---------- vista: estantería de sets ---------- */
+async function viewShelf(){
+  if(S.setId)return viewPack();
+  loading('Cargando los sets de cartas…');
+  let sets;try{sets=await getSets()}catch(e){return failure(e.message,viewShelf)}
+  if(S.tab!=='sobres'||S.setId)return;
+  app.innerHTML=`<h1 class="title">Elige un set</h1><p class="sub">Cada sobre trae ${packSize()} cartas reales del set que elijas. Cuesta ${PACK_COST} monedas${cfg.free?' (modo clase: gratis)':''}.</p>
+  <div class="row"><input type="search" id="q" placeholder="Buscar set o serie…" value="${esc(S.shelfQ)}" aria-label="Buscar set"></div><div class="shelf" id="shelf"></div><div class="row" style="justify-content:center;margin-top:14px"><button class="btn" id="more" hidden></button></div>`;
+  const draw=()=>{
+    const q=S.shelfQ.toLowerCase();
+    const list=sets.filter(s=>!q||(s.name+' '+s.series+' '+(s.code||'')).toLowerCase().includes(q));
+    const shown=list.slice(0,S.shelfN);
+    $('#shelf').innerHTML=shown.map(s=>{
+      const o=ownedInSet(s.id),tot=totalOf(s);
+      const art=s.logo?`<img loading="lazy" src="${esc(s.logo)}" alt="" data-txt="${esc(s.name)}">`:`<div class="code">${esc(s.code||s.name.slice(0,6))}</div>`;
+      return `<button class="setbtn" data-set="${esc(s.id)}"><div class="lg">${art}</div><b>${esc(s.name)}</b><small>${esc(s.series)}${s.releaseDate?' · '+esc(s.releaseDate.slice(0,4)):''}</small><div class="bar"><i style="width:${pctOf(o,tot)}%"></i></div><small>${o}${tot?' / '+tot:''} cartas</small></button>`;
+    }).join('')||'<p class="muted">No hay sets con ese nombre.</p>';
+    $$('.setbtn').forEach(b=>b.onclick=()=>{S.setId=b.dataset.set;viewPack()});
+    const more=$('#more'),rest=list.length-shown.length;more.hidden=rest<=0;more.textContent=`Mostrar más (${rest})`;
+  };
+  $('#q').oninput=e=>{S.shelfQ=e.target.value;S.shelfN=72;draw()};
+  $('#more').onclick=()=>{S.shelfN+=72;draw()};draw();
+}
+
+/* ---------- vista: sobre ---------- */
+async function viewPack(){
+  window.scrollTo(0,0);
+  const sets=await getSets().catch(()=>null);if(!sets)return failure('',viewShelf);
+  const set=sets.find(s=>s.id===S.setId);if(!set){S.setId=null;return viewShelf()}
+  const o=ownedInSet(set.id),h=hue(set.id),tot=totalOf(set);
+  const art=set.logo?`<img src="${esc(set.logo)}" alt="" data-hide>`:`<div class="code">${esc(set.code||set.name.slice(0,6))}</div>`;
+  app.innerHTML=`<button class="btn small" id="back">← Todos los sets</button>
+  <div class="stage">
+    <div class="packwrap" id="packwrap"><div class="pack" id="pack" style="--h1:${h};--h2:${(h+50)%360}" role="button" tabindex="0" aria-label="Abrir sobre de ${esc(set.name)}">
+      <div class="flap"></div><div class="body">${art}<span>${esc(set.name)}<br>${packSize()} cartas</span><div class="seal"></div></div><div class="shine"></div></div></div>
+    <div class="side">
+      <h2>${esc(set.name)}</h2>
+      <p class="muted">${esc(set.series)}${set.releaseDate?' · '+esc(set.releaseDate.slice(0,4)):''}${tot?' · '+tot+' cartas':''}</p>
+      <div class="bar" style="max-width:340px"><i style="width:${pctOf(o,tot)}%"></i></div>
+      <p class="muted" style="margin:4px 0 0">Tienes ${o} distintas${tot?` (${Math.round(pctOf(o,tot))}%)`:''}</p>
+      <div class="odds" id="odds"><div class="muted">Calculando probabilidades…</div></div>
+      <button class="btn main" id="buy">Abrir sobre · ${cfg.free?'gratis':PACK_COST+' 🪙'}</button>
+      <label class="qopt"><input type="checkbox" id="qskip" ${cfg.skip?'checked':''}> ⏩ Saltar animaciones del sobre</label>
+    </div></div>`;
+  $('#back').onclick=()=>{S.setId=null;viewShelf()};
+  $('#qskip').onchange=e=>{cfg.skip=e.target.checked;persistCfg()};
+  $('#buy').onclick=()=>openPack(set);$('#pack').onclick=()=>openPack(set);
+  $('#pack').onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openPack(set)}};
+  try{const cards=await getSetCards(set.id);if(S.setId!==set.id||S.tab!=='sobres')return;const p=pools(cards),od=slotOdds(p);
+    const fixed=GAME.fixed.map(([t,n])=>`${n} ${GAME.pl[t]}`).join(' y ');
+    const rows=TIERS.map((t,i)=>`<div><span><span class="dot" style="background:${t.c}"></span>${t.n}</span><span class="muted">${p[i].length} cartas</span></div>`).join('');
+    const hole=od?Object.keys(od).map(Number).sort().map(t=>`${TIERS[t].n} ${od[t].toFixed(0)}%`).join(' · '):'—';
+    $('#odds').innerHTML=`<b>Un sobre trae</b><div><span>${fixed}</span></div><div><span>1 carta especial</span><span class="muted">${hole}</span></div><hr style="border:0;border-top:1px solid var(--line);margin:8px 0">${rows}`;
+  }catch(e){$('#odds')&&($('#odds').innerHTML='<span class="muted">Las probabilidades se calcularán al abrir el sobre.</span>')}
+}
+
+/* ---------- abrir sobre ---------- */
+let opening=false;
+async function openPack(set){
+  if(opening)return;
+  const cost=cfg.free?0:PACK_COST;
+  if(save.coins<cost){toast('No tienes monedas suficientes. Vende repetidas o reclama el regalo diario.');return}
+  opening=true;
+  const btn=$('#buy');btn&&(btn.disabled=true,btn.textContent='Cargando cartas…');
+  let cards;
+  try{cards=await getSetCards(set.id)}catch(e){opening=false;btn&&(btn.disabled=false,btn.textContent='Abrir sobre');toast('No se pudieron cargar las cartas. Reintenta en unos segundos.');return}
+  if(!cards.length){opening=false;btn&&(btn.disabled=false,btn.textContent='Abrir sobre');toast('Este set no tiene cartas disponibles');return}
+  const drawn=buildPack(cards);
+  await Promise.all(drawn.map(c=>new Promise(r=>{const i=new Image();i.onload=i.onerror=r;i.src=imgOf(c);setTimeout(r,6000)})));
+  // cobrar y guardar
+  save.coins-=cost;save.spent+=cost;save.packs++;
+  const news=drawn.map(c=>!save.cards[c.id]);
+  drawn.forEach(c=>{const e=save.cards[c.id]||(save.cards[c.id]={n:0,m:{id:c.id,name:c.name,r:c.r,t:c.t,s:set.id,sn:set.name,num:c.num,img:c.img,fb:c.fb||'',pid:c.pid||0}});e.n++;save.pulls[c.t]++;save.total++});
+  persist();money();
+  let fast=cfg.skip;
+  const pack=$('#pack');
+  if(pack&&!cfg.skip){
+    sfx.tear();pack.classList.add('tear');
+    const hint=document.createElement('div');hint.className='skiphint';hint.textContent='Toca para saltar ⏭';$('#packwrap')&&$('#packwrap').appendChild(hint);
+    const skipped=await armSkip(null,1150);
+    hint.remove();
+    if(skipped)fast=true;
+    else{const f=$('#flash');f.classList.remove('go');void f.offsetWidth;f.classList.add('go')}
+  }
+  opening=false;
+  showReveal(set,drawn,news,fast);
+  checkAch();
+}
+
+/* ---------- revelar ---------- */
+function cardHTML(c,opts={}){
+  const t=TIERS[c.t],holo=isHolo(c),kind=c.t===4?'gold':c.t>=3?'':(holo?'soft':'');
+  const src=opts.big?bigOf(c):imgOf(c);
+  let fb=c.fb||'';if(opts.big&&src!==imgOf(c))fb=imgOf(c);
+  return `<div class="tilt"><div class="card"><div class="face back"></div><div class="face front">
+    <img src="${esc(src)}" ${fb?`data-fb="${esc(fb)}"`:''} data-n="${esc(c.name)}" data-t="${esc(t.n)}" alt="${esc(c.name)}" ${opts.lazy?'loading="lazy"':''} decoding="async">
+    ${holo?`<div class="holo ${kind}"></div>`:''}<div class="glare"></div></div></div></div>`;
+}
+function showReveal(set,drawn,news,fast){
+  app.innerHTML=`<div class="row" style="justify-content:space-between"><div><h1 class="title">${esc(set.name)}</h1><p class="sub" id="hint" style="margin:0">Toca cada carta para darle la vuelta (o pulsa Espacio).</p></div>
+    <div class="row"><button class="btn" id="all">Revelar todas</button></div></div>
+    <div class="grid${fast?' nodeal fast':''}" id="grid">${drawn.map((c,i)=>`<div class="cw t${c.t} dealt" data-i="${i}" style="--i:${i};--gc:${TIERS[c.t].c}" tabindex="0" role="button" aria-label="Carta ${i+1} sin revelar">${news[i]?'<span class="badge">¡Nueva!</span>':''}<div class="ring"></div>${cardHTML(c)}</div>`).join('')}</div>
+    <div class="row" id="after" style="justify-content:center;margin-top:8px"></div>`;
+  const grid=$('#grid');
+  if(!fast)armSkip(()=>grid.classList.add('nodeal'),Math.max(1200,drawn.length*70+500));   // un toque cancela el reparto
+  const flipped=new Set();
+  const flip=(i,quiet)=>{
+    const w=$(`.cw[data-i="${i}"]`);if(!w||flipped.has(i))return;
+    flipped.add(i);w.classList.add('flipped');const c=drawn[i];w.setAttribute('aria-label',`${c.name}, ${TIERS[c.t].n}`);
+    if(!quiet)c.t>=2?sfx.rare(c.t):sfx.flip();
+    if(c.t>=2){w.classList.add('glow');setTimeout(()=>w.classList.remove('glow'),1800)}
+    if(c.t>=3)w.classList.add('burst');
+    if(flipped.size===drawn.length)finish();
+  };
+  const flipAll=()=>{   // todas de golpe, con un solo sonido (el de la mejor carta)
+    const best=Math.max(...drawn.map(c=>c.t));
+    drawn.forEach((_,i)=>flip(i,true));
+    best>=2?sfx.rare(best):sfx.flip();
+  };
+  revealCtl={next(){const i=drawn.findIndex((_,k)=>!flipped.has(k));if(i>=0)flip(i)}};
+  function finish(){
+    $('#all').hidden=true;revealCtl=null;
+    const nn=news.filter(Boolean).length,best=Math.max(...drawn.map(c=>c.t)),dup=drawn.length-nn;
+    $('#hint').textContent=`Sobre completo: ${nn} carta${nn===1?'':'s'} nueva${nn===1?'':'s'}${dup?` y ${dup} repetida${dup===1?'':'s'}`:''}. Lo mejor: ${TIERS[best].n}.`;
+    $('#after').innerHTML='<button class="btn main" id="again"></button><button class="btn" id="goalb">Ver álbum</button><button class="btn" id="goback">Cambiar de set</button>';
+    const cost=cfg.free?0:PACK_COST;$('#again').textContent=`Abrir otro · ${cost?cost+' 🪙':'gratis'}`;
+    $('#again').onclick=()=>{S.setId=set.id;viewPack().then(()=>openPack(set))};
+    $('#goalb').onclick=()=>{S.albumSet=set.id;go('album')};
+    $('#goback').onclick=()=>{S.setId=null;viewShelf()};
+  }
+  $$('.cw',app).forEach(w=>{
+    w.onclick=()=>{const i=+w.dataset.i;if(!flipped.has(i))flip(i);else zoom(drawn[i])};
+    w.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();e.stopPropagation();w.onclick()}};
+  });
+  $('#all').onclick=()=>{
+    if(cfg.skip||fast){flipAll();return}
+    const timers=drawn.map((_,i)=>setTimeout(()=>flip(i),i*140));
+    armSkip(()=>{timers.forEach(clearTimeout);flipAll()},drawn.length*140+150);      // un toque revela el resto al instante
+  };
+  if(fast&&cfg.skip)flipAll();                  // con «saltar animaciones» las cartas ya salen reveladas
+}
+addEventListener('keydown',e=>{      // Espacio: revela la siguiente carta
+  if(e.key!==' '&&e.key!=='Enter')return;if(!revealCtl||e.repeat)return;
+  const t=e.target;if(t&&t!==document.body&&t.closest&&t.closest('button,input,select,textarea,.cw,a'))return;
+  e.preventDefault();revealCtl.next();
+});
+
+/* ---------- efecto de inclinación ---------- */
+function bindTilt(root){
+  root.addEventListener('pointermove',e=>{
+    const t=e.target.closest&&e.target.closest('.tilt');if(!t)return;
+    if(e.pointerType==='touch'&&!t.closest('.zoom'))return;
+    const r=t.getBoundingClientRect(),x=(e.clientX-r.left)/r.width,y=(e.clientY-r.top)/r.height;
+    t.classList.add('free','on');
+    t.style.transform=`perspective(700px) rotateX(${((.5-y)*16).toFixed(1)}deg) rotateY(${((x-.5)*20).toFixed(1)}deg) scale(1.03)`;
+    t.style.setProperty('--mx',(x*100).toFixed(0));t.style.setProperty('--my',(y*100).toFixed(0));
+  });
+  root.addEventListener('pointerout',e=>{const t=e.target.closest&&e.target.closest('.tilt');if(!t||t.contains(e.relatedTarget))return;t.classList.remove('free','on');t.style.transform=''});
+}
+bindTilt(document);
+
+/* ---------- zoom de carta ---------- */
+function zoom(c){
+  const t=TIERS[c.t],e=save.cards[c.id],n=e?e.n:0;
+  const m=$('#modal');
+  m.innerHTML=`<div class="zoom"><div class="cw flipped t${c.t}" style="--gc:${t.c}">${cardHTML(c,{big:true})}</div>
+    <div class="meta"><h3>${esc(c.name)}</h3><div><span class="dot" style="background:${t.c}"></span><b>${t.n}</b> · ${esc(c.sn||'')} · nº ${esc(c.num||'')}</div><div class="muted">Tienes ${n} · vale ${t.v} 🪙 cada una</div></div>
+    <div class="row" id="zbtn" style="justify-content:center"></div></div>`;
+  const zb=$('#zbtn',m);
+  if(n>1){const b=document.createElement('button');b.className='btn small';b.textContent=`Vender 1 repetida (+${t.v} 🪙)`;b.onclick=()=>{sellCard(c.id,1);zoom(c)};zb.appendChild(b)}
+  const x=document.createElement('button');x.className='btn small';x.textContent='Cerrar';x.onclick=closeModal;zb.appendChild(x);
+  m.classList.add('open');m.onclick=ev=>{if(ev.target===m)closeModal()};
+  setTimeout(()=>{const w=$('.zoom .cw');w&&w.classList.add('flipped')},30);
+}
+function closeModalNow(){const m=$('#modal');m.classList.remove('open');m.innerHTML=''}
+function closeModal(){closeModalNow();if(S.tab==='album')viewAlbum(true)}
+addEventListener('keydown',e=>{if(e.key==='Escape'&&$('#modal').classList.contains('open'))closeModal()});
+
+/* ---------- vender ---------- */
+function sellCard(id,n){const e=save.cards[id];if(!e||e.n<2)return 0;const k=Math.min(n,e.n-1);if(k<=0)return 0;e.n-=k;const g=k*TIERS[e.m.t].v;save.coins+=g;persist();money();sfx.coin();toast(`+${g} 🪙`);return g}
+function sellDupes(filterFn){let g=0,k=0;for(const id in save.cards){const e=save.cards[id];if(e.n>1&&(!filterFn||filterFn(e.m))){const x=e.n-1;g+=x*TIERS[e.m.t].v;k+=x;e.n=1}}
+  if(!k){toast('No tienes repetidas para vender');return}save.coins+=g;persist();money();sfx.coin();toast(`Vendiste ${k} repetidas: +${g} 🪙`);checkAch()}
+
+/* ---------- vista: álbum ---------- */
+async function viewAlbum(keep){
+  if(!keep)window.scrollTo(0,0);
+  const ownedSets=[...new Set(Object.values(save.cards).map(e=>e.m.s))];
+  let sets=[];try{sets=await getSets()}catch(e){}
+  const nameOf=id=>(sets.find(s=>s.id===id)||{}).name||(Object.values(save.cards).find(e=>e.m.s===id)||{m:{}}).m.sn||id;
+  if(!uniqueCount()){app.innerHTML=`<h1 class="title">Tu álbum</h1><div class="panel">Aún no tienes cartas de ${esc(GAME.name)}. Abre tu primer sobre en la pestaña <b>Sobres</b>.</div>`;return}
+  if(S.albumSet!=='all'&&!ownedSets.includes(S.albumSet)&&!sets.find(s=>s.id===S.albumSet))S.albumSet='all';
+  app.innerHTML=`<h1 class="title">Tu álbum</h1><p class="sub">${uniqueCount()} cartas distintas · ${save.total} en total</p>
+  <div class="row"><select id="aset" aria-label="Set"><option value="all">Todas mis cartas</option>${ownedSets.map(id=>`<option value="${esc(id)}"${S.albumSet===id?' selected':''}>${esc(nameOf(id))} (${ownedInSet(id)})</option>`).join('')}</select>
+  <input type="search" id="aq" placeholder="Buscar carta…" value="${esc(S.albumQ)}" aria-label="Buscar carta">
+  <label class="sw" style="padding:0"><input type="checkbox" id="aown" ${S.albumOwned?'checked':''}> Solo las que tengo</label>
+  <button class="btn small red" id="sellall">Vender repetidas</button></div>
+  <div class="chips" style="margin-top:10px" id="chips"><button class="chip" data-t="-1" aria-pressed="${S.albumTier===-1}">Todas</button>${TIERS.map((t,i)=>`<button class="chip" data-t="${i}" aria-pressed="${S.albumTier===i}">${t.n}</button>`).join('')}</div>
+  <div id="prog" style="margin-top:12px"></div><div class="album-grid" id="ag"></div>`;
+  $('#aset').onchange=e=>{S.albumSet=e.target.value;viewAlbum()};
+  $('#aq').oninput=e=>{S.albumQ=e.target.value;drawAlbum()};
+  $('#aown').onchange=e=>{S.albumOwned=e.target.checked;drawAlbum()};
+  $$('.chip',app).forEach(b=>b.onclick=()=>{S.albumTier=+b.dataset.t;$$('.chip',app).forEach(x=>x.setAttribute('aria-pressed',x===b));drawAlbum()});
+  $('#sellall').onclick=()=>{const f=S.albumSet==='all'?null:m=>m.s===S.albumSet;if(confirm('¿Vender todas las repetidas'+(f?' de este set':'')+'? Te quedas con 1 de cada carta.')){sellDupes(f);viewAlbum(true)}};
+  let full=null;
+  if(S.albumSet!=='all'){$('#ag').innerHTML='<div class="loader" style="grid-column:1/-1"><div class="spin"></div></div>';try{full=await getSetCards(S.albumSet)}catch(e){full=null}}
+  function drawAlbum(){
+    const q=S.albumQ.toLowerCase();let list;
+    if(S.albumSet==='all')list=Object.values(save.cards).map(e=>Object.assign({},e.m,{own:e.n}));
+    else if(full)list=full.map(c=>{const e=save.cards[c.id];return{id:c.id,name:c.name,r:c.r,t:c.t,s:S.albumSet,sn:nameOf(S.albumSet),num:c.num,img:c.img,fb:c.fb||'',pid:c.pid||0,own:e?e.n:0}});
+    else list=Object.values(save.cards).filter(e=>e.m.s===S.albumSet).map(e=>Object.assign({},e.m,{own:e.n}));
+    if(S.albumSet==='all')list.sort((a,b)=>b.t-a.t||a.name.localeCompare(b.name));
+    else list.sort((a,b)=>(parseInt(a.num)||0)-(parseInt(b.num)||0)||String(a.num).localeCompare(String(b.num),undefined,{numeric:true}));
+    const total=list.length,have=list.filter(c=>c.own).length;
+    $('#prog').innerHTML=S.albumSet==='all'?'':`<div class="bar" style="max-width:420px"><i style="width:${have/Math.max(total,1)*100}%"></i></div><small class="muted">${have} / ${total} cartas del set</small>`;
+    list=list.filter(c=>(S.albumTier<0||c.t===S.albumTier)&&(!q||c.name.toLowerCase().includes(q))&&(!S.albumOwned||c.own));
+    $('#ag').innerHTML=list.map(c=>`<div class="cw flipped t${c.t}${c.own?'':' locked'}" data-id="${esc(c.id)}" style="--gc:${TIERS[c.t].c}" tabindex="0" role="button" aria-label="${esc(c.name)}${c.own?'':' (sin conseguir)'}">${c.own>1?`<span class="count">×${c.own}</span>`:''}${cardHTML(c,{lazy:true})}${c.own?'':`<span class="num">${esc(c.num)}</span>`}</div>`).join('')||'<p class="muted">No hay cartas con esos filtros.</p>';
+    const byId=Object.fromEntries(list.map(c=>[c.id,c]));
+    $$('#ag .cw').forEach(w=>{w.onclick=()=>{const c=byId[w.dataset.id];if(c&&c.own)zoom(c)};w.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();w.onclick()}}});
+  }
+  drawAlbum();
+}
+
+/* ---------- logros ---------- */
+let ACH=[];
+function buildACH(){
+  const nm=i=>TIERS[i].n;
+  ACH=[
+    {id:'p1',i:'📦',n:'Primer sobre',d:'Abre tu primer sobre',r:50,v:s=>[s.packs,1]},
+    {id:'p10',i:'🎴',n:'Coleccionista',d:'Abre 10 sobres',r:150,v:s=>[s.packs,10]},
+    {id:'p50',i:'🏪',n:'Tienda propia',d:'Abre 50 sobres',r:500,v:s=>[s.packs,50]},
+    {id:'r1',i:'💙',n:'Algo especial',d:`Saca una carta ${nm(2)}`,r:50,v:s=>[s.pulls[2]+s.pulls[3]+s.pulls[4],1]},
+    {id:'u1',i:'💜',n:'Ultra suerte',d:`Saca una carta ${nm(3)}`,r:200,v:s=>[s.pulls[3]+s.pulls[4],1]},
+    {id:'s1',i:'🌟',n:'¡Secreta!',d:`Saca una carta ${nm(4)}`,r:600,v:s=>[s.pulls[4],1]},
+    {id:'c25',i:'🗂',n:'25 distintas',d:'Reúne 25 cartas distintas',r:100,v:()=>[uniqueCount(),25]},
+    {id:'c100',i:'📚',n:'100 distintas',d:'Reúne 100 cartas distintas',r:400,v:()=>[uniqueCount(),100]},
+    {id:'c250',i:'🏆',n:'250 distintas',d:'Reúne 250 cartas distintas',r:1000,v:()=>[uniqueCount(),250]},
+    {id:'set',i:'👑',n:'Set completo',d:'Consigue todas las cartas de un set',r:2000,v:()=>{let best=0,need=1;if(SETS)for(const s of SETS){const t=totalOf(s),o=ownedInSet(s.id);if(o&&t&&o/t>best/need){best=o;need=t}}return[best,need]}}
+  ];
+}
+function checkAch(){
+  ACH.forEach(a=>{if(save.ach[a.id])return;const[v,n]=a.v(save);if(v>=n){save.ach[a.id]=1;save.coins+=a.r;sfx.ach();toast(`🏅 ${a.n}: +${a.r} 🪙`)}});
+  persist();money();
+}
+
+/* ---------- vista: logros y datos ---------- */
+function viewStats(){
+  window.scrollTo(0,0);
+  const tot=save.pulls.reduce((a,b)=>a+b,0)||1,EXPECT=expectPct();
+  let value=0;for(const id in save.cards)value+=save.cards[id].n*TIERS[save.cards[id].m.t].v;
+  app.innerHTML=`<h1 class="title">Logros y datos</h1><p class="sub">Compara lo que has sacado con lo que dice la probabilidad. Con pocos sobres puede salir muy distinto; con muchos se parece cada vez más.</p>
+  <div class="cols">
+   <div class="panel"><h3 style="margin-bottom:10px">Tus sobres de ${esc(GAME.name)}</h3>
+    <div class="hist"><span>Sobres</span><span></span><b>${save.packs}</b></div>
+    <div class="hist"><span>Cartas</span><span></span><b>${save.total}</b></div>
+    <div class="hist"><span>Distintas</span><span></span><b>${uniqueCount()}</b></div>
+    <div class="hist"><span>Gastado</span><span></span><b>${save.spent} 🪙</b></div>
+    <div class="hist"><span>Valor</span><span></span><b>${value} 🪙</b></div>
+    <h3 style="margin:16px 0 4px;font-size:17px">Real vs. esperado</h3>
+    ${TIERS.map((t,i)=>{const a=save.pulls[i]/tot*100;return `<div class="hist"><span><span class="dot" style="background:${t.c}"></span>${t.n}</span><div class="bar"><i style="width:${Math.min(100,a)}%;background:${t.c}"></i></div><span>${a.toFixed(1)}% <small class="muted">(${EXPECT[i]}%)</small></span></div>`}).join('')}
+    <small class="muted">Entre paréntesis, el porcentaje esperado en un set que tenga todas las rarezas.</small></div>
+   <div class="panel"><h3 style="margin-bottom:6px">Logros</h3>${ACH.map(a=>{const[v,n]=a.v(save),d=!!save.ach[a.id];return `<div class="ach${d?' done':''}"><div class="ic">${a.i}</div><div class="t"><b>${a.n}</b><small>${a.d}${d?'':` · ${Math.min(v,n)}/${n}`}</small></div><b>${d?'✓':'+'+a.r+' 🪙'}</b></div>`}).join('')}</div>
+  </div>`;
+}
+
+/* ---------- ajustes ---------- */
+$('#cfg').onclick=()=>{
+  const m=$('#modal');
+  m.innerHTML=`<div class="sheet"><h3>Ajustes</h3>
+  <label class="sw"><input type="checkbox" id="sskip" ${cfg.skip?'checked':''}> ⏩ Saltar animaciones de los sobres</label>
+  <label class="sw"><input type="checkbox" id="smute" ${cfg.mute?'checked':''}> Silenciar sonidos</label>
+  <label class="sw"><input type="checkbox" id="sfree" ${cfg.free?'checked':''}> Modo clase: sobres gratis</label>
+  <p class="muted" style="margin:6px 0 0;font-size:13px">Aunque no lo marques, puedes saltar cualquier animación tocando la pantalla o pulsando una tecla mientras se abre el sobre.</p>
+  ${GAME.id==='pokemon'?`<hr><p class="muted" style="margin:0 0 4px;font-size:14px">Clave de la API de Pokémon TCG (opcional). Con clave gratuita de dev.pokemontcg.io hay más margen.</p><input type="text" id="skey" placeholder="Clave de la API" value="${esc(cfg.key)}" style="width:100%">`:''}
+  ${GAME.id==='yugioh'?`<hr><p class="muted" style="margin:0 0 4px;font-size:14px">Imágenes propias de Yu-Gi-Oh! (opcional). YGOPRODeck pide no cargar sus imágenes directamente en webs con mucho tráfico y alojarlas tú. Pon aquí tu dirección con <b>{id}</b>, por ejemplo <code>https://mi-web.com/ygo/{id}.jpg</code>.</p><input type="text" id="simg" placeholder="https://mi-web.com/ygo/{id}.jpg" value="${esc(cfg.ygoImg)}" style="width:100%">`:''}
+  <hr><p class="muted" style="margin:0 0 4px;font-size:14px">Copia de seguridad de <b>${esc(GAME.name)}</b>: guarda este texto para pasar tu partida a otro dispositivo.</p>
+  <textarea id="sdata" spellcheck="false"></textarea>
+  <div class="row" style="margin-top:10px"><button class="btn small" id="sexp">Mostrar copia</button><button class="btn small" id="simp">Cargar copia</button><button class="btn small red" id="sres">Borrar este juego</button></div>
+  <div class="row" style="margin-top:14px;justify-content:space-between"><button class="btn small" id="sgame">🎮 Cambiar de juego</button><button class="btn main small" id="sok">Listo</button></div></div>`;
+  m.classList.add('open');m.onclick=ev=>{if(ev.target===m)$('#sok').click()};
+  $('#sexp').onclick=()=>{$('#sdata').value=JSON.stringify(save)};
+  $('#simp').onclick=()=>{try{const d=JSON.parse($('#sdata').value);if(!d||typeof d.coins!=='number'||typeof d.cards!=='object')throw 0;
+      if(d.game&&d.game!==GAME.id){toast('Esa copia es de '+(GAMES[d.game]?GAMES[d.game].name:'otro juego')+'. Cárgala desde ese juego.');return}
+      save=Object.assign(defaults(GAME.id),d,{game:GAME.id});persist();money();toast('Partida cargada')}catch(e){toast('Ese texto no es una copia válida')}};
+  $('#sres').onclick=()=>{if(confirm('¿Borrar monedas, cartas y logros de '+GAME.name+'? No se puede deshacer.')){save=defaults(GAME.id);persist();money();toast('Partida reiniciada');$('#sok').click()}};
+  $('#sgame').onclick=()=>{cfgRead();showChooser()};
+  $('#sok').onclick=()=>{cfgRead();m.classList.remove('open');m.innerHTML='';render()};
+  function cfgRead(){cfg.skip=$('#sskip').checked;cfg.mute=$('#smute').checked;cfg.free=$('#sfree').checked;if($('#skey'))cfg.key=$('#skey').value.trim();if($('#simg'))cfg.ygoImg=$('#simg').value.trim();persistCfg()}
+};
+
+/* ---------- regalo diario ---------- */
+$('#daily').onclick=()=>{if(save.daily===today())return;save.daily=today();save.coins+=DAILY;persist();money();sfx.coin();toast(`🎁 +${DAILY} 🪙 · vuelve mañana`)};
+
+/* =====================================================================
+   ARRANQUE: primero se elige el juego
+   ===================================================================== */
+(function init(){
+  renderChooser();
+  const p=paramGame();
+  if(p)enterGame(p);                 // también se puede entrar directo con ?game=onepiece
+})();
+</script>
+</body>
+</html>
