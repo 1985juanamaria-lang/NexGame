@@ -68,7 +68,8 @@
         /* Selector de Fichas */
         .selector-fichas {
             display: flex;
-            gap: 10px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .btn-ficha {
@@ -91,6 +92,10 @@
         .ficha-25 { background: #27ae60; color: #fff; }
         .ficha-50 { background: #c0392b; color: #fff; }
         .ficha-100 { background: #ff69b4; color: #fff; border-color: #fff; } /* Ficha Rosa */
+        .ficha-500 { background: #8e44ad; color: #fff; }
+        .ficha-1000 { background: #e67e22; color: #fff; }
+        .ficha-10000 { background: #111; color: #f1c40f; border-color: #f1c40f; }
+        .ficha-500, .ficha-1000, .ficha-10000 { font-size: 0.62rem; }
 
         .btn-ficha.activo {
             transform: scale(1.15);
@@ -312,8 +317,11 @@
             bottom: 2px;
             right: 2px;
             border-radius: 50%;
-            width: 24px;
+            min-width: 24px;
             height: 24px;
+            padding: 0 4px;
+            box-sizing: border-box;
+            white-space: nowrap;
             font-size: 0.6rem;
             display: flex;
             align-items: center;
@@ -353,6 +361,9 @@ body{background:radial-gradient(900px 600px at 50% 0,#10241a,transparent 60%),#0
                 <button class="btn-ficha ficha-25" onclick="seleccionarFicha(25, 25, this)">25</button>
                 <button class="btn-ficha ficha-50" onclick="seleccionarFicha(50, 50, this)">50</button>
                 <button class="btn-ficha ficha-100" onclick="seleccionarFicha(100, 100, this)">100</button>
+                <button class="btn-ficha ficha-500" onclick="seleccionarFicha(500, 500, this)">500</button>
+                <button class="btn-ficha ficha-1000" onclick="seleccionarFicha(1000, 1000, this)">1000</button>
+                <button class="btn-ficha ficha-10000" onclick="seleccionarFicha(10000, 10000, this)">10000</button>
             </div>
             <div class="saldo-container">
                 <span>Saldo</span>
@@ -423,10 +434,26 @@ body{background:radial-gradient(900px 600px at 50% 0,#10241a,transparent 60%),#0
         }
         actualizarSaldoUI();
 
+        let girando = false;
+        const FICHA_MINIMA = 10;
+
         function resetearMonedas() {
+            const estado = document.getElementById('info-estado');
+            if (girando) {
+                estado.textContent = "⚠️ Espera a que termine el giro.";
+                return;
+            }
+            if (totalApostado > 0) {
+                estado.textContent = "⚠️ Tienes apuestas en la mesa. Gira o bórralas primero.";
+                return;
+            }
+            if (saldo >= FICHA_MINIMA) {
+                estado.textContent = "⚠️ Solo puedes reclamar monedas cuando te quedas sin saldo.";
+                return;
+            }
             saldo = 1000;
             actualizarSaldoUI();
-            document.getElementById('info-estado').textContent = "✨ ¡Saldo reseteado a $1000!";
+            estado.textContent = "✨ ¡Saldo reiniciado a $1000!";
         }
 
         function seleccionarFicha(valor, estilo, btn) {
@@ -507,6 +534,7 @@ body{background:radial-gradient(900px 600px at 50% 0,#10241a,transparent 60%),#0
         }
 
         function apostar(clave) {
+            if (girando) return;
             if (saldo < fichaActualValor) {
                 document.getElementById('info-estado').textContent = "⚠️ ¡Saldo insuficiente!";
                 return;
@@ -555,6 +583,7 @@ body{background:radial-gradient(900px 600px at 50% 0,#10241a,transparent 60%),#0
         }
 
         function limpiarApuestas() {
+            if (girando) return;
             saldo += totalApostado;
             apuestas = {};
             totalApostado = 0;
@@ -571,6 +600,7 @@ body{background:radial-gradient(900px 600px at 50% 0,#10241a,transparent 60%),#0
                 return;
             }
 
+            girando = true;
             document.getElementById('btn-girar').disabled = true;
             document.getElementById('info-estado').textContent = "🎲 Girando ruleta...";
 
@@ -598,6 +628,7 @@ body{background:radial-gradient(900px 600px at 50% 0,#10241a,transparent 60%),#0
                 apuestas = {};
                 totalApostado = 0;
                 actualizarVisualApuestas();
+                girando = false;
                 document.getElementById('btn-girar').disabled = false;
             }, 5000);
         }
