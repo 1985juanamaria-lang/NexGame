@@ -259,6 +259,58 @@ body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !imp
 .btn-apuesta.activo{background:var(--nx-accent);border-color:var(--nx-accent)}
 #btn-lanzar{border-radius:12px}
 </style>
+<style id="pachinko-look">
+/* ===== Nuevo aspecto Pachinko: neón sobre azul noche ===== */
+.contenedor-juego{background:radial-gradient(700px 520px at 50% 35%,#1a1440 0%,transparent 70%),radial-gradient(500px 300px at 20% 100%,#0b2b3a 0%,transparent 70%)}
+.tablero-pachinko{
+  background:
+    radial-gradient(circle at 50% 0%,rgba(120,90,255,.28),transparent 55%),
+    radial-gradient(rgba(255,255,255,.05) 1px,transparent 1.5px) 0 0/22px 22px,
+    linear-gradient(180deg,#120d33 0%,#0a0b24 60%,#07081a 100%);
+  border:2px solid transparent;
+  border-radius:18px;
+  background-clip:padding-box;
+  box-shadow:0 0 0 2px #3b2f8f,0 0 28px rgba(120,90,255,.35),0 26px 60px rgba(0,0,0,.6),inset 0 0 60px rgba(0,0,0,.55);
+}
+.lanzador{position:absolute;top:0;left:50%;width:54px;height:20px;transform:translateX(-50%);
+  background:linear-gradient(180deg,#4b3fb5,#2a2275);clip-path:polygon(0 0,100% 0,78% 100%,22% 100%);
+  box-shadow:0 0 18px rgba(140,120,255,.7);z-index:3}
+.lanzador::after{content:'';position:absolute;left:50%;bottom:3px;width:10px;height:4px;transform:translateX(-50%);border-radius:3px;background:#ffd86b;box-shadow:0 0 8px #ffd86b}
+.pin{width:10px;height:10px;background:radial-gradient(circle at 35% 30%,#ffffff,#7fe9ff 45%,#1a8fb8 100%);box-shadow:0 0 10px rgba(80,220,255,.65),0 0 2px #fff}
+.bola{width:14px;height:14px;z-index:4;
+  background:radial-gradient(circle at 35% 30%,#fffbe0 0%,#ffd86b 35%,#c98a10 80%,#6b4300 100%);
+  box-shadow:0 0 12px rgba(255,200,80,.85),0 2px 4px rgba(0,0,0,.6)}
+.estela{position:absolute;width:8px;height:8px;border-radius:50%;transform:translate(-50%,-50%);
+  background:rgba(255,200,80,.55);pointer-events:none;z-index:2;animation:estela .45s ease-out forwards}
+@keyframes estela{to{opacity:0;transform:translate(-50%,-50%) scale(.2)}}
+
+.ranuras{height:45px;background:#07081a;border-top:2px solid #3b2f8f;gap:0}
+.ranura{position:relative;border-right:1px solid rgba(255,255,255,.06);font-size:.85rem;font-weight:900;letter-spacing:.5px;transition:filter .2s}
+.ranura:last-child{border-right:0}
+.ranura-1 {color:#ff8a9a;background:linear-gradient(180deg,rgba(255,92,108,.05),rgba(255,92,108,.28))}
+.ranura-2 {color:#7cc4ff;background:linear-gradient(180deg,rgba(80,160,255,.05),rgba(80,160,255,.30))}
+.ranura-5 {color:#5dffa8;background:linear-gradient(180deg,rgba(53,208,127,.05),rgba(53,208,127,.32))}
+.ranura-10{color:#ffe07a;background:linear-gradient(180deg,rgba(255,200,60,.08),rgba(255,200,60,.42));animation:brilloOro 1.8s ease-in-out infinite}
+@keyframes brilloOro{0%,100%{box-shadow:inset 0 0 8px rgba(255,200,60,.25)}50%{box-shadow:inset 0 0 18px rgba(255,200,60,.7)}}
+.ranura.golpe{animation:golpe .6s ease-out}
+@keyframes golpe{0%{filter:brightness(2.6)}100%{filter:brightness(1)}}
+
+.premio-flotante{position:absolute;bottom:52px;transform:translateX(-50%);font-weight:900;font-size:1.05rem;
+  pointer-events:none;z-index:6;text-shadow:0 0 10px currentColor,0 2px 4px rgba(0,0,0,.8);animation:subir 1.3s ease-out forwards}
+@keyframes subir{0%{opacity:0;transform:translate(-50%,10px) scale(.8)}15%{opacity:1}100%{opacity:0;transform:translate(-50%,-60px) scale(1.15)}}
+
+.historial-bolas{margin-top:15px;background:var(--nx-surface2);border:1px solid var(--nx-line);border-radius:10px;padding:12px}
+.historial-bolas h3{color:var(--nx-muted);font-size:.64rem;letter-spacing:1.6px;text-transform:uppercase;font-weight:800;margin-bottom:8px}
+.chips-historial{display:flex;flex-wrap:wrap;gap:5px;min-height:24px}
+.chip-h{padding:3px 8px;border-radius:999px;font-size:.72rem;font-weight:800;border:1px solid transparent}
+.chip-h.m1{color:#ff8a9a;background:rgba(255,92,108,.12);border-color:rgba(255,92,108,.3)}
+.chip-h.m2{color:#7cc4ff;background:rgba(80,160,255,.12);border-color:rgba(80,160,255,.3)}
+.chip-h.m5{color:#5dffa8;background:rgba(53,208,127,.12);border-color:rgba(53,208,127,.3)}
+.chip-h.m10{color:#ffe07a;background:rgba(255,200,60,.16);border-color:rgba(255,200,60,.55)}
+.vacio-h{color:var(--nx-muted);font-size:.78rem}
+#btn-lanzar{background:linear-gradient(135deg,#7a5cff,#ff4f8b);box-shadow:0 6px 20px rgba(122,92,255,.35)}
+#btn-lanzar:hover{filter:brightness(1.1);background:linear-gradient(135deg,#7a5cff,#ff4f8b)}
+</style>
 </head>
 <body>
 
@@ -284,6 +336,11 @@ body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !imp
                     <button class="btn-apuesta" onclick="cambiarApuesta(100)">$100</button>
                 </div>
             </div>
+
+            <div class="historial-bolas">
+                <h3>Últimas bolas</h3>
+                <div class="chips-historial" id="chips-historial"><span class="vacio-h">Aún no has lanzado</span></div>
+            </div>
         </div>
 
         <div class="botones">
@@ -295,6 +352,7 @@ body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !imp
     <!-- Contenedor del Juego -->
     <div class="contenedor-juego">
         <div class="tablero-pachinko" id="tablero">
+            <div class="lanzador"></div>
             <div class="ranuras">
                 <div class="ranura ranura-10">x10</div>
                 <div class="ranura ranura-5">x5</div>
@@ -316,18 +374,46 @@ body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !imp
             localStorage.setItem('pachinko_dinero', saldo);
         }
 
+        // Formato compacto: 1.5K, 2.3M, 4B...
+        function formatoCompacto(n) {
+            const signo = n < 0 ? '-' : '';
+            n = Math.abs(n);
+            const unidades = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi'];
+            let i = 0;
+            while (n >= 1000 && i < unidades.length - 1) { n /= 1000; i++; }
+            if (i === 0) return signo + Math.floor(n);
+            return signo + (Math.floor(n * 100 + 1e-9) / 100) + unidades[i];
+        }
+        function formatoDinero(n) {
+            const t = formatoCompacto(n);
+            return t.startsWith('-') ? '-$' + t.slice(1) : '$' + t;
+        }
+
         let apuestaActual = 10;
+        const APUESTA_MINIMA = 10;
 
         function actualizarSaldoUI() {
-            document.getElementById('saldo-actual').textContent = `$${saldo}`;
+            const elSaldo = document.getElementById('saldo-actual');
+            elSaldo.textContent = formatoDinero(saldo);
+            elSaldo.title = '$' + saldo.toLocaleString('es-ES');
             localStorage.setItem('pachinko_dinero', saldo);
         }
         actualizarSaldoUI();
 
+        // Solo se puede reclamar cuando no te queda saldo y no hay bolas en juego
         function resetearMonedas() {
+            const estado = document.getElementById('info-estado');
+            if (bolas.length > 0) {
+                estado.textContent = "⚠️ Espera a que caigan todas las bolas.";
+                return;
+            }
+            if (saldo >= APUESTA_MINIMA) {
+                estado.textContent = "⚠️ Solo puedes reclamar monedas cuando te quedas sin saldo.";
+                return;
+            }
             saldo = 1000;
             actualizarSaldoUI();
-            document.getElementById('info-estado').textContent = "✨ ¡Saldo reseteado a $1000!";
+            estado.textContent = "✨ ¡Saldo reiniciado a $1000!";
         }
 
         function cambiarApuesta(valor) {
@@ -340,33 +426,91 @@ body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !imp
             });
         }
 
-        const tablero = document.getElementById('tablero');
+        /* ================= FÍSICA ================= */
+        const ANCHO = 420, R_BOLA = 7, R_PIN = 5, SLOTS = 7, Y_FIN = 475;
+        const FISICA = { sep: 42, filas: 10, y0: 60, dy: 38, g: 0.22, drag: 0.995, dragx: 0.93,
+                         e: 0.3, ruido: 0.3, jx: 6, vx0: 0.6, k: 0.006, yGuia: 100 };
         const multiplicadores = [10, 5, 2, 1, 2, 5, 10];
-        let pins = [];
 
-        // Generar estructura de pines más estrecha
+        // Probabilidad (%) de que cada ranura sea la "elegida" para la bola.
+        // x10 = 1.5% + 1.5% = 3% (aprox. 1 de cada 33 bolas). Es difícil, pero posible.
+        const PESOS = [1.5, 6, 15, 55, 15, 6, 1.5];
+
+        function elegirRanura() {
+            let r = Math.random() * 100;
+            for (let i = 0; i < PESOS.length; i++) {
+                if (r < PESOS[i]) return i;
+                r -= PESOS[i];
+            }
+            return 3;
+        }
+
+        const tablero = document.getElementById('tablero');
+        const ranurasEls = document.querySelectorAll('.ranura');
+        const pins = [];
+
+        // Rejilla de pines escalonada que cubre todo el ancho
         function generarPines() {
-            const filas = 7;
-            for (let f = 0; f < filas; f++) {
-                let numPines = f + 3;
-                let espacioY = 45 + f * 55;
-                let separacionX = 32; 
-                let anchoTotal = numPines * separacionX;
-                let inicioX = (420 - anchoTotal) / 2 + (separacionX / 2);
-
-                for (let p = 0; p < numPines; p++) {
-                    let pin = document.createElement('div');
-                    pin.classList.add('pin');
-                    let x = inicioX + p * separacionX;
-                    let y = espacioY;
-                    pin.style.left = `${x}px`;
-                    pin.style.top = `${y}px`;
-                    tablero.appendChild(pin);
-                    pins.push({x, y});
+            const S = FISICA.sep;
+            for (let r = 0; r < FISICA.filas; r++) {
+                const off = (r % 2) ? S / 2 : 0;
+                const n = Math.floor((ANCHO - off) / S) + 1;
+                for (let k = 0; k < n; k++) {
+                    const x = off + k * S;
+                    if (x < 8 || x > ANCHO - 8) continue;
+                    const y = FISICA.y0 + r * FISICA.dy;
+                    const el = document.createElement('div');
+                    el.classList.add('pin');
+                    el.style.left = `${x}px`;
+                    el.style.top = `${y}px`;
+                    tablero.appendChild(el);
+                    pins.push({ x, y });
                 }
             }
         }
         generarPines();
+
+        function pasoFisica(b) {
+            const F = FISICA;
+            // Guiado suave hacia la ranura elegida (aumenta al bajar)
+            const guia = Math.min(1, Math.max(0, (b.y - F.yGuia) / (Y_FIN - F.yGuia)));
+            b.vx += F.k * guia * (b.tx - b.x);
+
+            b.vy += F.g;
+            b.vx *= F.dragx;
+            b.vy *= F.drag;
+            b.x += b.vx;
+            b.y += b.vy;
+
+            if (b.x < R_BOLA) { b.x = R_BOLA; b.vx = Math.abs(b.vx) * 0.4; }
+            if (b.x > ANCHO - R_BOLA) { b.x = ANCHO - R_BOLA; b.vx = -Math.abs(b.vx) * 0.4; }
+
+            const lim = R_BOLA + R_PIN;
+            for (const p of pins) {
+                if (Math.abs(b.y - p.y) > lim || Math.abs(b.x - p.x) > lim) continue;
+                let dx = b.x - p.x, dy = b.y - p.y, d = Math.hypot(dx, dy);
+                if (d < lim) {
+                    if (d < 0.001) { dx = Math.random() - 0.5; dy = -1; d = Math.hypot(dx, dy); }
+                    const nx = dx / d, ny = dy / d;
+                    b.x = p.x + nx * lim;
+                    b.y = p.y + ny * lim;
+                    const vn = b.vx * nx + b.vy * ny;
+                    if (vn < 0) {
+                        b.vx -= (1 + F.e) * vn * nx;
+                        b.vy -= (1 + F.e) * vn * ny;
+                        b.vx += (Math.random() * 2 - 1) * F.ruido;
+                    }
+                }
+            }
+            // Por si una bola se queda atascada sobre un pin
+            b.pasos++;
+            if (b.pasos > 600) b.vx += (Math.random() - 0.5) * 0.4;
+        }
+
+        /* ================= BOLAS ================= */
+        let bolas = [];
+        let ultimoT = 0, acumulado = 0, bucleActivo = false;
+        const PASO_MS = 1000 / 60;
 
         function lanzarBola() {
             if (saldo < apuestaActual) {
@@ -377,67 +521,109 @@ body{font-family:Inter,'Segoe UI',system-ui,-apple-system,Roboto,sans-serif !imp
             saldo -= apuestaActual;
             actualizarSaldoUI();
 
-            let bolaEl = document.createElement('div');
-            bolaEl.classList.add('bola');
-            tablero.appendChild(bolaEl);
+            const el = document.createElement('div');
+            el.classList.add('bola');
+            tablero.appendChild(el);
 
-            let x = 210 + (Math.random() * 4 - 2); 
-            let y = 15;
-            let velocidadY = 1.0;
-            let velocidadX = (Math.random() - 0.5) * 1.0;
-            let ultimoPinColisionado = null;
+            bolas.push({
+                el,
+                apuesta: apuestaActual,              // la apuesta queda fijada al lanzar
+                tx: (elegirRanura() + 0.5) * (ANCHO / SLOTS),
+                x: ANCHO / 2 + (Math.random() * 2 - 1) * FISICA.jx,
+                y: 15,
+                vx: (Math.random() * 2 - 1) * FISICA.vx0,
+                vy: 0.8,
+                pasos: 0
+            });
 
-            let animacion = setInterval(() => {
-                y += velocidadY;
-                x += velocidadX;
-                velocidadY += 0.22; // Gravedad
-
-                // Rebordes laterales suaves
-                if (x < 10 || x > 410) {
-                    velocidadX *= -0.2; 
-                    x = Math.max(10, Math.min(410, x));
-                }
-
-                // Colisión con los pines (rebote sutil y suave)
-                pins.forEach(pin => {
-                    let distancia = Math.hypot(x - pin.x, y - pin.y);
-                    if (distancia < 12 && pin !== ultimoPinColisionado) {
-                        let direccionX = (x >= pin.x) ? 1 : -1;
-                        velocidadX = direccionX * (Math.abs(velocidadX) * 0.5 + 0.5);
-                        velocidadY = -velocidadY * 0.15; 
-                        
-                        ultimoPinColisionado = pin;
-                    } else if (distancia >= 14 && pin === ultimoPinColisionado) {
-                        ultimoPinColisionado = null;
-                    }
-                });
-
-                // Posicionar bola en pantalla
-                bolaEl.style.left = `${x}px`;
-                bolaEl.style.top = `${y}px`;
-
-                // Comprobar llegada abajo
-                if (y >= 475) {
-                    clearInterval(animacion);
-                    calcularResultado(x, bolaEl);
-                }
-            }, 20);
+            document.getElementById('info-estado').textContent = "🎱 ¡Bola en juego!";
+            if (!bucleActivo) {
+                bucleActivo = true;
+                ultimoT = 0; acumulado = 0;
+                requestAnimationFrame(bucle);
+            }
         }
 
-        function calcularResultado(xFinal, bolaEl) {
-            let anchoRanura = 420 / 7;
-            let indiceRanura = Math.floor(xFinal / anchoRanura);
-            indiceRanura = Math.max(0, Math.min(6, indiceRanura));
+        function bucle(t) {
+            if (!ultimoT) ultimoT = t;
+            acumulado += Math.min(100, t - ultimoT);
+            ultimoT = t;
 
-            let mult = multiplicadores[indiceRanura];
-            let premio = apuestaActual * mult;
+            while (acumulado >= PASO_MS) {
+                acumulado -= PASO_MS;
+                const terminadas = [];
+                for (const b of bolas) {
+                    pasoFisica(b);
+                    if (b.pasos % 3 === 0) crearEstela(b.x, b.y);
+                    if (b.y >= Y_FIN) terminadas.push(b);
+                }
+                for (const b of terminadas) {
+                    bolas = bolas.filter(o => o !== b);
+                    aterrizar(b);
+                }
+            }
+
+            for (const b of bolas) {
+                b.el.style.left = `${b.x}px`;
+                b.el.style.top = `${b.y}px`;
+            }
+
+            if (bolas.length > 0) {
+                requestAnimationFrame(bucle);
+            } else {
+                bucleActivo = false;
+            }
+        }
+
+        function crearEstela(x, y) {
+            const e = document.createElement('div');
+            e.className = 'estela';
+            e.style.left = `${x}px`;
+            e.style.top = `${y}px`;
+            e.addEventListener('animationend', () => e.remove());
+            tablero.appendChild(e);
+        }
+
+        function aterrizar(b) {
+            const anchoRanura = ANCHO / SLOTS;
+            const idx = Math.max(0, Math.min(SLOTS - 1, Math.floor(b.x / anchoRanura)));
+            const mult = multiplicadores[idx];
+            const premio = b.apuesta * mult;
 
             saldo += premio;
             actualizarSaldoUI();
+            b.el.remove();
 
-            document.getElementById('info-estado').textContent = `¡Bola en x${mult}! Ganaste $${premio}`;
+            document.getElementById('info-estado').textContent = (mult === 10)
+                ? `🔥 ¡¡JACKPOT x10!! Ganaste ${formatoDinero(premio)}`
+                : `¡Bola en x${mult}! Ganaste ${formatoDinero(premio)}`;
 
-            bolaEl.remove();
+            // Efecto en la ranura
+            const r = ranurasEls[idx];
+            r.classList.remove('golpe'); void r.offsetWidth; r.classList.add('golpe');
+
+            // Premio flotante
+            const colores = { 1: '#ff8a9a', 2: '#7cc4ff', 5: '#5dffa8', 10: '#ffe07a' };
+            const pop = document.createElement('div');
+            pop.className = 'premio-flotante';
+            pop.style.left = `${(idx + 0.5) * anchoRanura}px`;
+            pop.style.color = colores[mult];
+            pop.textContent = `+${formatoDinero(premio)}`;
+            pop.addEventListener('animationend', () => pop.remove());
+            tablero.appendChild(pop);
+
+            anadirHistorial(mult);
+        }
+
+        function anadirHistorial(mult) {
+            const cont = document.getElementById('chips-historial');
+            const vacio = cont.querySelector('.vacio-h');
+            if (vacio) vacio.remove();
+            const chip = document.createElement('span');
+            chip.className = `chip-h m${mult}`;
+            chip.textContent = `x${mult}`;
+            cont.prepend(chip);
+            while (cont.children.length > 14) cont.lastChild.remove();
         }
     </script>
 </body>

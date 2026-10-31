@@ -362,8 +362,8 @@ body{background:radial-gradient(900px 600px at 50% 0,#10241a,transparent 60%),#0
                 <button class="btn-ficha ficha-50" onclick="seleccionarFicha(50, 50, this)">50</button>
                 <button class="btn-ficha ficha-100" onclick="seleccionarFicha(100, 100, this)">100</button>
                 <button class="btn-ficha ficha-500" onclick="seleccionarFicha(500, 500, this)">500</button>
-                <button class="btn-ficha ficha-1000" onclick="seleccionarFicha(1000, 1000, this)">1000</button>
-                <button class="btn-ficha ficha-10000" onclick="seleccionarFicha(10000, 10000, this)">10000</button>
+                <button class="btn-ficha ficha-1000" onclick="seleccionarFicha(1000, 1000, this)">1K</button>
+                <button class="btn-ficha ficha-10000" onclick="seleccionarFicha(10000, 10000, this)">10K</button>
             </div>
             <div class="saldo-container">
                 <span>Saldo</span>
@@ -423,13 +423,30 @@ body{background:radial-gradient(900px 600px at 50% 0,#10241a,transparent 60%),#0
             localStorage.setItem('pachinko_dinero', saldo);
         }
 
+        // Formato compacto: 1.5K, 2.3M, 4B...
+        function formatoCompacto(n) {
+            const signo = n < 0 ? '-' : '';
+            n = Math.abs(n);
+            const unidades = ['', 'K', 'M', 'B', 'T', 'Qa', 'Qi'];
+            let i = 0;
+            while (n >= 1000 && i < unidades.length - 1) { n /= 1000; i++; }
+            if (i === 0) return signo + Math.floor(n);
+            return signo + (Math.floor(n * 100 + 1e-9) / 100) + unidades[i];
+        }
+        function formatoDinero(n) {
+            const t = formatoCompacto(n);
+            return t.startsWith('-') ? '-$' + t.slice(1) : '$' + t;
+        }
+
         let fichaActualValor = 10;
         let fichaActualEstilo = 10;
         let apuestas = {};
         let totalApostado = 0;
 
         function actualizarSaldoUI() {
-            document.getElementById('saldo-actual').textContent = `$${saldo}`;
+            const elSaldo = document.getElementById('saldo-actual');
+            elSaldo.textContent = formatoDinero(saldo);
+            elSaldo.title = '$' + saldo.toLocaleString('es-ES');
             localStorage.setItem('pachinko_dinero', saldo);
         }
         actualizarSaldoUI();
@@ -550,7 +567,7 @@ body{background:radial-gradient(900px 600px at 50% 0,#10241a,transparent 60%),#0
             apuestas[clave].total += fichaActualValor;
             apuestas[clave].tipo = fichaActualEstilo;
 
-            document.getElementById('info-estado').textContent = `Apuesta total en mesa: $${totalApostado}`;
+            document.getElementById('info-estado').textContent = `Apuesta total en mesa: ${formatoDinero(totalApostado)}`;
             actualizarVisualApuestas();
         }
 
@@ -570,7 +587,7 @@ body{background:radial-gradient(900px 600px at 50% 0,#10241a,transparent 60%),#0
                     let datos = apuestas[clave];
                     let fichaBadge = document.createElement('div');
                     fichaBadge.className = `ficha-casino-apuesta ficha-${datos.tipo}`;
-                    fichaBadge.textContent = datos.total;
+                    fichaBadge.textContent = formatoCompacto(datos.total);
                     
                     if(datos.tipo === 100) {
                         fichaBadge.style.background = '#ff69b4';
@@ -620,7 +637,7 @@ body{background:radial-gradient(900px 600px at 50% 0,#10241a,transparent 60%),#0
                 actualizarSaldoUI();
 
                 if (premio > 0) {
-                    document.getElementById('info-estado').textContent = `🎉 ¡Salió el ${numeroGanador}! Ganaste $${premio}`;
+                    document.getElementById('info-estado').textContent = `🎉 ¡Salió el ${numeroGanador}! Ganaste ${formatoDinero(premio)}`;
                 } else {
                     document.getElementById('info-estado').textContent = `❌ Salió el ${numeroGanador}. ¡Más suerte la próxima!`;
                 }
